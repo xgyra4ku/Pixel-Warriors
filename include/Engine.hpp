@@ -1,7 +1,7 @@
 #pragma once
 #include "globals.hpp"
 #include "Map.hpp"
-#include "Player.hpp"
+#include "Entity.hpp"
 
 class Engine
 {
@@ -13,18 +13,24 @@ class Engine
     private:
         Map map;
         Entity player1;
-        Player player2;
 
         sf::RenderWindow window;
         sf::Vector2f playerPos;
+        sf::Clock clock;
+        sf::Clock fpsClock;
 
+    
         sf::Texture texturePlayerList[3];
         
-        float plaerSpeed = 5;
+        float playerSpeed = 0.08f;
+        float time = 0.0f;
+        int frameCount = 0;
+        float fps = 0.0f;
         
         void Events();
         void logic();
         void updateDisplay();
         void initPlayer(int textureNumPlayer1);
         void controlKeyboard();
+        void collision();
 };

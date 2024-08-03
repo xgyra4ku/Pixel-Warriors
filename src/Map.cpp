@@ -41,7 +41,7 @@ void Map::draw(sf::RenderWindow &window) {
     for (int i = 0; i < layerSizeMaxY; i++) {
         for (int j = 0; j < layerSizeMaxX; j++) {
             if (LayerGround[i][j] != 0) {
-                int tileIndex = LayerGround[i][j] - 1; // Assuming LayerGround[i][j] starts from 1
+                int tileIndex = LayerGround[i][j] - 1;
                 int tilesPerRow = texture.getSize().x / tileSize;
                 int tileX = (tileIndex % tilesPerRow) * tileSize;
                 int tileY = (tileIndex / tilesPerRow) * tileSize;
@@ -101,4 +101,42 @@ void Map::init() {
     catch (const nlohmann::json::exception& error) {
         std::cerr << "ERROR: Failed to load tileset " << error.what() << std::endl;
     } 
+}
+
+int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) {
+    sf::FloatRect playerBox(playerPos.x + bias.x, playerPos.y + bias.y, playerSize.x, playerSize.y);
+
+    for (int i = 0; i < layerSizeMaxY; i++) {
+        for (int j = 0; j < layerSizeMaxX; j++) {
+            if (LayerOdj[i][j] != 0) {
+                sf::FloatRect tileBox(j * tileSize, i * tileSize, tileSize, tileSize);
+
+                if (playerBox.intersects(tileBox)) {
+                    float overlapLeft = playerBox.left + playerBox.width - tileBox.left;
+                    float overlapRight = tileBox.left + tileBox.width - playerBox.left;
+                    float overlapTop = playerBox.top + playerBox.height - tileBox.top;
+                    float overlapBottom = tileBox.top + tileBox.height - playerBox.top;
+
+                    bool collisionFromLeft = overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom;
+                    bool collisionFromRight = overlapRight < overlapLeft && overlapRight < overlapTop && overlapRight < overlapBottom;
+                    bool collisionFromTop = overlapTop < overlapBottom && overlapTop < overlapLeft && overlapTop < overlapRight;
+                    bool collisionFromBottom = overlapBottom < overlapTop && overlapBottom < overlapLeft && overlapBottom < overlapRight;
+
+                    if (collisionFromLeft) return 1; 
+                    if (collisionFromRight) return 2; 
+                    if (collisionFromTop) return 4; 
+                    if (collisionFromBottom) return 3; 
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+
+bool Map::checkingRangeOfNumbers(int a, int b, int c) { 
+    if (a >= b && a <= c) {
+        return true;
+    } 
+    return false; 
 }

@@ -8,19 +8,23 @@ public:
     Entity();
     ~Entity();
 
-    virtual void setPosition(sf::Vector2f positionSet);
-    virtual void setName(std::string nameSet);
-    virtual void setTexture(sf::Texture textureSet);
+    void setPosition(sf::Vector2f positionSet);
+    void setName(std::string nameSet);
+    void setTexture(sf::Texture textureSet);
+    void setSize(sf::Vector2f sizeSet);
 
-    virtual sf::Vector2f getPosition();
-    virtual sf::Sprite getSprite();
+    sf::Vector2f getPosition();
+    sf::Sprite getSprite();
+    sf::Vector2f getSize();
 
-    virtual void draw(sf::RenderWindow& window);
-
+    void draw(sf::RenderWindow& window);
+    void animate(float time, int dir);
+private:
+    sf::Vector2f size;
     std::string name;
     sf::Vector2f position;
     sf::Texture texture;
     sf::Sprite sprite;
-private:
-    
+    float currentFrame = 0;
+    float animationSpeed = 0.004f;
 };

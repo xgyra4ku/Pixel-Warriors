@@ -7,7 +7,7 @@
     "expandedProjectPaths": [
         "."
     ],
-    "file.lastUsedOpenFilter": "Все файлы (*)",
+    "file.lastUsedOpenFilter": "Проект Tiled (*.tiled-project)",
     "fileStates": {
         "forest_.json": {
             "scaleInDock": 1,
@@ -15,10 +15,10 @@
         },
         "map1.json": {
             "scale": 1,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 339,
-                "y": 421
+                "x": 516,
+                "y": 434
             }
         }
     },
