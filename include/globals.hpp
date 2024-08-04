@@ -9,5 +9,5 @@
 #define layerSizeMaxY 50
 #define tileSize 16
 
-extern int offsetX;
-extern int offsetY;
+extern float offsetX;
+extern float offsetY;

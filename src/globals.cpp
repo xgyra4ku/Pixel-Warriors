@@ -1,5 +1,5 @@
 #include "../include/globals.hpp"
 
-int offsetX = 0;
-int offsetY = 0;
+float offsetX = 0;
+float offsetY = 0;
 

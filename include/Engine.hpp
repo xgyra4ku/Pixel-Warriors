@@ -33,4 +33,5 @@ class Engine
         void initPlayer(int textureNumPlayer1);
         void controlKeyboard();
         void collision();
+        void offset();
 };
