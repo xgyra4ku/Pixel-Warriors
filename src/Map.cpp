@@ -104,12 +104,12 @@ void Map::init() {
 }
 
 int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) {
-    sf::FloatRect playerBox(playerPos.x + bias.x, playerPos.y + bias.y, playerSize.x, playerSize.y);
+    sf::FloatRect playerBox((playerPos.x + bias.x) - offsetX, (playerPos.y + bias.y) - offsetY, playerSize.x, playerSize.y);
 
     for (int i = 0; i < layerSizeMaxY; i++) {
         for (int j = 0; j < layerSizeMaxX; j++) {
             if (LayerOdj[i][j] != 0) {
-                sf::FloatRect tileBox(j * tileSize, i * tileSize, tileSize, tileSize);
+                sf::FloatRect tileBox(j * tileSize - offsetX, i * tileSize - offsetY, tileSize, tileSize);
 
                 if (playerBox.intersects(tileBox)) {
                     float overlapLeft = playerBox.left + playerBox.width - tileBox.left;

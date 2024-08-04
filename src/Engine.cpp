@@ -89,53 +89,71 @@ void Engine::collision() {
     switch (map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
     case 1:
         std::cout << 1 << std::endl;
-        newPos.x -= ((playerSpeed * 2) * time) - offsetX;
+        newPos.x -= ((playerSpeed * 2) * time);
         player1.setPosition(newPos);
         break;
     case 2:
         std::cout << 2 << std::endl;
-        newPos.x += ((playerSpeed * 2) * time) - offsetX;
+        newPos.x += ((playerSpeed * 2) * time);
         player1.setPosition(newPos);
         break;
     case 3:
         std::cout << 3 << std::endl;
-        newPos.y += ((playerSpeed * 2) * time) - offsetY;
+        newPos.y += ((playerSpeed * 2) * time);
         player1.setPosition(newPos);
         break;
     case 4:
         std::cout << 4 << std::endl;
-        newPos.y -= ((playerSpeed * 2) * time) - offsetY;
+        newPos.y -= ((playerSpeed * 2) * time);
         player1.setPosition(newPos);
         break;
     default:
         break;
     }
 
-    //std::cout << "Player position: (" << newPos.x << ", " << newPos.y << ")" << std::endl;
-}
+  //  std::cout << "Player position: (" << newPos.x << ", " << newPos.y << ")" << std::endl;
+} 
 
 void Engine::controlKeyboard() {
+    playerPos = player1.getPosition();
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
        player1.animate(time, 5);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+    else {
         playerPos = player1.getPosition();
-        player1.setPosition(sf::Vector2f(playerPos.x, playerPos.y - playerSpeed * time));
-        player1.animate(time, 1);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+            playerPos.y -= playerSpeed * time;
+            player1.animate(time, 1);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
+            playerPos.x -= playerSpeed * time;
+            player1.animate(time, 2);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
+            playerPos.y += playerSpeed * time;
+            player1.animate(time, 3);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
+            playerPos.x += playerSpeed * time;
+            player1.animate(time, 4);
+        }
+        
+        // playerPos.x -= offsetX;
+        // playerPos.y -= offsetY;
+        player1.setPosition(playerPos);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-        playerPos = player1.getPosition();
-        player1.setPosition(sf::Vector2f(playerPos.x - playerSpeed * time, playerPos.y));
-        player1.animate(time, 2);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+           offsetY -= 1;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+            offsetX -= 1;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+            offsetY += 1;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+            offsetX += 1;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-        playerPos = player1.getPosition();
-        player1.setPosition(sf::Vector2f(playerPos.x, playerPos.y + playerSpeed * time));
-        player1.animate(time, 3);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-        playerPos = player1.getPosition();
-        player1.setPosition(sf::Vector2f(playerPos.x + playerSpeed * time, playerPos.y));
-        player1.animate(time, 4);
-    }
+    player1.setPosition(playerPos);
+    
 }
