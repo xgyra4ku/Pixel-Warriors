@@ -53,6 +53,65 @@ void Map::draw(sf::RenderWindow &window) {
         }
     }
 }
+void Map::draw(sf::RenderWindow &window, std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) {
+    int textureSize = texture.getSize().x;
+    sf::VertexArray vertices(sf::Quads);
+
+    int xMax = int((playerPos.x + viev.x) / tileSize);
+    int xMin = int((playerPos.x - viev.x) / tileSize);
+    int yMax = int((playerPos.y + viev.y) / tileSize);
+    int yMin = int((playerPos.y - viev.y) / tileSize);
+
+    if (xMax > layerSizeMaxX)
+        xMax = layerSizeMaxX;
+    if (xMin < 0)
+        xMin = 0;
+    if (yMax > layerSizeMaxY)
+        yMax = layerSizeMaxY;
+    if (yMin < 0)
+        yMin = 0;
+
+    for (int i = yMin; i < yMax; i++) {
+        for (int j = xMin; j < xMax; j++) {
+            if (Layer[i][j] != 0) {
+                float Y = float(i) * tileSize;
+                float X = float(j) * tileSize;
+
+                int tileIndex = Layer[i][j] - 1;
+                int tilesPerRow = textureSize / tileSize;
+                float tileX = float((tileIndex % tilesPerRow) * tileSize);
+                float tileY = float((tileIndex / tilesPerRow) * tileSize);
+
+                // Создание четырех вершин (квадрата) для каждого тайла
+                sf::Vertex vertex1, vertex2, vertex3, vertex4;
+
+                vertex1.position = sf::Vector2f(X - offsetX, Y - offsetY);
+                vertex2.position = sf::Vector2f(X + tileSize - offsetX, Y - offsetY);
+                vertex3.position = sf::Vector2f(X + tileSize - offsetX, Y + tileSize - offsetY);
+                vertex4.position = sf::Vector2f(X - offsetX, Y + tileSize - offsetY);
+
+                vertex1.texCoords = sf::Vector2f(tileX, tileY);
+                vertex2.texCoords = sf::Vector2f(tileX + tileSize, tileY);
+                vertex3.texCoords = sf::Vector2f(tileX + tileSize, tileY + tileSize);
+                vertex4.texCoords = sf::Vector2f(tileX, tileY + tileSize);
+
+                vertices.append(vertex1);
+                vertices.append(vertex2);
+                vertices.append(vertex3);
+                vertices.append(vertex4);
+            }
+
+        }
+    }
+
+    // Установка текстуры
+    sf::RenderStates states;
+    states.texture = &texture;
+
+    // Отрисовка всех вершин за один вызов
+    window.draw(vertices, states);
+}
+
 
 int Map::getLayer(int x, int y, int layer) {
     if (layer == 0) {
@@ -108,7 +167,7 @@ int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f
 
     for (int i = 0; i < layerSizeMaxY; i++) {
         for (int j = 0; j < layerSizeMaxX; j++) {
-            if (LayerOdj[i][j] != 0) {
+            if (LayerOdj[i][j] == 159) {
                 sf::FloatRect tileBox(j * tileSize - offsetX, i * tileSize - offsetY, tileSize, tileSize);
 
                 if (playerBox.intersects(tileBox)) {
@@ -122,10 +181,10 @@ int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f
                     bool collisionFromTop = overlapTop < overlapBottom && overlapTop < overlapLeft && overlapTop < overlapRight;
                     bool collisionFromBottom = overlapBottom < overlapTop && overlapBottom < overlapLeft && overlapBottom < overlapRight;
 
-                    if (collisionFromLeft) return 1; 
-                    if (collisionFromRight) return 2; 
-                    if (collisionFromTop) return 4; 
-                    if (collisionFromBottom) return 3; 
+                    if (collisionFromLeft) return 1;
+                    if (collisionFromRight) return 2;
+                    if (collisionFromTop) return 4;
+                    if (collisionFromBottom) return 3;
                 }
             }
         }
@@ -133,9 +192,7 @@ int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f
     return 0;
 }
 
-
-// Функция инициализации карты случайными значениями
-void Map::initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, const double INITIAL_PROB, const int WIDTH, const int HEIGHT) {
+void Map::initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT) {
     std::srand(seed); // Инициализация генератора случайных чисел
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -145,8 +202,7 @@ void Map::initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, c
     }
 }
 
-// Функция подсчета количества соседей-суши вокруг клетки (x, y)
-int Map::countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, const int WIDTH, const int HEIGHT) {
+int Map::countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, int WIDTH, int HEIGHT) {
     int count = 0; // Счетчик соседей-суши
     for (int dy = -1; dy <= 1; ++dy) { // Перебор соседей по вертикали
         for (int dx = -1; dx <= 1; ++dx) { // Перебор соседей по горизонтали
@@ -162,8 +218,7 @@ int Map::countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int
     return count; // Возвращаем количество соседей-суши
 }
 
-// Функция одного шага клеточного автомата
-void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, const int HEIGHT) {
+void Map::stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT) {
     std::vector<std::vector<int>> newMap = map; // Создаем копию карты для обновлений
 
     for (int y = 0; y < HEIGHT; ++y) { // Перебор всех клеток по вертикали
@@ -183,7 +238,6 @@ void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, con
 
     map = newMap; // Обновляем карту
 }
-
 
 // // Основная функция программы
 // int main() {

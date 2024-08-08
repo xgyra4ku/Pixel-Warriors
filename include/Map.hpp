@@ -19,12 +19,13 @@ class Map
     void load();
     void save();
     void draw(sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window, std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev);
     int collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias);
 
 
-    void stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, const int HEIGHT);
-    int countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, const int WIDTH, const int HEIGHT);
-    void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, const double INITIAL_PROB, const int WIDTH, const int HEIGHT);
+    void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
+    int countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, int WIDTH, int HEIGHT);
+    void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
 
     void setLayer(int x, int y, int layer, int value);
 
@@ -42,8 +43,6 @@ private:
     
     int LayerOdj[layerSizeMaxX][layerSizeMaxY];
 	int LayerGround[layerSizeMaxX][layerSizeMaxY];
-
-
 };
 
 

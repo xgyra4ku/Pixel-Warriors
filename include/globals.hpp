@@ -2,11 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
-#define WindowWidth 800
-#define WindowHeight 600
+#define WindowWidth 1280
+#define WindowHeight 800
 
-#define layerSizeMaxX 50
-#define layerSizeMaxY 50
+#define layerSizeMaxX 300
+#define layerSizeMaxY 300
 #define tileSize 16
 
 extern float offsetX;

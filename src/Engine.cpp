@@ -8,8 +8,6 @@ Engine::Engine() {
         return;
     }
     std::cout << "INFO: Window created successfully" << std::endl;
-    map.init();
-    map.load();
     if (!texturePlayerList[0].loadFromFile("Assets/tex1.png")) {
         std::cerr << "ERROR: Failed loading Assets/tex1.png" << std::endl;
         window.close();
@@ -17,15 +15,80 @@ Engine::Engine() {
     }
     std::cout << "INFO: Texture loaded successfully" << std::endl;
 
+    loadDependency("Dependency/");
+    //modslist = loadMods("Mods");
+    offsetRUN = true;
+    collisionRUN = true;
+    map.init();
+    //map.load();
+
     initPlayer(1);
+    //generateMap(183265738, 300, 300);
 }
 
 Engine::~Engine() {
 }
 
+void Engine::loadDependency(const std::string& directory) {
+    DependencyFunctions functions;
+    std::string filePath = directory + "libmod-menu.dll";
+    HMODULE hModule = LoadLibrary(filePath.c_str());
+
+    if (hModule == NULL) {
+        std::cerr << "[ERROR]: Could not load " << filePath << std::endl;
+        return;
+    }
+
+    functions.initLib = (void (*)(sf::RenderWindow&)) GetProcAddress(hModule, "initLib");
+    functions.menuLib = (void (*)(sf::RenderWindow&, int&)) GetProcAddress(hModule, "menuLib");
+
+    if (!functions.initLib || !functions.menuLib) {
+        std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
+        FreeLibrary(hModule);
+    }
+    functions.initLib(window);
+    dependencylist["menuLib"] = functions;
+}
+//
+// std::vector<Mod> Engine::loadMods(const std::string& directory) {
+//     std::vector<Mod> mods;
+//     WIN32_FIND_DATA findFileData;
+//     HANDLE hFind = FindFirstFile((directory + "\\*.dll").c_str(), &findFileData);
+//
+//     if (hFind == INVALID_HANDLE_VALUE) {
+//         std::cerr << "No mods found in " << directory << std::endl;
+//         return mods;
+//     }
+//
+//     do {
+//         std::string filePath = directory + "\\" + findFileData.cFileName;
+//         HMODULE hModule = LoadLibrary(filePath.c_str());
+//         if (hModule == NULL) {
+//             std::cerr << "Could not load " << filePath << std::endl;
+//             continue;
+//         }
+//
+//         DependencyFunctions functions;
+//         functions.initLib = (void (*)(sf::RenderWindow&)) GetProcAddress(hModule, "initLib");
+//         functions.menuLib = (void (*)(sf::RenderWindow&, int&)) GetProcAddress(hModule, "menuLib");
+//
+//         if (!functions.initLib || !functions.menuLib) {
+//             std::cerr << "Could not locate functions in " << filePath << std::endl;
+//             FreeLibrary(hModule);
+//             continue;
+//         }
+//
+//         functions.initLib(window);
+//         mods.push_back({ hModule, functions });
+//     } while (FindNextFile(hFind, &findFileData) != 0);
+//
+//     FindClose(hFind);
+//     return mods;
+// }
 
 void Engine::run() {
-    //window.setFramerateLimit(60);
+    menu = 0;
+    window.setFramerateLimit(60);
 	while (window.isOpen()) {
         time = clock.getElapsedTime().asMicroseconds();
 		clock.restart();
@@ -40,16 +103,24 @@ void Engine::run() {
             fpsClock.restart();
             std::cout << "FPS: " << int(fps) << std::endl;
         }
-        logic();
+        dependencylist["menuLib"].menuLib(window, menu);
+        //logic();
 		Events();
-        window.clear();
-        //window.draw(shape);
-        updateDisplay();
+        //window.clear();
+       // updateDisplay();
 		window.display();
 	}
 }
+
+void Engine::logic() {
+    if (collisionRUN)
+        collision();
+    controlKeyboard();
+    if (offsetRUN)
+        offset();
+}
 void Engine::updateDisplay() {
-   map.draw(window);
+   map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
    player1.draw(window);
 }
 
@@ -76,15 +147,12 @@ void Engine::initPlayer(int textureNumPlayer1) {
     default:
         break;
     }
-    player1.setPosition(sf::Vector2f(150, 150));
+    player1.setPosition(sf::Vector2f(800, 800));
     player1.setSize(sf::Vector2f(16, 16));
+    offsetX = 40 ;
+    offsetY = 80 ;
 }
 
-void Engine::logic() {
-   collision();
-   controlKeyboard();
-   offset();
-}
 
 void Engine::collision() {
     sf::Vector2f newPos = player1.getPosition();
@@ -119,10 +187,10 @@ void Engine::collision() {
 } 
 void Engine::offset() {
     // Define the dead zone boundaries
-    const float leftDeadZone = 380.0f;
-    const float rightDeadZone = 420.0f;
-    const float topDeadZone = 280.0f;
-    const float bottomDeadZone = 320.0f;
+    const float leftDeadZone = 630.0f;
+    const float rightDeadZone = 650.0f;
+    const float topDeadZone = 390.0f;
+    const float bottomDeadZone = 410.0f;
 
     // Player's current position
     sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(offsetX, offsetY);
@@ -211,18 +279,44 @@ void Engine::controlKeyboard() {
         }
         player1.setPosition(playerPos);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-           offsetY -= 1;
+    if (!offsetRUN) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+            offsetY -= 10;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-            offsetX -= 1;
+            offsetX -= 10;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            offsetY += 1;
+            offsetY += 10;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-            offsetX += 1;
+            offsetX += 10;
+        }
     }
     player1.setPosition(playerPos);
     
+}
+
+void Engine::generateMap(unsigned int seed, int WIDTH, int HEIGHT) {
+    mapGenerated = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
+
+    std::cout << "Map initialized" << std::endl;
+
+    map.initializeMap(mapGenerated, seed, 0.55, WIDTH, HEIGHT); // Инициализация карты случайными значениями
+
+    int generations = 200; // Количество поколений клеточного автомата
+
+    std::cout << "Map generated..." << std::endl;
+
+    // Запуск клеточного автомата на заданное количество поколений
+    for (int gen = 0; gen < generations; ++gen) {
+        map.stepAutomaton(mapGenerated, WIDTH, HEIGHT); // Выполнение одного шага клеточного автомата
+    }
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            if (mapGenerated[y][x] == 0) mapGenerated[y][x] = 159;
+            if (mapGenerated[y][x] == 1) mapGenerated[y][x] = 47;
+        }
+    }
+    std::cout << "Map generated successfully" << std::endl;
 }
