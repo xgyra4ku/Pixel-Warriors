@@ -139,7 +139,8 @@ void Map::setLayer(int x, int y, int layer, int value) {
 
 void Map::init() {
     try {
-        std::cout << "INFO: Loading tileset" << std::endl;	
+        std::cout << "INFO: Loading tileset" << std::endl;
+
         fileInput.open("../Maps/map1/forest_.json");
         fileInput >> objJson;
         fileInput.close();

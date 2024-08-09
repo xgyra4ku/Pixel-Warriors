@@ -1,0 +1,16 @@
+{
+  "settings": [
+    {
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "fps": 60,
+      "squareMove": {
+        "x": 40,
+        "y": 40
+      },
+      "mods": false
+    }
+  ]
+}

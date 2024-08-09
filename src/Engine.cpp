@@ -1,18 +1,23 @@
 #include "../include/Engine.hpp"
 
 Engine::Engine() {
-    window.create(sf::VideoMode(WindowWidth, WindowHeight), "3D Engine");//sf::Style::Close
+    settings = save_and_load_.loadSettings();
+    window.create(sf::VideoMode(WindowWidth, WindowHeight), "3D Engine", sf::Style::Close);
+
     if (!window.isOpen()) {
         std::cerr << "ERROR: Failed creating window" << std::endl;
         window.close();
         return;
     }
+
     std::cout << "INFO: Window created successfully" << std::endl;
+
     if (!texturePlayerList[0].loadFromFile("Assets/tex1.png")) {
         std::cerr << "ERROR: Failed loading Assets/tex1.png" << std::endl;
         window.close();
         return;
     }
+
     std::cout << "INFO: Texture loaded successfully" << std::endl;
 
     loadDependency("Dependency/");
@@ -20,9 +25,10 @@ Engine::Engine() {
     offsetRUN = true;
     collisionRUN = true;
     map.init();
+
     //map.load();
 
-    initPlayer(1);
+    //initPlayer(1);
     //generateMap(183265738, 300, 300);
 }
 
@@ -47,7 +53,7 @@ void Engine::loadDependency(const std::string& directory) {
         FreeLibrary(hModule);
     }
     functions.initLib(window);
-    dependencylist["menuLib"] = functions;
+    dependencyList["menuLib"] = functions;
 }
 //
 // std::vector<Mod> Engine::loadMods(const std::string& directory) {
@@ -88,30 +94,39 @@ void Engine::loadDependency(const std::string& directory) {
 
 void Engine::run() {
     menu = 0;
-    window.setFramerateLimit(60);
+    if (!settings["fps"] == 0)
+        std::cout << "INFO: FPS set to " << settings["fps"] << std::endl;
+        window.setFramerateLimit(settings["fps"]);
+
 	while (window.isOpen()) {
-        time = clock.getElapsedTime().asMicroseconds();
-		clock.restart();
-
-		time = time / 700.0f;
-
-		if (time > 60.0f) time = 60.0f;
-        frameCount++;
-        if (fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
-            fps = frameCount / fpsClock.getElapsedTime().asSeconds();
-            frameCount = 0;
-            fpsClock.restart();
-            std::cout << "FPS: " << int(fps) << std::endl;
+        window.clear();
+        Events();
+        timer();
+        if (menu != -1)
+            dependencyList["menuLib"].menuLib(window, menu);
+        else {
+	        logic();
+            updateDisplay();
         }
-        dependencylist["menuLib"].menuLib(window, menu);
-        //logic();
-		Events();
-        //window.clear();
-       // updateDisplay();
-		window.display();
+        window.display();
 	}
 }
+void Engine::timer() {
 
+    time = clock.getElapsedTime().asMicroseconds();
+    clock.restart();
+
+    time = time / 700.0f;
+
+    if (time > 60.0f) time = 60.0f;
+    frameCount++;
+    if (fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
+        fps = frameCount / fpsClock.getElapsedTime().asSeconds();
+        frameCount = 0;
+        fpsClock.restart();
+        std::cout << "FPS: " << int(fps) << std::endl;
+    }
+}
 void Engine::logic() {
     if (collisionRUN)
         collision();
@@ -120,19 +135,22 @@ void Engine::logic() {
         offset();
 }
 void Engine::updateDisplay() {
-   map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
-   player1.draw(window);
+    map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
+    player1.draw(window);
 }
 
 
 void Engine::Events() {
+
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             window.close();
         if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape)
+            if (event.key.code == sf::Keyboard::Escape && menu == 0)
                 window.close();
+            else if (event.key.code == sf::Keyboard::Escape && menu == -1)
+                menu = 0;
         }
     }
 }

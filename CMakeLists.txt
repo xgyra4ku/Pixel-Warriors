@@ -38,12 +38,14 @@ list(APPEND CMAKE_PREFIX_PATH "${SFML_DIR}/lib/cmake/SFML")
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 target_link_libraries(
+
         Pixel-Warriors
         sfml-system
         sfml-window
         sfml-graphics
         sfml-network
         sfml-audio
+
 )
 
 # Для Windows добавляем пути к библиотекам DLL

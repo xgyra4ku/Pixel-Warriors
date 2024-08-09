@@ -3,6 +3,7 @@
 #include <map>
 #include "globals.hpp"
 #include "Map.hpp"
+#include "SaveAndLoad.hpp"
 #include "Entity.hpp"
 
 struct DependencyFunctions {
@@ -25,6 +26,7 @@ class Engine
     private:
         Map map;
         Entity player1;
+        SaveAndLoad save_and_load_;
 
 
         sf::RenderWindow window;
@@ -32,7 +34,7 @@ class Engine
         sf::Clock clock;
         sf::Clock fpsClock;
         sf::Texture texturePlayerList[3];
-        
+
         float playerSpeed = 0.08f;
         float time = 0.0f;
         float fps = 0.0f;
@@ -43,10 +45,12 @@ class Engine
         bool collisionRUN;
 
         std::vector<std::vector<int>> mapGenerated;
-        std::vector<Mod> modslist;
-        std::map<std::string, DependencyFunctions> dependencylist;
+        std::vector<Mod> modsList;
+        std::map<std::string, DependencyFunctions> dependencyList;
+        std::map<std::string, int> settings;
 
         void Events();
+        void timer();
         void logic();
         void updateDisplay();
         void initPlayer(int textureNumPlayer1);
