@@ -23,6 +23,7 @@ file(GLOB_RECURSE SOURCES "${SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.hpp")
 
 # Включите заголовочные файлы в проект для удобства IDE
+#add_library(${TARGET_NAME_XXX} SHARED ${SOME_DIR_HAVING_THIS_WARNING}/empty_xxx.c)
 add_executable(Pixel-Warriors ${SOURCES} ${HEADERS})
 
 set(SFML_DIR "${CMAKE_SOURCE_DIR}/SFML")
@@ -58,6 +59,7 @@ if(WIN32)
             "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Dependency"
             $<TARGET_FILE_DIR:Pixel-Warriors>)
 endif()
+
 #
 ## Путь к DLL-файлам в папке сборки
 #set(SFML_BIN_DIR ${SFML}"/")

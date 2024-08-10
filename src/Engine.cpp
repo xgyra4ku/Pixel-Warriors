@@ -2,7 +2,14 @@
 
 Engine::Engine() {
     settings = save_and_load_.loadSettings();
-    window.create(sf::VideoMode(WindowWidth, WindowHeight), "3D Engine", sf::Style::Close);
+    if (settings["fullscreen"] == 1) {
+        window.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen);
+        WindowWidth = window.getSize().x;
+        WindowHeight = window.getSize().y;
+    } else {
+        window.create(sf::VideoMode(WindowWidth, WindowHeight), "3D Engine", sf::Style::Close);
+    }
+
 
     if (!window.isOpen()) {
         std::cerr << "ERROR: Failed creating window" << std::endl;

@@ -10,6 +10,7 @@ void SaveAndLoad::saveSettings(std::map<std::string, int> settings) {
         objJson["settings"][0]["squareMove"]["x"] = settings["squareMoveX"];
         objJson["settings"][0]["squareMove"]["y"] = settings["squareMoveY"];
         objJson["settings"][0]["mods"] = settings["mods"];
+        objJson["settings"][0]["fullscreen"] = settings["fullscreen"];
         file << objJson;
         file.close();
         std::cout << "INFO: Settings saved successfully" << std::endl;
@@ -17,6 +18,7 @@ void SaveAndLoad::saveSettings(std::map<std::string, int> settings) {
     catch (const nlohmann::json::exception& error) {
         std::cerr << "ERROR: Failed to save settings" << error.what() << std::endl;
     }
+    
 
 }
 
@@ -40,6 +42,7 @@ std::map<std::string, int> SaveAndLoad::loadSettings() {
         settings["squareMoveX"] = layers[0]["squareMove"]["x"];
         settings["squareMoveY"] = layers[0]["squareMove"]["y"];
         settings["mods"] = layers[0]["mods"];
+        settings["fullscreen"] = layers[0]["window"]["fullscreen"];
         std::cout << "INFO: Settings loaded successfully" << std::endl;
     }
     catch (const nlohmann::json::exception& error) {

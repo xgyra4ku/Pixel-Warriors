@@ -12,6 +12,7 @@ public:
     std::map<std::string, int> loadSettings();
 private:
     nlohmann::json objJson;
+    
     std::fstream file;
 };
 
