@@ -1,6 +1,9 @@
 #include "../include/SaveAndLoad.hpp"
 
-void SaveAndLoad::saveSettings(std::map<std::string, int> settings) {
+SaveAndLoad::SaveAndLoad() {
+
+}
+void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
     std::cout << "INFO: Saving settings" << std::endl;
     try {
         file.open("./Save/settings.json");
@@ -43,6 +46,10 @@ std::map<std::string, int> SaveAndLoad::loadSettings() {
         settings["squareMoveY"] = layers[0]["squareMove"]["y"];
         settings["mods"] = layers[0]["mods"];
         settings["fullscreen"] = layers[0]["window"]["fullscreen"];
+        for (const auto& key : keys) {
+            std::string settingKey = "keyboard_" + key;
+            settings[settingKey] = layers["keys"][key];
+        }
         std::cout << "INFO: Settings loaded successfully" << std::endl;
     }
     catch (const nlohmann::json::exception& error) {
