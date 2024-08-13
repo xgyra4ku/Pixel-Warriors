@@ -2,13 +2,16 @@
 
 Engine::Engine() {
     settings = save_and_load_.loadSettings();
+    sf::ContextSettings settingsDisplay;
+    settingsDisplay.antialiasingLevel = 8;
     if (settings["fullscreen"] == 1) {
-        window.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen);
-        WindowWidth = window.getSize().x;
-        WindowHeight = window.getSize().y;
+        window.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen, settingsDisplay);
+
     } else {
-        window.create(sf::VideoMode(WindowWidth, WindowHeight), "3D Engine", sf::Style::Close);
+        window.create(sf::VideoMode(settings["windowWidth"], settings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
     }
+    WindowWidth = window.getSize().x;
+    WindowHeight = window.getSize().y;
 
 
     if (!window.isOpen()) {
@@ -36,7 +39,7 @@ Engine::Engine() {
     //map.load();
 
     //initPlayer(1);
-    //generateMap(183265738, 300, 300);
+    // generateMap(1111111111, 300, 300);
 }
 
 Engine::~Engine() {
@@ -53,7 +56,7 @@ void Engine::loadDependency(const std::string& directory) {
     }
 
     functions.initLib = (void (*)(sf::RenderWindow&)) GetProcAddress(hModule, "initLib");
-    functions.menuLib = (void (*)(sf::RenderWindow&, int&)) GetProcAddress(hModule, "menuLib");
+    functions.menuLib = (void (*)(sf::RenderWindow&, int&, std::map<std::string, int>&)) GetProcAddress(hModule, "menuLib");
 
     if (!functions.initLib || !functions.menuLib) {
         std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
@@ -101,20 +104,35 @@ void Engine::loadDependency(const std::string& directory) {
 
 void Engine::run() {
     menu = 0;
-    if (!settings["fps"] == 0)
-        std::cout << "INFO: FPS set to " << settings["fps"] << std::endl;
-        window.setFramerateLimit(settings["fps"]);
+    if (settings["V-sync"] == 1) {
+        window.setVerticalSyncEnabled(true);
+        std::cout << "INFO: V-sync enabled" << std::endl;
+    } else {
+        window.setVerticalSyncEnabled(false);
+        std::cout << "INFO: V-sync disabled" << std::endl;
+        if (settings["fps"] == -1) {
+            std::cout << "INFO: FPS not set" << std::endl;
+        } else {
+            std::cout << "INFO: FPS set to " << settings["fps"] << std::endl;
+            window.setFramerateLimit(settings["fps"]);
+        }
+    }
 
 	while (window.isOpen()) {
         window.clear();
         Events();
         timer();
-        if (menu != -1)
-            dependencyList["menuLib"].menuLib(window, menu);
-        else {
-	        logic();
+        if (menu == -1) {
+            //game
+            logic();
             updateDisplay();
-        }
+        } else if (menu == -2) {
+            save_and_load_.saveSettings(settings);
+	        menu = 3;
+            dependencyList["menuLib"].menuLib(window, menu, settings);
+        } else {
+	        dependencyList["menuLib"].menuLib(window, menu, settings);
+	    }
         window.display();
 	}
 }
@@ -205,9 +223,6 @@ void Engine::collision() {
     default:
         break;
     }
-
-
-
   //std::cout << "Player position: (" << newPos.x - offsetX << ", " << newPos.y - offsetY << ")" << std::endl;
 } 
 void Engine::offset() {

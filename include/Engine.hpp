@@ -8,7 +8,7 @@
 
 struct DependencyFunctions {
     void (*initLib)(sf::RenderWindow&);
-    void (*menuLib)(sf::RenderWindow&, int&);
+    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&);
 };
 
 struct Mod {

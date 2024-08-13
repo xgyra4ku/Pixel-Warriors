@@ -1,9 +1,4 @@
-#include "../include/KeystrokeLogging.h"
-
-KeystrokeLogging::KeystrokeLogging() {
-}
-KeystrokeLogging::~KeystrokeLogging() {
-}
+#include "../include/KeystrokeLogging.hpp"
 
 char KeystrokeLogging::codeToChar(int code) {
     if (code >= 32 && code <= 126) { // Проверяем, чтобы код был в диапазоне видимых ASCII символов
@@ -13,10 +8,6 @@ char KeystrokeLogging::codeToChar(int code) {
     }
 }
 
-#include <iostream>
-#include <SFML/Window/Keyboard.hpp>
-#include <string>
-#include <map>
 
 // Функция, которая возвращает строку с названием клавиши по её коду
 std::string KeystrokeLogging::getKeyName(sf::Keyboard::Key key) {
@@ -129,16 +120,8 @@ std::string KeystrokeLogging::getKeyName(sf::Keyboard::Key key) {
     if (it != keyMap.end()) {
         return it->second;
     } else {
-        return "Unknown Key";
+        return "Unknown";
     }
 }
 
-int main() {
-    // Пример использования
-    sf::Keyboard::Key key = sf::Keyboard::W;
-    std::string keyName = getKeyName(key);
-    std::cout << "The key is: " << keyName << std::endl;
-
-    return 0;
-}
 
