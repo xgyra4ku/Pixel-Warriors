@@ -240,17 +240,104 @@ void Map::stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGH
     map = newMap; // Обновляем карту
 }
 
-// // Основная функция программы
-// int main() {
-//     std::vector<std::vector<int>> map(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
-//     unsigned int seed = 12345; // Задайте ваше значение seed здесь
+double Map::fade(double t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+}
 
-//     initializeMap(map, seed); // Инициализация карты случайными значениями
+double Map::lerp(double t, double a, double b) {
+    return a + t * (b - a);
+}
 
-//     int generations = 10; // Количество поколений клеточного автомата
+double Map::grad(int hash, double x, double y) {
+    int h = hash & 15;
+    double u = h < 8 ? x : y;
+    double v = h < 4 ? y : h == 12 || h == 14 ? x : 0;
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+}
 
-//     // Запуск клеточного автомата на заданное количество поколений
-//     for (int gen = 0; gen < generations; ++gen) {
-//         stepAutomaton(map); // Выполнение одного шага клеточного автомата
-//     }
-// }
+double Map::perlin(double x, double y, int *permutation) {
+    int xi = (int)x & 255;
+    int yi = (int)y & 255;
+
+    double xf = x - (int)x;
+    double yf = y - (int)y;
+
+    double u = fade(xf);
+    double v = fade(yf);
+
+    int aa = permutation[permutation[xi] + yi];
+    int ab = permutation[permutation[xi] + yi + 1];
+    int ba = permutation[permutation[xi + 1] + yi];
+    int bb = permutation[permutation[xi + 1] + yi + 1];
+
+    double x1 = lerp(u, grad(aa, xf, yf), grad(ba, xf - 1, yf));
+    double x2 = lerp(u, grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1));
+
+    return lerp(v, x1, x2);
+}
+
+void Map::generatePermutation(int *permutation) {
+    for (int i = 0; i < 256; ++i)
+        permutation[i] = i;
+
+    std::random_shuffle(&permutation[0], &permutation[256]);
+
+    for (int i = 0; i < 256; ++i)
+        permutation[256 + i] = permutation[i];
+}
+
+
+Chunk Map::generateChunk(int chunkX, int chunkY, int* permutation) {
+    Chunk chunk;
+    // Генерация чанка с шумом Перлина
+    for (int y = 0; y < 16; ++y) {
+        for (int x = 0; x < 16; ++x) {
+            double worldX = chunkX * 16 + x;
+            double worldY = chunkY * 16 + y;
+            double height = perlin(worldX * 0.1, worldY * 0.1, permutation);
+
+            sf::RectangleShape tile(sf::Vector2f(32, 32));  // Размер тайла 32x32 пикселя
+            tile.setPosition(worldX * 32, worldY * 32);
+            tile.setFillColor(sf::Color(0, 255 * height, 0));  // Пример окрашивания
+            chunk.tiles.push_back(tile);
+        }
+    }
+    return chunk;
+}
+
+void Map::updateChunks(sf::Vector2f playerPosition, int* permutation) {
+    int chunkX = static_cast<int>(playerPosition.x / (16 * 32));
+    int chunkY = static_cast<int>(playerPosition.y / (16 * 32));
+
+    std::vector<std::pair<int, int>> neededChunks;
+
+    // Загрузка чанков вокруг игрока
+    for (int y = -1; y <= 1; ++y) {
+        for (int x = -1; x <= 1; ++x) {
+            int cx = chunkX + x;
+            int cy = chunkY + y;
+            if (loadedChunks.find({cx, cy}) == loadedChunks.end()) {
+                loadedChunks[{cx, cy}] = generateChunk(cx, cy, permutation);
+            }
+            neededChunks.push_back({cx, cy});
+        }
+    }
+
+    // Выгрузка чанков, которые больше не нужны
+    for (auto it = loadedChunks.begin(); it != loadedChunks.end();) {
+        if (std::find(neededChunks.begin(), neededChunks.end(), it->first) == neededChunks.end()) {
+            it = loadedChunks.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void Map::drawChunks(sf::RenderWindow& window) {
+    for (const auto& chunk : loadedChunks) {
+        for (const auto& tile : chunk.second.tiles) {
+            window.draw(tile);
+        }
+    }
+}
+

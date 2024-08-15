@@ -7,6 +7,9 @@
 #include <cstdlib>
 #include <ctime>
 #include "nlohmann/json.hpp"
+struct Chunk {
+    std::vector<sf::RectangleShape> tiles;  // Замените на нужный тип данных для хранения тайлов
+};
 
 
 class Map
@@ -30,6 +33,17 @@ class Map
     void setLayer(int x, int y, int layer, int value);
 
     int getLayer(int x, int y, int layer);
+
+
+    double fade(double t);
+    double lerp(double t, double a, double b);
+    double perlin(double x, double y, int *permutation);
+    double grad(int hash, double x, double y);
+
+    void generatePermutation(int *permutation);
+    Chunk generateChunk(int chunkX, int chunkY, int* permutation);
+    void updateChunks(sf::Vector2f playerPosition, int* permutation);
+    void drawChunks(sf::RenderWindow& window);
 private:
     nlohmann::json objJson;
     
@@ -43,6 +57,7 @@ private:
     
     int LayerOdj[layerSizeMaxX][layerSizeMaxY];
 	int LayerGround[layerSizeMaxX][layerSizeMaxY];
+    std::map<std::pair<int, int>, Chunk> loadedChunks;
 };
 
 

@@ -157,7 +157,8 @@
 				8,
 				9,
 				10,
-				11
+				11,
+				12
 			]
 		}
 	],
@@ -213,6 +214,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "include/Entity.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/KeystrokeLogging.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
