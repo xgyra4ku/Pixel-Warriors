@@ -1,10 +1,13 @@
 #pragma once
 #include <windows.h>
 #include <map>
+#include <cstdlib>
+#include <ctime>
 #include "globals.hpp"
 #include "Map.hpp"
 #include "SaveAndLoad.hpp"
 #include "Entity.hpp"
+
 
 struct DependencyFunctions {
     void (*initLib)(sf::RenderWindow&);
@@ -25,6 +28,7 @@ class Engine
         void run();
     private:
         Map map;
+
         Entity player1;
         SaveAndLoad save_and_load_;
 
@@ -40,12 +44,14 @@ class Engine
         float fps = 0.0f;
         int frameCount = 0;
         int menu;
+        sf::Vector2i chunckPos;
 
         bool offsetRUN;
         bool collisionRUN;
 
         std::vector<std::vector<int>> mapGenerated;
         std::vector<Mod> modsList;
+        std::vector<std::vector<int>> chunkMap;
         std::map<std::string, DependencyFunctions> dependencyList;
         std::map<std::string, int> settings;
 

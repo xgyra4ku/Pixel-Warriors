@@ -14,7 +14,7 @@ struct Chunk {
 
 class Map
 {
-    public:
+public:
     Map();
     ~Map();
 
@@ -46,18 +46,16 @@ class Map
     void drawChunks(sf::RenderWindow& window);
 private:
     nlohmann::json objJson;
-    
-	std::fstream fileInput;
+
+    std::fstream fileInput;
 
     sf::Sprite sprite;
     sf::Texture texture;
 
     int imageheight;
     int imagewidth;
-    
+
     int LayerOdj[layerSizeMaxX][layerSizeMaxY];
-	int LayerGround[layerSizeMaxX][layerSizeMaxY];
+    int LayerGround[layerSizeMaxX][layerSizeMaxY];
     std::map<std::pair<int, int>, Chunk> loadedChunks;
 };
-
-

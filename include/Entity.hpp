@@ -1,4 +1,5 @@
-#pragma onse
+#pragma once
+
 #include <string>
 #include "globals.hpp"
 

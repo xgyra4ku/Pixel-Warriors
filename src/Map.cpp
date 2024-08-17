@@ -12,7 +12,7 @@ Map::~Map() {
 void Map::load()
 {
     try {
-        std::cout << "INFO: Loading Map" << std::endl;	
+        std::cout << "INFO: Loading Map" << std::endl;
 		fileInput.open("./Maps/map1/map1.json");
 		fileInput >> objJson;
 		fileInput.close();
@@ -25,14 +25,14 @@ void Map::load()
 				LayerGround[i][j] = groundData[i * layerSizeMaxX + j];
 			}
 		}
-        std::cout << "INFO: Map loaded successfully" << std::endl;  
+        std::cout << "INFO: Map loaded successfully" << std::endl;
 	}
 	catch (const nlohmann::json::exception& error) {
 	    std::cerr << "ERROR: Failed to load map " << error.what() << std::endl;
-	} 
+	}
 }
 
-void Map::save() {    
+void Map::save() {
 
 }
 
@@ -70,6 +70,7 @@ void Map::draw(sf::RenderWindow &window, std::vector<std::vector<int>>& Layer, s
         yMax = layerSizeMaxY;
     if (yMin < 0)
         yMin = 0;
+
 
     for (int i = yMin; i < yMax; i++) {
         for (int j = xMin; j < xMax; j++) {
@@ -116,7 +117,7 @@ void Map::draw(sf::RenderWindow &window, std::vector<std::vector<int>>& Layer, s
 int Map::getLayer(int x, int y, int layer) {
     if (layer == 0) {
         return LayerGround[y][x];
-    } else if (layer == 1) { 
+    } else if (layer == 1) {
         return LayerOdj[y][x];
     }
     if (layer >= 0 && layer < 2 && y >= 0 && y < layerSizeMaxY && x >= 0 && x < layerSizeMaxX) {
@@ -126,7 +127,7 @@ int Map::getLayer(int x, int y, int layer) {
             return LayerOdj[y][x];
         }
     }
-    return -1; 
+    return -1;
 }
 
 void Map::setLayer(int x, int y, int layer, int value) {
@@ -148,19 +149,19 @@ void Map::init() {
         imageheight = int(objJson["imageheight"]);
         imagewidth = int(objJson["imagewidth"]);
 
-        
+
         if (!texture.loadFromFile("../Maps/map1/forest_.png")) {
             std::cerr << "ERROR: Failed loading texture from file" << std::endl;
             return;
         }
-    
+
         sprite.setTexture(texture);
 
         std::cout << "INFO: Tileset loaded successfully" << std::endl;
     }
     catch (const nlohmann::json::exception& error) {
         std::cerr << "ERROR: Failed to load tileset " << error.what() << std::endl;
-    } 
+    }
 }
 
 int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) {
@@ -340,4 +341,3 @@ void Map::drawChunks(sf::RenderWindow& window) {
         }
     }
 }
-

@@ -31,15 +31,32 @@ Engine::Engine() {
     std::cout << "INFO: Texture loaded successfully" << std::endl;
 
     loadDependency("Dependency/");
+    menu = 0;
+
     //modslist = loadMods("Mods");
-    offsetRUN = true;
-    collisionRUN = true;
+    offsetRUN = false;
+    collisionRUN = false;
     map.init();
 
-    //map.load();
 
-    //initPlayer(1);
-    // generateMap(1111111111, 300, 300);
+    //map.load();
+    // std::srand(std::time(NULL));
+
+    initPlayer(1);
+    unsigned int seed;
+    seed = std::rand();
+    std::cout << "INFO: Seed: " << seed << std::endl;
+    // std::time(NULL);
+    // map.generateMap(seed, 128);
+    generateMap(111111111, 00, 1900);
+    // map.generateChunk(100, 100, chunkMap);
+    // chunckPos.x = playerPos.x;
+    // chunckPos.y = playerPos.y;
+    //map.generateMap(seed, 32);
+    //noise(12345);  // Seed
+    //world(noise, 12345, 3);  // Seed and render distance
+    //map.initializeMap();
+
 }
 
 Engine::~Engine() {
@@ -103,7 +120,6 @@ void Engine::loadDependency(const std::string& directory) {
 // }
 
 void Engine::run() {
-    menu = 0;
     if (settings["V-sync"] == 1) {
         window.setVerticalSyncEnabled(true);
         std::cout << "INFO: V-sync enabled" << std::endl;
@@ -126,12 +142,14 @@ void Engine::run() {
             //game
             logic();
             updateDisplay();
+
         } else if (menu == -2) {
             save_and_load_.saveSettings(settings);
 	        menu = 3;
             dependencyList["menuLib"].menuLib(window, menu, settings);
         } else {
 	        dependencyList["menuLib"].menuLib(window, menu, settings);
+
 	    }
         window.display();
 	}
@@ -158,9 +176,17 @@ void Engine::logic() {
     controlKeyboard();
     if (offsetRUN)
         offset();
+
+    //map.update(player1.getPosition());
 }
 void Engine::updateDisplay() {
     map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
+
+   // map.draw(window);
+   // map.draw();
+
+
+
     player1.draw(window);
 }
 
@@ -198,32 +224,32 @@ void Engine::initPlayer(int textureNumPlayer1) {
 
 
 void Engine::collision() {
-    sf::Vector2f newPos = player1.getPosition();
-    switch (map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
-    case 1:
-        std::cout << 1 << std::endl;
-        newPos.x -= ((playerSpeed * 2) * time);
-        player1.setPosition(newPos);
-        break;
-    case 2:
-        std::cout << 2 << std::endl;
-        newPos.x += ((playerSpeed * 2) * time);
-        player1.setPosition(newPos);
-        break;
-    case 3:
-        std::cout << 3 << std::endl;
-        newPos.y += ((playerSpeed * 2) * time);
-        player1.setPosition(newPos);
-        break;
-    case 4:
-        std::cout << 4 << std::endl;
-        newPos.y -= ((playerSpeed * 2) * time);
-        player1.setPosition(newPos);
-        break;
-    default:
-        break;
-    }
-  //std::cout << "Player position: (" << newPos.x - offsetX << ", " << newPos.y - offsetY << ")" << std::endl;
+  //   sf::Vector2f newPos = player1.getPosition();
+  //   switch (map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
+  //   case 1:
+  //       std::cout << 1 << std::endl;
+  //       newPos.x -= ((playerSpeed * 2) * time);
+  //       player1.setPosition(newPos);
+  //       break;
+  //   case 2:
+  //       std::cout << 2 << std::endl;
+  //       newPos.x += ((playerSpeed * 2) * time);
+  //       player1.setPosition(newPos);
+  //       break;
+  //   case 3:
+  //       std::cout << 3 << std::endl;
+  //       newPos.y += ((playerSpeed * 2) * time);
+  //       player1.setPosition(newPos);
+  //       break;
+  //   case 4:
+  //       std::cout << 4 << std::endl;
+  //       newPos.y -= ((playerSpeed * 2) * time);
+  //       player1.setPosition(newPos);
+  //       break;
+  //   default:
+  //       break;
+  //   }
+  // //std::cout << "Player position: (" << newPos.x - offsetX << ", " << newPos.y - offsetY << ")" << std::endl;
 } 
 void Engine::offset() {
     // Define the dead zone boundaries
@@ -342,15 +368,16 @@ void Engine::generateMap(unsigned int seed, int WIDTH, int HEIGHT) {
 
     std::cout << "Map initialized" << std::endl;
 
-    map.initializeMap(mapGenerated, seed, 0.55, WIDTH, HEIGHT); // Инициализация карты случайными значениями
+    map.initializeMap(mapGenerated, seed, 0.58, WIDTH, HEIGHT); // Инициализация карты случайными значениями
 
-    int generations = 200; // Количество поколений клеточного автомата
+    int generations = 20; // Количество поколений клеточного автомата
 
     std::cout << "Map generated..." << std::endl;
 
     // Запуск клеточного автомата на заданное количество поколений
     for (int gen = 0; gen < generations; ++gen) {
         map.stepAutomaton(mapGenerated, WIDTH, HEIGHT); // Выполнение одного шага клеточного автомата
+        std::cout << "INFO: Generation " << gen << " completed" << std::endl;
     }
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
