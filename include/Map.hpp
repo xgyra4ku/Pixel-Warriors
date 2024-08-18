@@ -30,7 +30,7 @@ public:
 
 
     void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
-    int countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, int WIDTH, int HEIGHT);
+    //int countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, int WIDTH, int HEIGHT);
     void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
 
     void setLayer(int x, int y, int layer, int value);
@@ -47,7 +47,7 @@ public:
     void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
     double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence);
 
-    void chunkLoader();
+
 
 private:
     nlohmann::json objJson;
@@ -70,8 +70,5 @@ private:
     std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
 
 
-    // Многопоточность
-    std::thread chunkLoaderThread; // Поток для загрузки чанков
-    std::mutex chunkMutex; // Мьютекс для защиты доступа к данным
-    bool stopThread; // Флаг для завершения потока
+
 };

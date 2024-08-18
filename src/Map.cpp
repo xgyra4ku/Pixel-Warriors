@@ -1,14 +1,10 @@
 #include "../include/Map.hpp"
 
-Map::Map() : distanceView(3), stopThread(false) {
-    ChunkGenerationThread = std::thread(&Map::, this);
+
+Map::Map() : distanceView(3) { // Устанавливаем значение distanceView по умолчанию
 }
 
 Map::~Map() {
-    stopThread = true;
-    if (ChunkGenerationThread.joinable()) {
-        ChunkGenerationThread.join();
-    }
 }
 
 void Map::load() {
@@ -39,20 +35,14 @@ double Map::generatePerlinNoise(double x, double y, double scale, int octaves, d
 
 std::vector<std::vector<int>> Map::generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize) {
     std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
-    double scale = 0.005;
+    double scale = 0.001;
     int octaves = 1;
-    double persistence = 0.005;
+    double persistence = 0.01;
 
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
             double noiseValue = generatePerlinNoise(x + chunkX * chunkSize, y + chunkY * chunkSize, scale, octaves, persistence);
-            if (noiseValue < 0) {
-                chunk[y][x] = 159;
-            } else if (noiseValue < 0.1) {
-                chunk[y][x] = 100;
-            } else {
-                chunk[y][x] = 47;
-            }
+            chunk[y][x] = (noiseValue < 0) ? 159 : 47; // Вода или земля
         }
     }
     return chunk;
@@ -273,7 +263,6 @@ void Map::unloadDistantChunks(sf::Vector2f playerPos, int chunkSize) {
         }
     }
 }
-
 void Map::draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize) {
     loadChunksAroundPlayer(playerPos, chunkSize, 12345);
 
@@ -281,6 +270,10 @@ void Map::draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f vi
     int playerChunkY = int(playerPos.y) / (chunkSize * tileSize);
 
     sf::VertexArray vertices(sf::Quads);
+
+    // Округляем offsetX и offsetY
+    int roundedOffsetX = static_cast<int>(std::round(offsetX));
+    int roundedOffsetY = static_cast<int>(std::round(offsetY));
 
     for (int y = -distanceView; y <= distanceView; ++y) {
         for (int x = -distanceView; x <= distanceView; ++x) {
@@ -301,10 +294,10 @@ void Map::draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f vi
                             float tileX = float((tileValue - 1) % tilesPerRow) * tileSize;
                             float tileY = float((tileValue - 1) / tilesPerRow) * tileSize;
 
-                            vertices.append(sf::Vertex(sf::Vector2f(X - offsetX, Y - offsetY), sf::Vector2f(tileX, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - offsetX, Y - offsetY), sf::Vector2f(tileX + tileSize, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - offsetX, Y + tileSize - offsetY), sf::Vector2f(tileX + tileSize, tileY + tileSize)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X - offsetX, Y + tileSize - offsetY), sf::Vector2f(tileX, tileY + tileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + tileSize, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - roundedOffsetX, Y + tileSize - roundedOffsetY), sf::Vector2f(tileX + tileSize, tileY + tileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + tileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + tileSize)));
                         }
                     }
                 }
@@ -317,26 +310,4 @@ void Map::draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f vi
     window.draw(vertices, states);
 
     unloadDistantChunks(playerPos, chunkSize);
-}
-void Map::chunkLoader() {
-    while (!stopThread) {
-        std::pair<int, int> chunkKey;
-        {
-            std::lock_guard<std::mutex> lock(chunkMutex);
-            if (!chunksToLoad.empty()) {
-                chunkKey = chunksToLoad.front();
-                chunksToLoad.pop();
-            } else {
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                continue;
-            }
-        }
-
-        int chunkSize = 16; // размер чанка
-        unsigned int seed = 12345;
-        auto chunk = generateChunk(chunkKey.first, chunkKey.second, seed, chunkSize);
-
-        std::lock_guard<std::mutex> lock(chunkMutex);
-        chunks[chunkKey] = std::move(chunk);
-    }
 }
