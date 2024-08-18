@@ -48,6 +48,7 @@ class Engine
 
         bool offsetRUN;
         bool collisionRUN;
+        bool playerPosRUN;
 
         std::vector<std::vector<int>> mapGenerated;
         std::vector<Mod> modsList;

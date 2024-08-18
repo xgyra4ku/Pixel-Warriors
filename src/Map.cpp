@@ -1,41 +1,80 @@
 #include "../include/Map.hpp"
 
-
-Map::Map() {
-
+Map::Map() : distanceView(3), stopThread(false) {
+    ChunkGenerationThread = std::thread(&Map::, this);
 }
 
 Map::~Map() {
-
+    stopThread = true;
+    if (ChunkGenerationThread.joinable()) {
+        ChunkGenerationThread.join();
+    }
 }
 
-void Map::load()
-{
+void Map::load() {
     try {
         std::cout << "INFO: Loading Map" << std::endl;
-		fileInput.open("./Maps/map1/map1.json");
-		fileInput >> objJson;
-		fileInput.close();
-		auto layers = objJson["layers"];
-		for (int i = 0; i < layerSizeMaxY; i++) {
-			auto odjData = layers[0]["data"];
-			auto groundData = layers[1]["data"];
-			for (int j = 0; j < layerSizeMaxX; j++) {
-				LayerOdj[i][j] = odjData[i * layerSizeMaxX + j];
-				LayerGround[i][j] = groundData[i * layerSizeMaxX + j];
-			}
-		}
+        fileInput.open("./Maps/map1/map1.json");
+        fileInput >> objJson;
+        fileInput.close();
+        auto layers = objJson["layers"];
+        for (int i = 0; i < layerSizeMaxY; i++) {
+            auto odjData = layers[0]["data"];
+            auto groundData = layers[1]["data"];
+            for (int j = 0; j < layerSizeMaxX; j++) {
+                LayerOdj[i][j] = odjData[i * layerSizeMaxX + j];
+                LayerGround[i][j] = groundData[i * layerSizeMaxX + j];
+            }
+        }
         std::cout << "INFO: Map loaded successfully" << std::endl;
-	}
-	catch (const nlohmann::json::exception& error) {
-	    std::cerr << "ERROR: Failed to load map " << error.what() << std::endl;
-	}
+    } catch (const nlohmann::json::exception& error) {
+        std::cerr << "ERROR: Failed to load map " << error.what() << std::endl;
+    }
+}
+
+double Map::generatePerlinNoise(double x, double y, double scale, int octaves, double persistence) {
+    PerlinNoise perlin(555555);
+    return perlin.octave2D_01(x * scale, y * scale, octaves, persistence);
+}
+
+std::vector<std::vector<int>> Map::generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize) {
+    std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
+    double scale = 0.005;
+    int octaves = 1;
+    double persistence = 0.005;
+
+    for (int y = 0; y < chunkSize; ++y) {
+        for (int x = 0; x < chunkSize; ++x) {
+            double noiseValue = generatePerlinNoise(x + chunkX * chunkSize, y + chunkY * chunkSize, scale, octaves, persistence);
+            if (noiseValue < 0) {
+                chunk[y][x] = 159;
+            } else if (noiseValue < 0.1) {
+                chunk[y][x] = 100;
+            } else {
+                chunk[y][x] = 47;
+            }
+        }
+    }
+    return chunk;
+}
+
+void Map::generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize) {
+    int riverStartX = rand() % chunkSize;
+    int riverY = 0;
+
+    while (riverY < chunkSize) {
+        if (chunk[riverY][riverStartX] != 159) {
+            chunk[riverY][riverStartX] = 159;
+        }
+        riverY++;
+        int direction = rand() % 3 - 1;
+        riverStartX = std::max(0, std::min(chunkSize - 1, riverStartX + direction));
+    }
 }
 
 void Map::save() {
-
+    // Реализация сохранения карты
 }
-
 
 void Map::draw(sf::RenderWindow &window) {
     for (int i = 0; i < layerSizeMaxY; i++) {
@@ -53,80 +92,48 @@ void Map::draw(sf::RenderWindow &window) {
         }
     }
 }
-void Map::draw(sf::RenderWindow &window, std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) {
-    int textureSize = texture.getSize().x;
+
+void Map::draw(sf::RenderWindow &window, std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f view) {
     sf::VertexArray vertices(sf::Quads);
+    int textureSize = texture.getSize().x;
 
-    int xMax = int((playerPos.x + viev.x) / tileSize);
-    int xMin = int((playerPos.x - viev.x) / tileSize);
-    int yMax = int((playerPos.y + viev.y) / tileSize);
-    int yMin = int((playerPos.y - viev.y) / tileSize);
+    int xMax = int((playerPos.x + view.x) / tileSize);
+    int xMin = int((playerPos.x - view.x) / tileSize);
+    int yMax = int((playerPos.y + view.y) / tileSize);
+    int yMin = int((playerPos.y - view.y) / tileSize);
 
-    if (xMax > layerSizeMaxX)
-        xMax = layerSizeMaxX;
-    if (xMin < 0)
-        xMin = 0;
-    if (yMax > layerSizeMaxY)
-        yMax = layerSizeMaxY;
-    if (yMin < 0)
-        yMin = 0;
-
+    xMax = std::min(xMax, layerSizeMaxX);
+    xMin = std::max(xMin, 0);
+    yMax = std::min(yMax, layerSizeMaxY);
+    yMin = std::max(yMin, 0);
 
     for (int i = yMin; i < yMax; i++) {
         for (int j = xMin; j < xMax; j++) {
             if (Layer[i][j] != 0) {
-                float Y = float(i) * tileSize;
-                float X = float(j) * tileSize;
-
                 int tileIndex = Layer[i][j] - 1;
                 int tilesPerRow = textureSize / tileSize;
                 float tileX = float((tileIndex % tilesPerRow) * tileSize);
                 float tileY = float((tileIndex / tilesPerRow) * tileSize);
 
-                // Создание четырех вершин (квадрата) для каждого тайла
-                sf::Vertex vertex1, vertex2, vertex3, vertex4;
+                float X = float(j) * tileSize - offsetX;
+                float Y = float(i) * tileSize - offsetY;
 
-                vertex1.position = sf::Vector2f(X - offsetX, Y - offsetY);
-                vertex2.position = sf::Vector2f(X + tileSize - offsetX, Y - offsetY);
-                vertex3.position = sf::Vector2f(X + tileSize - offsetX, Y + tileSize - offsetY);
-                vertex4.position = sf::Vector2f(X - offsetX, Y + tileSize - offsetY);
-
-                vertex1.texCoords = sf::Vector2f(tileX, tileY);
-                vertex2.texCoords = sf::Vector2f(tileX + tileSize, tileY);
-                vertex3.texCoords = sf::Vector2f(tileX + tileSize, tileY + tileSize);
-                vertex4.texCoords = sf::Vector2f(tileX, tileY + tileSize);
-
-                vertices.append(vertex1);
-                vertices.append(vertex2);
-                vertices.append(vertex3);
-                vertices.append(vertex4);
+                vertices.append(sf::Vertex(sf::Vector2f(X, Y), sf::Vector2f(tileX, tileY)));
+                vertices.append(sf::Vertex(sf::Vector2f(X + tileSize, Y), sf::Vector2f(tileX + tileSize, tileY)));
+                vertices.append(sf::Vertex(sf::Vector2f(X + tileSize, Y + tileSize), sf::Vector2f(tileX + tileSize, tileY + tileSize)));
+                vertices.append(sf::Vertex(sf::Vector2f(X, Y + tileSize), sf::Vector2f(tileX, tileY + tileSize)));
             }
-
         }
     }
 
-    // Установка текстуры
     sf::RenderStates states;
     states.texture = &texture;
-
-    // Отрисовка всех вершин за один вызов
     window.draw(vertices, states);
 }
 
-
 int Map::getLayer(int x, int y, int layer) {
-    if (layer == 0) {
-        return LayerGround[y][x];
-    } else if (layer == 1) {
-        return LayerOdj[y][x];
-    }
-    if (layer >= 0 && layer < 2 && y >= 0 && y < layerSizeMaxY && x >= 0 && x < layerSizeMaxX) {
-        if (layer == 0) {
-            return LayerGround[y][x];
-        } else if (layer == 1) {
-            return LayerOdj[y][x];
-        }
-    }
+    if (layer == 0) return LayerGround[y][x];
+    if (layer == 1) return LayerOdj[y][x];
     return -1;
 }
 
@@ -138,7 +145,8 @@ void Map::setLayer(int x, int y, int layer, int value) {
     }
 }
 
-void Map::init() {
+void Map::init(int distanceView) {
+    this->distanceView = distanceView;
     try {
         std::cout << "INFO: Loading tileset" << std::endl;
 
@@ -149,14 +157,12 @@ void Map::init() {
         imageheight = int(objJson["imageheight"]);
         imagewidth = int(objJson["imagewidth"]);
 
-
         if (!texture.loadFromFile("../Maps/map1/forest_.png")) {
             std::cerr << "ERROR: Failed loading texture from file" << std::endl;
             return;
         }
 
         sprite.setTexture(texture);
-
         std::cout << "INFO: Tileset loaded successfully" << std::endl;
     }
     catch (const nlohmann::json::exception& error) {
@@ -195,149 +201,142 @@ int Map::collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f
 }
 
 void Map::initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT) {
-    std::srand(seed); // Инициализация генератора случайных чисел
+    std::srand(seed);
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            // Заполняем карту случайными значениями на основе начальной вероятности суши
             map[y][x] = (std::rand() / (double)RAND_MAX) < INITIAL_PROB ? 1 : 0;
         }
     }
 }
 
-int Map::countLandNeighbors(const std::vector<std::vector<int>>& map, int x, int y, int WIDTH, int HEIGHT) {
-    int count = 0; // Счетчик соседей-суши
-    for (int dy = -1; dy <= 1; ++dy) { // Перебор соседей по вертикали
-        for (int dx = -1; dx <= 1; ++dx) { // Перебор соседей по горизонтали
-            if (dy == 0 && dx == 0) continue; // Пропуск самой клетки
-            int nx = x + dx; // Координата x соседа
-            int ny = y + dy; // Координата y соседа
-            // Проверка, что сосед находится внутри карты
-            if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                count += map[ny][nx]; // Увеличение счетчика, если сосед - суша
-            }
-        }
-    }
-    return count; // Возвращаем количество соседей-суши
-}
-
 void Map::stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT) {
-    std::vector<std::vector<int>> newMap = map; // Создаем копию карты для обновлений
+    std::vector<std::vector<int>> newMap = map;
 
-    for (int y = 0; y < HEIGHT; ++y) { // Перебор всех клеток по вертикали
-        for (int x = 0; x < WIDTH; ++x) { // Перебор всех клеток по горизонтали
-            int landNeighbors = countLandNeighbors(map, x, y, WIDTH, HEIGHT); // Подсчет соседей-суши
-            if (map[y][x] == 1) { // Если текущая клетка - суша
-                if (landNeighbors < 4) { // Меньше 4 соседей-суши
-                    newMap[y][x] = 0; // Клетка становится водой
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            int count = 0;
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    if (dy == 0 && dx == 0) continue;
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+                        count += map[ny][nx];
+                    }
                 }
-            } else { // Если текущая клетка - вода
-                if (landNeighbors > 4) { // Больше 4 соседей-суши
-                    newMap[y][x] = 1; // Клетка становится сушей
+            }
+
+            if (map[y][x] == 1) {
+                if (count < 4) {
+                    newMap[y][x] = 0;
+                }
+            } else {
+                if (count > 4) {
+                    newMap[y][x] = 1;
                 }
             }
         }
     }
 
-    map = newMap; // Обновляем карту
+    map = newMap;
 }
 
-double Map::fade(double t) {
-    return t * t * t * (t * (t * 6 - 15) + 10);
-}
+void Map::loadChunksAroundPlayer(sf::Vector2f playerPos, int chunkSize, unsigned int seed) {
+    int playerChunkX = int(playerPos.x) / (chunkSize * tileSize);
+    int playerChunkY = int(playerPos.y) / (chunkSize * tileSize);
 
-double Map::lerp(double t, double a, double b) {
-    return a + t * (b - a);
-}
+    for (int y = -distanceView; y <= distanceView; ++y) {
+        for (int x = -distanceView; x <= distanceView; ++x) {
+            int chunkX = playerChunkX + x;
+            int chunkY = playerChunkY + y;
 
-double Map::grad(int hash, double x, double y) {
-    int h = hash & 15;
-    double u = h < 8 ? x : y;
-    double v = h < 4 ? y : h == 12 || h == 14 ? x : 0;
-    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
-}
-
-double Map::perlin(double x, double y, int *permutation) {
-    int xi = (int)x & 255;
-    int yi = (int)y & 255;
-
-    double xf = x - (int)x;
-    double yf = y - (int)y;
-
-    double u = fade(xf);
-    double v = fade(yf);
-
-    int aa = permutation[permutation[xi] + yi];
-    int ab = permutation[permutation[xi] + yi + 1];
-    int ba = permutation[permutation[xi + 1] + yi];
-    int bb = permutation[permutation[xi + 1] + yi + 1];
-
-    double x1 = lerp(u, grad(aa, xf, yf), grad(ba, xf - 1, yf));
-    double x2 = lerp(u, grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1));
-
-    return lerp(v, x1, x2);
-}
-
-void Map::generatePermutation(int *permutation) {
-    for (int i = 0; i < 256; ++i)
-        permutation[i] = i;
-
-    std::random_shuffle(&permutation[0], &permutation[256]);
-
-    for (int i = 0; i < 256; ++i)
-        permutation[256 + i] = permutation[i];
-}
-
-
-Chunk Map::generateChunk(int chunkX, int chunkY, int* permutation) {
-    Chunk chunk;
-    // Генерация чанка с шумом Перлина
-    for (int y = 0; y < 16; ++y) {
-        for (int x = 0; x < 16; ++x) {
-            double worldX = chunkX * 16 + x;
-            double worldY = chunkY * 16 + y;
-            double height = perlin(worldX * 0.1, worldY * 0.1, permutation);
-
-            sf::RectangleShape tile(sf::Vector2f(32, 32));  // Размер тайла 32x32 пикселя
-            tile.setPosition(worldX * 32, worldY * 32);
-            tile.setFillColor(sf::Color(0, 255 * height, 0));  // Пример окрашивания
-            chunk.tiles.push_back(tile);
-        }
-    }
-    return chunk;
-}
-
-void Map::updateChunks(sf::Vector2f playerPosition, int* permutation) {
-    int chunkX = static_cast<int>(playerPosition.x / (16 * 32));
-    int chunkY = static_cast<int>(playerPosition.y / (16 * 32));
-
-    std::vector<std::pair<int, int>> neededChunks;
-
-    // Загрузка чанков вокруг игрока
-    for (int y = -1; y <= 1; ++y) {
-        for (int x = -1; x <= 1; ++x) {
-            int cx = chunkX + x;
-            int cy = chunkY + y;
-            if (loadedChunks.find({cx, cy}) == loadedChunks.end()) {
-                loadedChunks[{cx, cy}] = generateChunk(cx, cy, permutation);
+            auto chunkKey = std::make_pair(chunkX, chunkY);
+            if (chunks.find(chunkKey) == chunks.end()) {
+                chunks[chunkKey] = generateChunk(chunkX, chunkY, seed, chunkSize);
             }
-            neededChunks.push_back({cx, cy});
         }
     }
+}
 
-    // Выгрузка чанков, которые больше не нужны
-    for (auto it = loadedChunks.begin(); it != loadedChunks.end();) {
-        if (std::find(neededChunks.begin(), neededChunks.end(), it->first) == neededChunks.end()) {
-            it = loadedChunks.erase(it);
+void Map::unloadDistantChunks(sf::Vector2f playerPos, int chunkSize) {
+    int playerChunkX = int(playerPos.x) / (chunkSize * tileSize);
+    int playerChunkY = int(playerPos.y) / (chunkSize * tileSize);
+
+    for (auto it = chunks.begin(); it != chunks.end();) {
+        int chunkX = it->first.first;
+        int chunkY = it->first.second;
+
+        if (abs(chunkX - playerChunkX) > distanceView || abs(chunkY - playerChunkY) > distanceView) {
+            it = chunks.erase(it);
         } else {
             ++it;
         }
     }
 }
 
-void Map::drawChunks(sf::RenderWindow& window) {
-    for (const auto& chunk : loadedChunks) {
-        for (const auto& tile : chunk.second.tiles) {
-            window.draw(tile);
+void Map::draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize) {
+    loadChunksAroundPlayer(playerPos, chunkSize, 12345);
+
+    int playerChunkX = int(playerPos.x) / (chunkSize * tileSize);
+    int playerChunkY = int(playerPos.y) / (chunkSize * tileSize);
+
+    sf::VertexArray vertices(sf::Quads);
+
+    for (int y = -distanceView; y <= distanceView; ++y) {
+        for (int x = -distanceView; x <= distanceView; ++x) {
+            int chunkX = playerChunkX + x;
+            int chunkY = playerChunkY + y;
+
+            auto chunkKey = std::make_pair(chunkX, chunkY);
+            if (chunks.find(chunkKey) != chunks.end()) {
+                auto& chunk = chunks[chunkKey];
+                for (int i = 0; i < chunkSize; ++i) {
+                    for (int j = 0; j < chunkSize; ++j) {
+                        int tileValue = chunk[i][j];
+                        if (tileValue != 0) {
+                            float X = float(j + chunkX * chunkSize) * tileSize;
+                            float Y = float(i + chunkY * chunkSize) * tileSize;
+
+                            int tilesPerRow = texture.getSize().x / tileSize;
+                            float tileX = float((tileValue - 1) % tilesPerRow) * tileSize;
+                            float tileY = float((tileValue - 1) / tilesPerRow) * tileSize;
+
+                            vertices.append(sf::Vertex(sf::Vector2f(X - offsetX, Y - offsetY), sf::Vector2f(tileX, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - offsetX, Y - offsetY), sf::Vector2f(tileX + tileSize, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - offsetX, Y + tileSize - offsetY), sf::Vector2f(tileX + tileSize, tileY + tileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X - offsetX, Y + tileSize - offsetY), sf::Vector2f(tileX, tileY + tileSize)));
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    sf::RenderStates states;
+    states.texture = &texture;
+    window.draw(vertices, states);
+
+    unloadDistantChunks(playerPos, chunkSize);
+}
+void Map::chunkLoader() {
+    while (!stopThread) {
+        std::pair<int, int> chunkKey;
+        {
+            std::lock_guard<std::mutex> lock(chunkMutex);
+            if (!chunksToLoad.empty()) {
+                chunkKey = chunksToLoad.front();
+                chunksToLoad.pop();
+            } else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                continue;
+            }
+        }
+
+        int chunkSize = 16; // размер чанка
+        unsigned int seed = 12345;
+        auto chunk = generateChunk(chunkKey.first, chunkKey.second, seed, chunkSize);
+
+        std::lock_guard<std::mutex> lock(chunkMutex);
+        chunks[chunkKey] = std::move(chunk);
     }
 }

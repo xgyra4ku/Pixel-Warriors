@@ -7,10 +7,13 @@
 #include <cstdlib>
 #include <ctime>
 #include "nlohmann/json.hpp"
-struct Chunk {
-    std::vector<sf::RectangleShape> tiles;  // Замените на нужный тип данных для хранения тайлов
-};
-
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <thread>
+#include <mutex>
+#include <queue>
+#include "PerlinNoise.hpp"
 
 class Map
 {
@@ -18,7 +21,7 @@ public:
     Map();
     ~Map();
 
-    void init();
+    void init(int distanceView);
     void load();
     void save();
     void draw(sf::RenderWindow &window);
@@ -35,15 +38,17 @@ public:
     int getLayer(int x, int y, int layer);
 
 
-    double fade(double t);
-    double lerp(double t, double a, double b);
-    double perlin(double x, double y, int *permutation);
-    double grad(int hash, double x, double y);
 
-    void generatePermutation(int *permutation);
-    Chunk generateChunk(int chunkX, int chunkY, int* permutation);
-    void updateChunks(sf::Vector2f playerPosition, int* permutation);
-    void drawChunks(sf::RenderWindow& window);
+    void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize);
+    void loadChunksAroundPlayer(sf::Vector2f playerPos, int chunkSize, unsigned int seed);
+    std::vector<std::vector<int>> generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize);
+    void unloadDistantChunks(sf::Vector2f playerPos, int chunkSize);
+
+    void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
+    double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence);
+
+    void chunkLoader();
+
 private:
     nlohmann::json objJson;
 
@@ -52,10 +57,21 @@ private:
     sf::Sprite sprite;
     sf::Texture texture;
 
+    bool stopThread;
+    std::thread ChunkGenerationThread;
+
     int imageheight;
     int imagewidth;
+    int distanceView;
 
     int LayerOdj[layerSizeMaxX][layerSizeMaxY];
     int LayerGround[layerSizeMaxX][layerSizeMaxY];
-    std::map<std::pair<int, int>, Chunk> loadedChunks;
+
+    std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
+
+
+    // Многопоточность
+    std::thread chunkLoaderThread; // Поток для загрузки чанков
+    std::mutex chunkMutex; // Мьютекс для защиты доступа к данным
+    bool stopThread; // Флаг для завершения потока
 };

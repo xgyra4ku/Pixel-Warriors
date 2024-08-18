@@ -34,9 +34,11 @@ Engine::Engine() {
     menu = 0;
 
     //modslist = loadMods("Mods");
-    offsetRUN = false;
-    collisionRUN = false;
-    map.init();
+    offsetRUN = true;
+    collisionRUN = true;
+    playerPosRUN = false;
+    map.init(4);
+   // map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
 
 
     //map.load();
@@ -48,7 +50,7 @@ Engine::Engine() {
     std::cout << "INFO: Seed: " << seed << std::endl;
     // std::time(NULL);
     // map.generateMap(seed, 128);
-    generateMap(111111111, 00, 1900);
+    //generateMap(111111111, 1900, 1900);
     // map.generateChunk(100, 100, chunkMap);
     // chunckPos.x = playerPos.x;
     // chunckPos.y = playerPos.y;
@@ -176,14 +178,14 @@ void Engine::logic() {
     controlKeyboard();
     if (offsetRUN)
         offset();
+    if (playerPosRUN)
+        std::cout << "Player position: (" << playerPos.x - offsetX << ", " << playerPos.y - offsetY << ")" << std::endl;
 
-    //map.update(player1.getPosition());
 }
 void Engine::updateDisplay() {
-    map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
+    //map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
 
-   // map.draw(window);
-   // map.draw();
+   map.draw(window, playerPos, sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)), 16);
 
 
 
@@ -224,32 +226,31 @@ void Engine::initPlayer(int textureNumPlayer1) {
 
 
 void Engine::collision() {
-  //   sf::Vector2f newPos = player1.getPosition();
-  //   switch (map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
-  //   case 1:
-  //       std::cout << 1 << std::endl;
-  //       newPos.x -= ((playerSpeed * 2) * time);
-  //       player1.setPosition(newPos);
-  //       break;
-  //   case 2:
-  //       std::cout << 2 << std::endl;
-  //       newPos.x += ((playerSpeed * 2) * time);
-  //       player1.setPosition(newPos);
-  //       break;
-  //   case 3:
-  //       std::cout << 3 << std::endl;
-  //       newPos.y += ((playerSpeed * 2) * time);
-  //       player1.setPosition(newPos);
-  //       break;
-  //   case 4:
-  //       std::cout << 4 << std::endl;
-  //       newPos.y -= ((playerSpeed * 2) * time);
-  //       player1.setPosition(newPos);
-  //       break;
-  //   default:
-  //       break;
-  //   }
-  // //std::cout << "Player position: (" << newPos.x - offsetX << ", " << newPos.y - offsetY << ")" << std::endl;
+    sf::Vector2f newPos = player1.getPosition();
+    switch (map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
+    case 1:
+        std::cout << 1 << std::endl;
+        newPos.x -= ((playerSpeed * 2) * time);
+        player1.setPosition(newPos);
+        break;
+    case 2:
+        std::cout << 2 << std::endl;
+        newPos.x += ((playerSpeed * 2) * time);
+        player1.setPosition(newPos);
+        break;
+    case 3:
+        std::cout << 3 << std::endl;
+        newPos.y += ((playerSpeed * 2) * time);
+        player1.setPosition(newPos);
+        break;
+    case 4:
+        std::cout << 4 << std::endl;
+        newPos.y -= ((playerSpeed * 2) * time);
+        player1.setPosition(newPos);
+        break;
+    default:
+        break;
+    }
 } 
 void Engine::offset() {
     // Define the dead zone boundaries
@@ -304,7 +305,6 @@ void Engine::controlKeyboard() {
        player1.animate(time, 5);
     }
     else {
-        playerPos = player1.getPosition();
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
             playerPos.y -= (playerSpeed / 1.5f) * time;
             playerPos.x -= (playerSpeed / 1.5f)  * time;
@@ -347,16 +347,16 @@ void Engine::controlKeyboard() {
     }
     if (!offsetRUN) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-            offsetY -= 10;
+            offsetY -= 5;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-            offsetX -= 10;
+            offsetX -= 5;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            offsetY += 10;
+            offsetY += 5;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-            offsetX += 10;
+            offsetX += 5;
         }
     }
     player1.setPosition(playerPos);
