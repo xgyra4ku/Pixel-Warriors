@@ -5,8 +5,7 @@
 
 class KeystrokeLogging {
 public:
-    char codeToChar(int code);
-    std::string getKeyName(sf::Keyboard::Key key);
-private:
+    static char codeToChar(int code);
 
+    static std::string getKeyName(sf::Keyboard::Key key);
 };

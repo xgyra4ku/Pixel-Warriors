@@ -1,42 +1,42 @@
 #include "../include/Entity.hpp"
 
-Entity::Entity() {
-}
+#include <cmath>
 
-Entity::~Entity() {
-}
+Entity::Entity() = default;
 
-void Entity::setPosition(sf::Vector2f positionSet) {
+Entity::~Entity() = default;
+
+void Entity::setPosition(const sf::Vector2f positionSet) {
     position = positionSet;
     sprite.setPosition(sf::Vector2f(position.x - offsetX, position.y - offsetY));
 }
 
-void Entity::setName(std::string nameSet) {
+void Entity::setName(const std::string &nameSet) {
     this->name = nameSet;
 }
-void Entity::setTexture(sf::Texture textureSet) {
+void Entity::setTexture(const sf::Texture& textureSet) {
     this->texture = textureSet;
     sprite.setTexture(texture);
 }
 
-void Entity::setSize(sf::Vector2f sizeSet) {
+void Entity::setSize(const sf::Vector2f sizeSet) {
     this->size = sizeSet;
 }
 
-sf::Vector2f Entity::getPosition() {
+sf::Vector2f Entity::getPosition() const {
     return position;
 }
 sf::Sprite Entity::getSprite() {
     return sprite;
 }
 
-sf::Vector2f Entity::getSize() {
+sf::Vector2f Entity::getSize() const {
     return size;
 }
-void Entity::draw(sf::RenderWindow& window) {
-    window.draw(sprite);
+void Entity::draw(sf::RenderWindow& window) const {
+	window.draw(sprite);
 }
-void Entity::animate(float time, int dir) {
+void Entity::animate(const float time, const int dir) {
     if (dir == 1)
 	{
 		currentFrame += animationSpeed * time;

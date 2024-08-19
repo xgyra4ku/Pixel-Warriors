@@ -10,15 +10,15 @@ public:
     ~Entity();
 
     void setPosition(sf::Vector2f positionSet);
-    void setName(std::string nameSet);
-    void setTexture(sf::Texture textureSet);
+    void setName(const std::string &nameSet);
+    void setTexture(const sf::Texture& textureSet);
     void setSize(sf::Vector2f sizeSet);
 
-    sf::Vector2f getPosition();
+    sf::Vector2f getPosition() const;
     sf::Sprite getSprite();
-    sf::Vector2f getSize();
+    sf::Vector2f getSize() const;
 
-    void draw(sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window) const;
     void animate(float time, int dir);
 private:
     sf::Vector2f size;

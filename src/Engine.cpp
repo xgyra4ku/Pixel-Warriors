@@ -1,4 +1,5 @@
 #include "../include/Engine.hpp"
+#include "../include/globals.hpp"
 
 Engine::Engine() {
     settings = save_and_load_.loadSettings();
@@ -10,8 +11,8 @@ Engine::Engine() {
     } else {
         window.create(sf::VideoMode(settings["windowWidth"], settings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
     }
-    WindowWidth = window.getSize().x;
-    WindowHeight = window.getSize().y;
+    WindowWidth = static_cast<int>(window.getSize().x);
+    WindowHeight = static_cast<int>(window.getSize().y);
 
 
     if (!window.isOpen()) {
@@ -45,8 +46,7 @@ Engine::Engine() {
     // std::srand(std::time(NULL));
 
     initPlayer(1);
-    unsigned int seed;
-    seed = std::rand();
+    const unsigned int seed = std::rand();
     std::cout << "INFO: Seed: " << seed << std::endl;
     // std::time(NULL);
     // map.generateMap(seed, 128);
@@ -61,21 +61,20 @@ Engine::Engine() {
 
 }
 
-Engine::~Engine() {
-}
+Engine::~Engine() = default;
 
 void Engine::loadDependency(const std::string& directory) {
-    DependencyFunctions functions;
-    std::string filePath = directory + "libmod-menu.dll";
-    HMODULE hModule = LoadLibrary(filePath.c_str());
+    DependencyFunctions functions{};
+    const std::string filePath = directory + "libmod-menu.dll";
+    const HMODULE hModule = LoadLibrary(filePath.c_str());
 
-    if (hModule == NULL) {
+    if (hModule == nullptr) {
         std::cerr << "[ERROR]: Could not load " << filePath << std::endl;
         return;
     }
 
-    functions.initLib = (void (*)(sf::RenderWindow&)) GetProcAddress(hModule, "initLib");
-    functions.menuLib = (void (*)(sf::RenderWindow&, int&, std::map<std::string, int>&)) GetProcAddress(hModule, "menuLib");
+    functions.initLib = reinterpret_cast<void (*)(sf::RenderWindow &)>(GetProcAddress(hModule, "initLib"));
+    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &)>(GetProcAddress(hModule, "menuLib"));
 
     if (!functions.initLib || !functions.menuLib) {
         std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
@@ -158,7 +157,7 @@ void Engine::run() {
 }
 void Engine::timer() {
 
-    time = clock.getElapsedTime().asMicroseconds();
+    time = static_cast<float>(clock.getElapsedTime().asMicroseconds());
     clock.restart();
 
     time = time / 700.0f;
@@ -166,10 +165,10 @@ void Engine::timer() {
     if (time > 60.0f) time = 60.0f;
     frameCount++;
     if (fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
-        fps = frameCount / fpsClock.getElapsedTime().asSeconds();
+        fps = static_cast<float>(frameCount) / fpsClock.getElapsedTime().asSeconds();
         frameCount = 0;
         fpsClock.restart();
-        std::cout << "FPS: " << int(fps) << std::endl;
+        std::cout << "FPS: " << static_cast<int>(fps) << std::endl;
     }
 }
 void Engine::logic() {
@@ -185,7 +184,7 @@ void Engine::logic() {
 void Engine::updateDisplay() {
     //map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
 
-   map.draw(window, playerPos, sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)), 16);
+   map.draw(window, playerPos, sf::Vector2f((static_cast<float>(WindowWidth) / 2.0f + 30), (static_cast<float>(WindowHeight) / 2.0f + 30)), 16);
 
 
 
@@ -195,7 +194,7 @@ void Engine::updateDisplay() {
 
 void Engine::Events() {
 
-    sf::Event event;
+    sf::Event event{};
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             window.close();
@@ -226,8 +225,7 @@ void Engine::initPlayer(int textureNumPlayer1) {
 
 
 void Engine::collision() {
-    sf::Vector2f newPos = player1.getPosition();
-    switch (map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
+    switch (sf::Vector2f newPos = player1.getPosition(); map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
     case 1:
         std::cout << 1 << std::endl;
         newPos.x -= ((playerSpeed * 2) * time);
@@ -254,13 +252,13 @@ void Engine::collision() {
 } 
 void Engine::offset() {
     // Define the dead zone boundaries
-    const float leftDeadZone = 630.0f;
-    const float rightDeadZone = 650.0f;
-    const float topDeadZone = 390.0f;
-    const float bottomDeadZone = 410.0f;
+    constexpr float leftDeadZone = 630.0f;
+    constexpr float rightDeadZone = 650.0f;
+    constexpr float topDeadZone = 390.0f;
+    constexpr float bottomDeadZone = 410.0f;
 
     // Player's current position
-    sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(offsetX, offsetY);
+    const sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(offsetX, offsetY);
 
     // Calculate the desired offset based on the player's position relative to the dead zone
     float targetOffsetX = offsetX;
@@ -279,10 +277,10 @@ void Engine::offset() {
     }
 
     // Smoothly interpolate the offset values for a more gradual camera movement
-    float smoothFactor = 0.1f; // Adjust this factor for more or less smoothness
+    constexpr float smoothFactor = 0.1f; // Adjust this factor for more or less smoothness
 
     // Add some inertia to the camera movement
-    float inertia = 0.1f; // Adjust this for more or less camera inertia
+    constexpr float inertia = 0.1f; // Adjust this for more or less camera inertia
 
     // Compute the new offset values
     offsetX += (targetOffsetX - offsetX) * smoothFactor;
@@ -363,14 +361,14 @@ void Engine::controlKeyboard() {
     
 }
 
-void Engine::generateMap(unsigned int seed, int WIDTH, int HEIGHT) {
+void Engine::generateMap(const unsigned int seed, const int WIDTH, const int HEIGHT) {
     mapGenerated = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
 
     std::cout << "Map initialized" << std::endl;
 
     map.initializeMap(mapGenerated, seed, 0.58, WIDTH, HEIGHT); // Инициализация карты случайными значениями
 
-    int generations = 20; // Количество поколений клеточного автомата
+    constexpr int generations = 20; // Количество поколений клеточного автомата
 
     std::cout << "Map generated..." << std::endl;
 

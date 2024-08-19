@@ -1,16 +1,14 @@
 #include "../include/KeystrokeLogging.hpp"
 
-char KeystrokeLogging::codeToChar(int code) {
-    if (code >= 32 && code <= 126) { // Проверяем, чтобы код был в диапазоне видимых ASCII символов
+char KeystrokeLogging::codeToChar(const int code) {
+    if (code >= 32 && code <= 126) {
         return static_cast<char>(code);
     } else {
-        return '?'; // Возвращаем знак вопроса для некорректных кодов
+        return '?';
     }
 }
 
-
-// Функция, которая возвращает строку с названием клавиши по её коду
-std::string KeystrokeLogging::getKeyName(sf::Keyboard::Key key) {
+std::string KeystrokeLogging::getKeyName(const sf::Keyboard::Key key) {
     static std::map<sf::Keyboard::Key, std::string> keyMap = {
         {sf::Keyboard::A, "A"},
         {sf::Keyboard::B, "B"},
@@ -113,7 +111,6 @@ std::string KeystrokeLogging::getKeyName(sf::Keyboard::Key key) {
         {sf::Keyboard::F14, "F14"},
         {sf::Keyboard::F15, "F15"},
         {sf::Keyboard::Pause, "Pause"}
-        // Добавьте остальные клавиши при необходимости
     };
 
     auto it = keyMap.find(key);

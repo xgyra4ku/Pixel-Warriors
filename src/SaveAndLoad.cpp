@@ -1,11 +1,10 @@
 #include "../include/SaveAndLoad.hpp"
+#include "../include/globals.hpp"
+#include <iostream>
 
-SaveAndLoad::SaveAndLoad() {
+SaveAndLoad::SaveAndLoad() = default;
 
-}
-
-SaveAndLoad::~SaveAndLoad() {
-}
+SaveAndLoad::~SaveAndLoad() = default;
 void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
     std::cout << "INFO: Saving settings" << std::endl;
     try {

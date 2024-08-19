@@ -3,7 +3,6 @@
 #include <map>
 #include <cstdlib>
 #include <ctime>
-#include "globals.hpp"
 #include "Map.hpp"
 #include "SaveAndLoad.hpp"
 #include "Entity.hpp"

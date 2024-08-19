@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
+
 #include <fstream>
 #include <map>
 #include <nlohmann/json.hpp>
-#include "globals.hpp"
+
 
 class SaveAndLoad {
 
