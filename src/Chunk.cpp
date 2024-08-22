@@ -2,7 +2,7 @@
 
 void Chunk::generate() {
     cells.resize(SIZE, std::vector<int>(SIZE, 0));
-    srand(seed + chunkX * 73856093 + chunkY * 19349663); // Уникальное значение для каждой позиции чанка
+    srand(seed + chunkX * 73856093 + chunkY * 19349663);
     initializeCells();
 
     for (int step = 0; step < 5; ++step) {

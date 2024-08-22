@@ -1,9 +1,12 @@
 #include "../include/Map.hpp"
+#include <iostream>
+#include <cmath>
 
+Map::Map() : distanceView(3), ChunksThreadOnOff(false), chunkLoadThread() { }
 
-Map::Map() : distanceView(3) {}
-
-Map::~Map() = default;
+Map::~Map() {
+    stopChunkLoadingThread();
+}
 
 void Map::load() {
     try {
@@ -26,7 +29,7 @@ void Map::load() {
     }
 }
 
-double Map::generatePerlinNoise(const double x,const double y,const double scale,const int octaves,const double persistence) {
+double Map::generatePerlinNoise(const double x, const double y, const double scale, const int octaves, const double persistence) {
     const PerlinNoise perlin(555555);
     return perlin.octave2D_01(x * scale, y * scale, octaves, persistence);
 }
@@ -46,7 +49,7 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
     return chunk;
 }
 
-void Map::generateRivers(std::vector<std::vector<int>>& chunk,const int chunkSize) {
+void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
     int riverStartX = rand() % chunkSize;
     int riverY = 0;
 
@@ -108,7 +111,7 @@ int Map::getLayer(const int x, const int y, const int layer) const {
     return -1;
 }
 
-void Map::setLayer(const int x,const int y, const int layer,const int value) {
+void Map::setLayer(const int x, const int y, const int layer, const int value) {
     if (layer == 0) {
         LayerGround[y][x] = value;
     } else if (layer == 1) {
@@ -141,7 +144,7 @@ void Map::init(const int distanceView) {
     }
 }
 
-int Map::collision(const sf::Vector2f playerPos,const sf::Vector2f playerSize,const sf::Vector2f bias) const {
+int Map::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, const sf::Vector2f bias) const {
     const sf::FloatRect playerBox((playerPos.x + bias.x) - offsetX, (playerPos.y + bias.y) - offsetY, playerSize.x, playerSize.y);
 
     for (int i = 0; i < layerSizeMaxY; i++) {
@@ -169,7 +172,7 @@ int Map::collision(const sf::Vector2f playerPos,const sf::Vector2f playerSize,co
     return 0;
 }
 
-void Map::initializeMap(std::vector<std::vector<int>>& map,const unsigned int seed,const double INITIAL_PROB,const int WIDTH,const int HEIGHT) {
+void Map::initializeMap(std::vector<std::vector<int>>& map, const unsigned int seed, const double INITIAL_PROB, const int WIDTH, const int HEIGHT) {
     std::srand(seed);
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -178,7 +181,7 @@ void Map::initializeMap(std::vector<std::vector<int>>& map,const unsigned int se
     }
 }
 
-void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH,const int HEIGHT) {
+void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, const int HEIGHT) {
     std::vector<std::vector<int>> newMap = map;
 
     for (int y = 0; y < HEIGHT; ++y) {
@@ -239,7 +242,11 @@ void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize)
         }
     }
 }
+
 void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
+    // Lock the mutex while modifying chunks
+    std::lock_guard<std::mutex> lock(chunkMutex);
+
     loadChunksAroundPlayer(playerPos, chunkSize, 12345);
 
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
@@ -284,4 +291,27 @@ void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vecto
     window.draw(vertices, states);
 
     unloadDistantChunks(playerPos, chunkSize);
+}
+
+void Map::funkLoadChunksThread() {
+    while (ChunksThreadOnOff) {
+        // Lock the mutex while modifying chunks
+        std::lock_guard<std::mutex> lock(chunkMutex);
+
+        loadChunksAroundPlayer(PlayerPos, 16, 12345);
+        unloadDistantChunks(PlayerPos, 16);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1)); // Adjust as needed
+    }
+}
+
+void Map::startChunkLoadingThread() {
+    chunkLoadThread = std::thread(&Map::funkLoadChunksThread, this);
+}
+
+void Map::stopChunkLoadingThread() {
+    ChunksThreadOnOff = false;
+    if (chunkLoadThread.joinable()) {
+        chunkLoadThread.join();
+    }
 }
