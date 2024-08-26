@@ -7,7 +7,7 @@ extern int WindowHeight;
 
 #define layerSizeMaxX 300
 #define layerSizeMaxY 300
-#define tileSize 16
+#define tileSize 32
 
 extern float offsetX;
 extern float offsetY;

@@ -44,12 +44,12 @@ public:
 
     static void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
     static double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence);
-    void draw(sf::Vector2f playerPos, sf::RenderWindow &window);
-
+    static int getNeighborTile(int chunkX, int chunkY, int x, int y, int chunkSize, std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks);
 private:
     void funkLoadChunksThread();
     void startChunkLoadingThread();
     void stopChunkLoadingThread();
+
 
     nlohmann::json objJson;
     std::fstream fileInput;
@@ -64,10 +64,11 @@ private:
     int LayerOdj[layerSizeMaxX][layerSizeMaxY]{};
     int LayerGround[layerSizeMaxX][layerSizeMaxY]{};
 
+
     std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
     std::vector<chunk> chunkVector;
 
     std::thread chunkLoadThread;
     std::mutex chunkMutex;
-    bool ChunksThreadOnOff{false}; // Set to false initially
+    bool ChunksThreadOnOff; // Set to false initially
 };

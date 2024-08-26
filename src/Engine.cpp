@@ -265,15 +265,15 @@ void Engine::offset() {
     float targetOffsetY = offsetY;
 
     if (playerPos.x < leftDeadZone) {
-        targetOffsetX -= 1 * time;
+        targetOffsetX -= offsetSpeed * time;
     } else if (playerPos.x > rightDeadZone) {
-        targetOffsetX += 1 * time;
+        targetOffsetX += offsetSpeed * time;
     }
 
     if (playerPos.y < topDeadZone) {
-        targetOffsetY -= 1 * time;
+        targetOffsetY -= offsetSpeed * time;
     } else if (playerPos.y > bottomDeadZone) {
-        targetOffsetY += 1 * time;
+        targetOffsetY += offsetSpeed * time;
     }
 
     // Smoothly interpolate the offset values for a more gradual camera movement

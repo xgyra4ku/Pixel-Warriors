@@ -34,7 +34,7 @@ double Map::generatePerlinNoise(const double x, const double y, const double sca
     return perlin.octave2D_01(x * scale, y * scale, octaves, persistence);
 }
 
-std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chunkY, unsigned int seed, const int chunkSize) {
+std::vector<std::vector<int>> Map::generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize) {
     std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
 
     for (int y = 0; y < chunkSize; ++y) {
@@ -42,11 +42,65 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
             constexpr double scale = 0.001;
             constexpr int octaves = 1;
             constexpr double persistence = 0.01;
-            const double noiseValue = generatePerlinNoise(x + chunkX * chunkSize, y + chunkY * chunkSize, scale, octaves, persistence);
-            chunk[y][x] = (noiseValue < 0) ? 159 : 47; // Вода или земля
+            double noiseValue = generatePerlinNoise(x + chunkX * chunkSize, y + chunkY * chunkSize, scale, octaves, persistence);
+
+            if (noiseValue < 0) {
+                chunk[y][x] = 91;
+            } else {
+                chunk[y][x] = ((0 + rand() % 2) == 1) ? 143 : 106;
+            }
         }
     }
-    return chunk;
+
+    for (int y = 0; y < chunkSize; ++y) {
+        for (int x = 0; x < chunkSize; ++x) {
+            if (chunk[y][x] != 91) {
+                int top = (y > 0) ? chunk[y-1][x] : getNeighborTile(chunkX, chunkY, x, y - 1, chunkSize);
+                int bottom = (y < chunkSize - 1) ? chunk[y+1][x] : getNeighborTile(chunkX, chunkY, x, y + 1, chunkSize);
+                int left = (x > 0) ? chunk[y][x-1] : getNeighborTile(chunkX, chunkY, x - 1, y, chunkSize);
+                int right = (x < chunkSize - 1) ? chunk[y][x+1] : getNeighborTile(chunkX, chunkY, x + 1, y, chunkSize);
+
+                if (top == 91 && left == 91) chunk[y][x] = 127;
+                if (bottom == 91 && right == 91) chunk[y][x] = 159;
+                if (bottom == 91 && left == 91) chunk[y][x] = 157;
+                if (top == 91 && right == 91) chunk[y][x] = 129;
+            }
+        }
+    }
+
+    return chunk; // This should be outside the for-loop, correctly placed.
+}
+
+int Map::getNeighborTile(const int chunkX, const int chunkY, const int x, const int y, const int chunkSize, std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks) {
+    // Рассчитываем координаты соседнего чанка и тайла внутри него
+    int neighborChunkX = chunkX;
+    int neighborChunkY = chunkY;
+    int neighborTileX = x;
+    int neighborTileY = y;
+
+    if (x < 0) {
+        neighborChunkX -= 1;
+        neighborTileX = chunkSize - 1;
+    } else if (x >= chunkSize) {
+        neighborChunkX += 1;
+        neighborTileX = 0;
+    }
+
+    if (y < 0) {
+        neighborChunkY -= 1;
+        neighborTileY = chunkSize - 1;
+    } else if (y >= chunkSize) {
+        neighborChunkY += 1;
+        neighborTileY = 0;
+    }
+
+    // Проверяем наличие соседнего чанка и возвращаем тайл или значение по умолчанию
+    auto it = chunks.find({neighborChunkX, neighborChunkY});
+    if (it != chunks.end()) {
+        return it->second[neighborTileY][neighborTileX];
+    }
+
+    return 0; // Например, возвращаем 0, если соседний чанк не загружен
 }
 
 void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
@@ -124,14 +178,14 @@ void Map::init(const int distanceView) {
     try {
         std::cout << "INFO: Loading tileset" << std::endl;
 
-        fileInput.open("../Maps/map1/forest_.json");
+        fileInput.open("Maps/map2/3.json");
         fileInput >> objJson;
         fileInput.close();
 
         imageHeight = static_cast<int>(objJson["imageheight"]);
         imageWidth = static_cast<int>(objJson["imagewidth"]);
 
-        if (!texture.loadFromFile("../Maps/map1/forest_.png")) {
+        if (!texture.loadFromFile("Maps/map2/3.png")) {
             std::cerr << "ERROR: Failed loading texture from file" << std::endl;
             return;
         }
