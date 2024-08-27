@@ -40,15 +40,21 @@ public:
     void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize);
     void loadChunksAroundPlayer(sf::Vector2f playerPos, int chunkSize, unsigned int seed);
     static std::vector<std::vector<int>> generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize);
+
+    static void adaptChunkTerrain(std::vector<std::vector<int>> &chunk, int chunkSize);
+
     void unloadDistantChunks(sf::Vector2f playerPos, int chunkSize);
 
     static void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
-    static double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence);
-    static int getNeighborTile(int chunkX, int chunkY, int x, int y, int chunkSize, std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks);
+
+    static double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence, unsigned int seed);
+
 private:
     void funkLoadChunksThread();
     void startChunkLoadingThread();
     void stopChunkLoadingThread();
+
+    static void chunkAdaptation(int chunkX, int chunkY, unsigned int seed, int chunkSize);
 
 
     nlohmann::json objJson;

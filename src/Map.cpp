@@ -29,22 +29,27 @@ void Map::load() {
     }
 }
 
-double Map::generatePerlinNoise(const double x, const double y, const double scale, const int octaves, const double persistence) {
-    const PerlinNoise perlin(555555);
+double Map::generatePerlinNoise(const double x, const double y, const double scale, const int octaves, const double persistence, const unsigned int seed) {
+    const PerlinNoise perlin(seed);
     return perlin.octave2D_01(x * scale, y * scale, octaves, persistence);
 }
 
-std::vector<std::vector<int>> Map::generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize) {
+std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chunkY, const unsigned int seed, const int chunkSize) {
     std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
+    std::vector<std::vector<double>> noiseValues(chunkSize + 2, std::vector<double>(chunkSize + 2, 0.0));
 
+    for (int y = -1; y <= chunkSize; ++y) {
+        for (int x = -1; x <= chunkSize; ++x) {
+            constexpr double persistence = 0.01;
+            constexpr int octaves = 1;
+            constexpr double scale = 0.001;
+            const double noiseValue = generatePerlinNoise((x + chunkX * chunkSize), (y + chunkY * chunkSize), scale, octaves, persistence, seed);
+            noiseValues[y + 1][x + 1] = noiseValue;
+        }
+    }
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
-            constexpr double scale = 0.001;
-            constexpr int octaves = 1;
-            constexpr double persistence = 0.01;
-            double noiseValue = generatePerlinNoise(x + chunkX * chunkSize, y + chunkY * chunkSize, scale, octaves, persistence);
-
-            if (noiseValue < 0) {
+            if (const double noiseValue = noiseValues[y + 1][x + 1]; noiseValue < 0) {
                 chunk[y][x] = 91;
             } else {
                 chunk[y][x] = ((0 + rand() % 2) == 1) ? 143 : 106;
@@ -55,52 +60,88 @@ std::vector<std::vector<int>> Map::generateChunk(int chunkX, int chunkY, unsigne
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
             if (chunk[y][x] != 91) {
-                int top = (y > 0) ? chunk[y-1][x] : getNeighborTile(chunkX, chunkY, x, y - 1, chunkSize);
-                int bottom = (y < chunkSize - 1) ? chunk[y+1][x] : getNeighborTile(chunkX, chunkY, x, y + 1, chunkSize);
-                int left = (x > 0) ? chunk[y][x-1] : getNeighborTile(chunkX, chunkY, x - 1, y, chunkSize);
-                int right = (x < chunkSize - 1) ? chunk[y][x+1] : getNeighborTile(chunkX, chunkY, x + 1, y, chunkSize);
 
-                if (top == 91 && left == 91) chunk[y][x] = 127;
-                if (bottom == 91 && right == 91) chunk[y][x] = 159;
-                if (bottom == 91 && left == 91) chunk[y][x] = 157;
-                if (top == 91 && right == 91) chunk[y][x] = 129;
+                //верх низ право лево
+                if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
+                    chunk[y][x] = 127;  // Верхний левый
+                    continue;
+                }
+                if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                    chunk[y][x] = 114;  // Верхний правый
+                    continue;
+                }
+                if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                    chunk[y][x] = 144;  // Нижний правый
+                    continue;
+                }
+                if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
+                    chunk[y][x] = 157;  // Нижний левый
+                    continue;
+                }
+
+
+                // // соприковновение по диагонвли
+                // if (noiseValues[y][x] < 0 && noiseValues[y + 1][x] < 0) {
+                //     chunk[y][x] = 153;  // верхний левый
+                //     continue;
+                // }
+                // if (noiseValues[y][x + 2] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                //     chunk[y][x] = 151;  // верхний правый
+                //     continue;
+                // }
+                // if (noiseValues[y + 2][x] < 0 && noiseValues[y + 1][x] < 0) {
+                //     chunk[y][x] = 123;  // нижжний левый
+                //     continue;
+                // }
+                // if (noiseValues[y + 2][x + 2] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                //     chunk[y][x] = 121; // нижний правый
+                //     continue;
+                // }
+
+                // двойное соприкосновкение
+                if (noiseValues[y + 1][x] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                    chunk[y][x] = 144;  // Соприкосновение с водой слева
+                    continue;
+                }
+                if (noiseValues[y + 1][x + 2] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                    chunk[y][x] = 129;  // Соприкосновение с водой справа
+                    continue;
+                }
+                if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                    chunk[y][x] = 128;  // Соприкосновение с водой сверху
+                    continue;
+                }
+                if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                    chunk[y][x] = 158;  // Соприкосновение с водой снизу
+                }
+                // Проверка диагонали: вода в верхнем левом углу
+                if (noiseValues[y][x] < 0) {
+                    chunk[y][x] = 153;  // Вода в верхнем левом углу
+                    continue;
+                }
+
+                // Проверка диагонали: вода в верхнем правом углу
+                if (noiseValues[y][x + 2] < 0) {
+                    chunk[y][x] = 151;  // Вода в верхнем правом углу
+                    continue;
+                }
+
+                // Проверка диагонали: вода в нижнем левом углу
+                if (noiseValues[y + 2][x] < 0) {
+                    chunk[y][x] = 123;  // Вода в нижнем левом углу
+                    continue;
+                }
+
+                // Проверка диагонали: вода в нижнем правом углу
+                if (noiseValues[y + 2][x + 2] < 0) {
+                    chunk[y][x] = 121;  // Вода в нижнем правом углу
+                    continue;
+                }
             }
         }
     }
 
-    return chunk; // This should be outside the for-loop, correctly placed.
-}
-
-int Map::getNeighborTile(const int chunkX, const int chunkY, const int x, const int y, const int chunkSize, std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks) {
-    // Рассчитываем координаты соседнего чанка и тайла внутри него
-    int neighborChunkX = chunkX;
-    int neighborChunkY = chunkY;
-    int neighborTileX = x;
-    int neighborTileY = y;
-
-    if (x < 0) {
-        neighborChunkX -= 1;
-        neighborTileX = chunkSize - 1;
-    } else if (x >= chunkSize) {
-        neighborChunkX += 1;
-        neighborTileX = 0;
-    }
-
-    if (y < 0) {
-        neighborChunkY -= 1;
-        neighborTileY = chunkSize - 1;
-    } else if (y >= chunkSize) {
-        neighborChunkY += 1;
-        neighborTileY = 0;
-    }
-
-    // Проверяем наличие соседнего чанка и возвращаем тайл или значение по умолчанию
-    auto it = chunks.find({neighborChunkX, neighborChunkY});
-    if (it != chunks.end()) {
-        return it->second[neighborTileY][neighborTileX];
-    }
-
-    return 0; // Например, возвращаем 0, если соседний чанк не загружен
+    return chunk;
 }
 
 void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
@@ -115,6 +156,16 @@ void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSi
         const int direction = rand() % 3 - 1;
         riverStartX = std::max(0, std::min(chunkSize - 1, riverStartX + direction));
     }
+}
+
+
+void Map::chunkAdaptation(int chunkX, int chunkY, unsigned int seed, int chunkSize) {
+    for (int y = 0; y < chunkSize; ++y) {
+        for (int x = 0; x < chunkSize; ++x) {
+
+        }
+    }
+
 }
 
 void Map::save() {
@@ -352,7 +403,7 @@ void Map::funkLoadChunksThread() {
         // Lock the mutex while modifying chunks
         std::lock_guard<std::mutex> lock(chunkMutex);
 
-        loadChunksAroundPlayer(PlayerPos, 16, 12345);
+        loadChunksAroundPlayer(PlayerPos, 16, 0);
         unloadDistantChunks(PlayerPos, 16);
 
         std::this_thread::sleep_for(std::chrono::seconds(1)); // Adjust as needed
