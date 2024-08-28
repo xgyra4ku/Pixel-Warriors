@@ -81,7 +81,7 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
 
                 // двойное соприкосновкение
                 if (noiseValues[y + 1][x] < 0 && noiseValues[y + 1][x + 1] >= 0) {
-                    chunk[y][x] = 144;  // Соприкосновение с водой слева
+                    chunk[y][x] = 142;  // Соприкосновение с водой слева
                     continue;
                 }
                 if (noiseValues[y + 1][x + 2] < 0 && noiseValues[y + 1][x + 1] >= 0) {
@@ -94,7 +94,9 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
                 }
                 if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
                     chunk[y][x] = 158;  // Соприкосновение с водой снизу
+                    continue;
                 }
+
                 // Проверка диагонали: вода в верхнем левом углу
                 if (noiseValues[y][x] < 0) {
                     chunk[y][x] = 153;  // Вода в верхнем левом углу
@@ -116,7 +118,28 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
                 // Проверка диагонали: вода в нижнем правом углу
                 if (noiseValues[y + 2][x + 2] < 0) {
                     chunk[y][x] = 121;  // Вода в нижнем правом углу
+                    continue;
                 }
+
+                // // соприковновение по диагонвли
+                // if (noiseValues[y][x] < 0 && noiseValues[y + 1][x] < 0) {
+                //     chunk[y][x] = 153;  // верхний левый
+                //     continue;
+                // }
+                // if (noiseValues[y][x + 2] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                //     chunk[y][x] = 151;  // верхний правый
+                //     continue;
+                // }
+                // if (noiseValues[y + 2][x] < 0 && noiseValues[y + 1][x] < 0) {
+                //     chunk[y][x] = 123;  // нижжний левый
+                //     continue;
+                // }
+                // if (noiseValues[y + 2][x + 2] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                //     chunk[y][x] = 121; // нижний правый
+                //     continue;
+                // }
+
+
             }
         }
     }
