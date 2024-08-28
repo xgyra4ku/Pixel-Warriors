@@ -38,7 +38,7 @@ Engine::Engine() {
     offsetRUN = true;
     collisionRUN = true;
     playerPosRUN = false;
-    map.init(4);
+    map.init(4, 7774);
    // map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
 
 
