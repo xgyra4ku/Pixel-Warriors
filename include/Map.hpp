@@ -80,7 +80,7 @@ private:
     void stopChunkLoadingThread();
     void loadingChunksFromFile(const std::string &nameFile);
 
-    bool checkingDownloadedChunks(std::vector<std::string> &requiredChunks, std::vector<std::vector<int>> &dataChunk);
+    bool checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>> &chunkData);
 
     void loadChunksAroundPlayer(sf::Vector2f playerPos, int chunkSize);
     void unloadDistantChunks(sf::Vector2f playerPos, int chunkSize);

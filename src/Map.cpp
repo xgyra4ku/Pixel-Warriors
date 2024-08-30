@@ -145,9 +145,9 @@ void Map::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, s
     }
 }
 void Map::loadingChunksFromFile(const std::string& nameFile) {
+    fileInput.open("worlds/" + nameFile);
     if (!fileInput.is_open()) {
-        fileInput.open("worlds/"+nameFile);
-        std::cerr << "\033[31m" << "ERROR: opening file: " << nameFile << "\033[33m" << std::endl;
+        std::cerr << "ERROR: opening file: " << nameFile << std::endl;
         return;
     }
     fileInput >> jsonLoad;
@@ -157,9 +157,7 @@ void Map::loadingChunksFromFile(const std::string& nameFile) {
 bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>>& chunkData) {
     if (jsonLoad.contains("chunks")) {
         if (jsonLoad["chunks"].contains(requiredChunk)) {
-            const auto& chunk = jsonLoad["chunks"][requiredChunk];
-
-            if (chunk.contains("data")) {
+            if (const auto& chunk = jsonLoad["chunks"][requiredChunk]; chunk.contains("data")) {
                 chunkData.clear();  // Очистить предыдущие данные
                 for (const auto& row : chunk["data"]) {
                     std::vector<int> rowData;
@@ -169,15 +167,12 @@ bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector
                     chunkData.push_back(rowData);
                 }
                 return true;
-            } else {
-                std::cerr << "\033[33m WARNING: The chunk \"" << requiredChunk << "\" does not contain the \"data\" key\033[0m" << std::endl;
             }
-        } else {
-            std::cerr << "\033[33m WARNING: The required chunk \"" << requiredChunk << "\" was not found in the JSON file\033[0m" << std::endl;
+            std::cerr << "ERROR: The chunk '" << requiredChunk << "' does not contain the 'data' " << std::endl;
         }
-    } else {
-        std::cerr << "\033[33m WARNING: The \"chunks\" key is missing in the JSON file\033[0m" << std::endl;
+        return false;
     }
+    std::cerr << "ERROR: File is corrupted, there is no line 'chunks'" << std::endl;
     return false;
 }
 
@@ -231,6 +226,7 @@ void Map::save() {
 
     // Очищаем буфер после сохранения в файл
     chunkBuffer.clear();
+    loadingChunksFromFile("map1.json");
 }
 
 void Map::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
@@ -288,6 +284,8 @@ void Map::setLayer(const int x, const int y, const int layer, const int value) {
 void Map::init(const int distanceView, const unsigned int seed) {
     this->seed = seed;
     this->distanceView = distanceView;
+
+    loadingChunksFromFile("map1.json");
     try {
         std::cout << "INFO: Loading tileset" << std::endl;
 
@@ -380,7 +378,6 @@ void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, con
 }
 
 void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSize) {
-    std::vector<std::string> name;
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * tileSize);
 
@@ -390,7 +387,8 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
             int chunkY = playerChunkY + y;
 
             if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) == chunks.end()) {
-                if (std::vector<std::vector<int>> temp; checkingDownloadedChunks(i, temp)) {
+                const std::string name = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
+                if (std::vector<std::vector<int>> temp; checkingDownloadedChunks(name, temp)) {
                     chunks[chunkKey] = temp;
                 } else {
                     chunks[chunkKey] = generateChunk(chunkX, chunkY, seed, chunkSize);
