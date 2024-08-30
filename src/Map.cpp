@@ -27,7 +27,7 @@ void Map::load() {
         }
         std::cout << "INFO: Map loaded successfully" << std::endl;
     } catch (const nlohmann::json::exception& error) {
-        std::cerr << "ERROR: Failed to load map " << error.what() << std::endl;
+        std::cerr << "\033[31m" << "ERROR: Failed to load map " << error.what() << "\033[0m" << std::endl;
     }
 }
 
@@ -58,11 +58,30 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
             }
         }
     }
+    chunkAdaptation(noiseValues, chunk, chunkSize);
 
+    return chunk;
+}
+
+void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
+    int riverStartX = rand() % chunkSize;
+    int riverY = 0;
+
+    while (riverY < chunkSize) {
+        if (chunk[riverY][riverStartX] != 159) {
+            chunk[riverY][riverStartX] = 159;
+        }
+        riverY++;
+        const int direction = rand() % 3 - 1;
+        riverStartX = std::max(0, std::min(chunkSize - 1, riverStartX + direction));
+    }
+}
+
+
+void Map::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, std::vector<std::vector<int>>& chunk, const int chunkSize) {
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
             if (chunk[y][x] != 91) {
-
                 //верх низ право лево
                 if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
                     chunk[y][x] = 127;  // Верхний левый
@@ -120,93 +139,71 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
                 // Проверка диагонали: вода в нижнем правом углу
                 if (noiseValues[y + 2][x + 2] < 0) {
                     chunk[y][x] = 121;  // Вода в нижнем правом углу
-                    continue;
                 }
-
-                // // соприковновение по диагонвли
-                // if (noiseValues[y][x] < 0 && noiseValues[y + 1][x] < 0) {
-                //     chunk[y][x] = 153;  // верхний левый
-                //     continue;
-                // }
-                // if (noiseValues[y][x + 2] < 0 && noiseValues[y + 1][x + 2] < 0) {
-                //     chunk[y][x] = 151;  // верхний правый
-                //     continue;
-                // }
-                // if (noiseValues[y + 2][x] < 0 && noiseValues[y + 1][x] < 0) {
-                //     chunk[y][x] = 123;  // нижжний левый
-                //     continue;
-                // }
-                // if (noiseValues[y + 2][x + 2] < 0 && noiseValues[y + 1][x + 2] < 0) {
-                //     chunk[y][x] = 121; // нижний правый
-                //     continue;
-                // }
-
-
             }
         }
     }
-
-    return chunk;
 }
-
-void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
-    int riverStartX = rand() % chunkSize;
-    int riverY = 0;
-
-    while (riverY < chunkSize) {
-        if (chunk[riverY][riverStartX] != 159) {
-            chunk[riverY][riverStartX] = 159;
-        }
-        riverY++;
-        const int direction = rand() % 3 - 1;
-        riverStartX = std::max(0, std::min(chunkSize - 1, riverStartX + direction));
+void Map::loadingChunksFromFile(const std::string& nameFile) {
+    if (!fileInput.is_open()) {
+        fileInput.open("worlds/"+nameFile);
+        std::cerr << "\033[31m" << "ERROR: opening file: " << nameFile << "\033[33m" << std::endl;
+        return;
     }
+    fileInput >> jsonLoad;
+    fileInput.close();
 }
 
+bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>>& chunkData) {
+    if (jsonLoad.contains("chunks")) {
+        if (jsonLoad["chunks"].contains(requiredChunk)) {
+            const auto& chunk = jsonLoad["chunks"][requiredChunk];
 
-void Map::chunkAdaptation(int chunkX, int chunkY, unsigned int seed, int chunkSize) {
-    for (int y = 0; y < chunkSize; ++y) {
-        for (int x = 0; x < chunkSize; ++x) {
-
+            if (chunk.contains("data")) {
+                chunkData.clear();  // Очистить предыдущие данные
+                for (const auto& row : chunk["data"]) {
+                    std::vector<int> rowData;
+                    for (const auto& value : row) {
+                        rowData.push_back(value);
+                    }
+                    chunkData.push_back(rowData);
+                }
+                return true;
+            } else {
+                std::cerr << "\033[33m WARNING: The chunk \"" << requiredChunk << "\" does not contain the \"data\" key\033[0m" << std::endl;
+            }
+        } else {
+            std::cerr << "\033[33m WARNING: The required chunk \"" << requiredChunk << "\" was not found in the JSON file\033[0m" << std::endl;
         }
+    } else {
+        std::cerr << "\033[33m WARNING: The \"chunks\" key is missing in the JSON file\033[0m" << std::endl;
     }
-
+    return false;
 }
-
 
 void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::vector<int>>& data, const int chunkSize) {
-
-    // Генерация идентификатора чанка
-    std::string chunkName = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
-
-    // Сохраняем данные чанка в буфере как 2D массив
+    const std::string chunkName = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
     chunkBuffer[chunkName] = data;
-
-    // Опционально: можно добавить проверку, чтобы сохранять в файл, если буфер достигает определенного размера
     if (size(chunkBuffer) > 100) save();
 }
 
 void Map::save() {
     if (!fileWorldIsOpen) {
-        // Открываем файл для записи
         fileWorld.open("worlds/map1.json");
         if (fileWorld.is_open()) {
             std::cout << "INFO: Файл открыт для записи" << std::endl;
-
-            // Загружаем предыдущие данные, если файл не пуст
             if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
-                fileWorld >> jsonOdj;
+                fileWorld >> jsonSave;
             } else {
-                // Инициализируем объект JSON, если файл пуст
-                jsonOdj = json::object();
-                jsonOdj["seed"] = seed;
-                jsonOdj["chunks"] = json::object();
+                jsonSave = json::object();
+                jsonSave["seed"] = seed;
+                jsonSave["chunks"] = json::object();
             }
 
             fileWorld.close();
             fileWorldIsOpen = true;
         } else {
-            std::cerr << "ERROR: Невозможно открыть файл для записи" << std::endl;
+            std::cerr << "\033[31m" << "ERROR: Невозможно открыть файл для записи" << "\033[0m" <<  std::endl;
             return;
         }
     }
@@ -219,17 +216,17 @@ void Map::save() {
             chunkData.push_back(row);  // Добавляем каждую строку как массив в JSON
         }
 
-        jsonOdj["chunks"][chunkName]["data"] = chunkData;
+        jsonSave["chunks"][chunkName]["data"] = chunkData;
     }
 
     // Записываем обновленный JSON в файл
     fileWorld.open("worlds/map1.json", std::ofstream::out | std::ofstream::trunc);
     if (fileWorld.is_open()) {
-        fileWorld << jsonOdj.dump(4);  // Сохранение с отступом 4 пробела для читаемости
+        fileWorld << jsonSave.dump(4);  // Сохранение с отступом 4 пробела для читаемости
         fileWorld.close();
         std::cout << "INFO: SAVE" << std::endl;
     } else {
-        std::cerr << "ERROR: Невозможно открыть файл для сохранения изменений" << std::endl;
+        std::cerr << "\033[31m" << "ERROR: Невозможно открыть файл для сохранения изменений" << "\033[0m" << std::endl;
     }
 
     // Очищаем буфер после сохранения в файл
@@ -302,7 +299,7 @@ void Map::init(const int distanceView, const unsigned int seed) {
         imageWidth = static_cast<int>(objJson["imagewidth"]);
 
         if (!texture.loadFromFile("Maps/map2/3.png")) {
-            std::cerr << "ERROR: Failed loading texture from file" << std::endl;
+            std::cerr << "\033[31m" << "ERROR: Failed loading texture from file" << "\033[0m" << std::endl;
             return;
         }
 
@@ -310,7 +307,7 @@ void Map::init(const int distanceView, const unsigned int seed) {
         std::cout << "INFO: Tileset loaded successfully" << std::endl;
     }
     catch (const nlohmann::json::exception& error) {
-        std::cerr << "ERROR: Failed to load tileset " << error.what() << std::endl;
+        std::cerr << "\033[31m" << "ERROR: Failed to load tileset " << error.what() << "\033[30m" << std::endl;
     }
 }
 
@@ -383,6 +380,7 @@ void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, con
 }
 
 void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSize) {
+    std::vector<std::string> name;
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * tileSize);
 
@@ -392,13 +390,11 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
             int chunkY = playerChunkY + y;
 
             if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) == chunks.end()) {
-
-                if () {
-
+                if (std::vector<std::vector<int>> temp; checkingDownloadedChunks(i, temp)) {
+                    chunks[chunkKey] = temp;
                 } else {
                     chunks[chunkKey] = generateChunk(chunkX, chunkY, seed, chunkSize);
                 }
-
             }
         }
     }

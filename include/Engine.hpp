@@ -39,8 +39,8 @@ class Engine
         sf::Texture texturePlayerList[3];
 
         //float playerSpeed = 0.08f;
-        float playerSpeed = 10;
-        float offsetSpeed = 20;
+        float playerSpeed = 0.08f;
+        float offsetSpeed = 1;
         float time = 0.0f;
         float fps = 0.0f;
         int frameCount = 0;

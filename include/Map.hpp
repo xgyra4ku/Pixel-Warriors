@@ -34,14 +34,23 @@ public:
     void setLayer(int x, int y, int layer, int value);
 
     int getLayer(int x, int y, int layer) const;
+
+    static void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
+    static void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
 private:
     sf::Sprite sprite;
     sf::Texture texture;
     sf::Vector2f PlayerPos;
 
     using json = nlohmann::json;
+    using unorderedMapChunks = std::unordered_map<std::string, std::vector<std::vector<int>>>;
 
     json objJson;
+    json jsonSave;
+    json jsonLoad;
+
+    unorderedMapChunks chunkBuffer;
+    unorderedMapChunks chunkBufferLoadIsFile;
 
     std::fstream fileInput;
     std::fstream fileWorld;
@@ -58,9 +67,6 @@ private:
     int LayerOdj[layerSizeMaxX][layerSizeMaxY]{};
     int LayerGround[layerSizeMaxX][layerSizeMaxY]{};
 
-    std::unordered_map<std::string, std::vector<std::vector<int>>> chunkBuffer;
-    std::unordered_map<std::string, std::vector<std::vector<int>>> chunkBufferLoadIsFile;
-
     std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
 
     std::vector<chunk> chunkVector;
@@ -72,15 +78,16 @@ private:
     void funkLoadChunksThread();
     void startChunkLoadingThread();
     void stopChunkLoadingThread();
+    void loadingChunksFromFile(const std::string &nameFile);
+
+    bool checkingDownloadedChunks(std::vector<std::string> &requiredChunks, std::vector<std::vector<int>> &dataChunk);
+
     void loadChunksAroundPlayer(sf::Vector2f playerPos, int chunkSize);
     void unloadDistantChunks(sf::Vector2f playerPos, int chunkSize);
     void saveChunk(int chunkX, int chunkY, const std::vector<std::vector<int>> &data, int chunkSize);
 
-    static void chunkAdaptation(int chunkX, int chunkY, unsigned int seed, int chunkSize);
+    static void chunkAdaptation(const std::vector<std::vector<double>> &noiseValues, std::vector<std::vector<int>> &chunk, int chunkSize);
     static void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
     static double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence, unsigned int seed);
     static std::vector<std::vector<int>> generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize);
-    static void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
-    static void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
-
 };
