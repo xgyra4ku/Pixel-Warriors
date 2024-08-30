@@ -2,10 +2,12 @@
 #include <iostream>
 #include <cmath>
 
-Map::Map() : distanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false) { }
+Map::Map() : distanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false) {
+    //startChunkLoadingThread();
+}
 
 Map::~Map() {
-    stopChunkLoadingThread();
+    //stopChunkLoadingThread();
 }
 
 void Map::load() {
@@ -173,6 +175,7 @@ void Map::chunkAdaptation(int chunkX, int chunkY, unsigned int seed, int chunkSi
 
 
 void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::vector<int>>& data, const int chunkSize) {
+
     // Генерация идентификатора чанка
     std::string chunkName = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
 
@@ -180,7 +183,7 @@ void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::v
     chunkBuffer[chunkName] = data;
 
     // Опционально: можно добавить проверку, чтобы сохранять в файл, если буфер достигает определенного размера
-    if (size(chunkBuffer) > 1000) save();
+    if (size(chunkBuffer) > 100) save();
 }
 
 void Map::save() {
@@ -224,6 +227,7 @@ void Map::save() {
     if (fileWorld.is_open()) {
         fileWorld << jsonOdj.dump(4);  // Сохранение с отступом 4 пробела для читаемости
         fileWorld.close();
+        std::cout << "INFO: SAVE" << std::endl;
     } else {
         std::cerr << "ERROR: Невозможно открыть файл для сохранения изменений" << std::endl;
     }
@@ -388,13 +392,20 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
             int chunkY = playerChunkY + y;
 
             if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) == chunks.end()) {
-                chunks[chunkKey] = generateChunk(chunkX, chunkY, seed, chunkSize);
+
+                if () {
+
+                } else {
+                    chunks[chunkKey] = generateChunk(chunkX, chunkY, seed, chunkSize);
+                }
+
             }
         }
     }
 }
 
 void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize) {
+
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * tileSize);
 
@@ -413,7 +424,7 @@ void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize)
 
 void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
     // Lock the mutex while modifying chunks
-    std::lock_guard<std::mutex> lock(chunkMutex);
+   // std::lock_guard<std::mutex> lock(chunkMutex);
 
     loadChunksAroundPlayer(playerPos, chunkSize);
 
@@ -457,23 +468,23 @@ void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vecto
     sf::RenderStates states;
     states.texture = &texture;
     window.draw(vertices, states);
-
     unloadDistantChunks(playerPos, chunkSize);
 }
 
 void Map::funkLoadChunksThread() {
     while (ChunksThreadOnOff) {
         // Lock the mutex while modifying chunks
-        std::lock_guard<std::mutex> lock(chunkMutex);
+        //std::lock_guard<std::mutex> lock_guard(chunkMutex);
 
-        loadChunksAroundPlayer(PlayerPos, 16);
-        unloadDistantChunks(PlayerPos, 16);
+        //loadChunksAroundPlayer(PlayerPos, 16);
+        //unloadDistantChunks(PlayerPos, 16);
 
-        std::this_thread::sleep_for(std::chrono::seconds(1)); // Adjust as needed
+        //std::this_thread::sleep_for(std::chrono::seconds(1)); // Adjust as needed
     }
 }
 
 void Map::startChunkLoadingThread() {
+    ChunksThreadOnOff = true;
     chunkLoadThread = std::thread(&Map::funkLoadChunksThread, this);
 }
 
