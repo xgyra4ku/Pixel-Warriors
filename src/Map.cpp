@@ -8,6 +8,17 @@ Map::Map() : distanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileW
 
 Map::~Map() {
     //stopChunkLoadingThread();
+    save();
+
+    chunks.clear();
+    chunkBufferLoadIsFile.clear();
+    chunkBuffer.clear();
+    chunkVector.clear();
+    fileWorldIsOpen = false;
+}
+void Map::deleting() const {
+    std::cout << "deleting" << std::endl;
+    delete this;
 }
 
 void Map::load() {
@@ -158,7 +169,7 @@ bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector
     if (jsonLoad.contains("chunks")) {
         if (jsonLoad["chunks"].contains(requiredChunk)) {
             if (const auto& chunk = jsonLoad["chunks"][requiredChunk]; chunk.contains("data")) {
-                chunkData.clear();  // Очистить предыдущие данные
+                chunkData.clear();
                 for (const auto& row : chunk["data"]) {
                     std::vector<int> rowData;
                     for (const auto& value : row) {
@@ -179,17 +190,19 @@ bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector
 void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::vector<int>>& data, const int chunkSize) {
     const std::string chunkName = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
     chunkBuffer[chunkName] = data;
-    if (size(chunkBuffer) > 100) save();
+    if (size(chunkBuffer) > 300) save();
 }
 
 void Map::save() {
     if (!fileWorldIsOpen) {
-        fileWorld.open("worlds/map1.json");
+        fileWorld.open("worlds/map1.json", std::ios::out | std::ios::app);
         if (fileWorld.is_open()) {
-            std::cout << "INFO: Файл открыт для записи" << std::endl;
+
             if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
+                std::cout << "INFO: The file is open for writing" << std::endl;
                 fileWorld >> jsonSave;
             } else {
+                std::cout << "INFO: New file is open for writing" << std::endl;
                 jsonSave = json::object();
                 jsonSave["seed"] = seed;
                 jsonSave["chunks"] = json::object();
@@ -198,33 +211,28 @@ void Map::save() {
             fileWorld.close();
             fileWorldIsOpen = true;
         } else {
-            std::cerr << "\033[31m" << "ERROR: Невозможно открыть файл для записи" << "\033[0m" <<  std::endl;
+            std::cerr << "\033[31m" << "ERROR: Cannot open file for writing" << "\033[0m" <<  std::endl;
             return;
         }
     }
 
-    // Переносим данные из буфера в JSON объект как 2D массив
     for (const auto& [chunkName, data] : chunkBuffer) {
-        json chunkData = json::array();  // Используем JSON массив для представления 2D данных
-
+        json chunkData = json::array();
         for (const auto& row : data) {
-            chunkData.push_back(row);  // Добавляем каждую строку как массив в JSON
+            chunkData.push_back(row);
         }
-
         jsonSave["chunks"][chunkName]["data"] = chunkData;
     }
 
-    // Записываем обновленный JSON в файл
     fileWorld.open("worlds/map1.json", std::ofstream::out | std::ofstream::trunc);
     if (fileWorld.is_open()) {
-        fileWorld << jsonSave.dump(4);  // Сохранение с отступом 4 пробела для читаемости
+        fileWorld << jsonSave.dump(4);
         fileWorld.close();
         std::cout << "INFO: SAVE" << std::endl;
     } else {
-        std::cerr << "\033[31m" << "ERROR: Невозможно открыть файл для сохранения изменений" << "\033[0m" << std::endl;
+        std::cerr << "ERROR: Cannot open file to save changes" << std::endl;
     }
 
-    // Очищаем буфер после сохранения в файл
     chunkBuffer.clear();
     loadingChunksFromFile("map1.json");
 }
@@ -284,7 +292,7 @@ void Map::setLayer(const int x, const int y, const int layer, const int value) {
 void Map::init(const int distanceView, const unsigned int seed) {
     this->seed = seed;
     this->distanceView = distanceView;
-
+    save();
     loadingChunksFromFile("map1.json");
     try {
         std::cout << "INFO: Loading tileset" << std::endl;

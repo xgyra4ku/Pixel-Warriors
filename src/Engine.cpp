@@ -4,10 +4,9 @@
 Engine::Engine() {
     settings = save_and_load_.loadSettings();
     sf::ContextSettings settingsDisplay;
-    settingsDisplay.antialiasingLevel = 8;
+    settingsDisplay.antialiasingLevel = 0;
     if (settings["fullscreen"] == 1) {
         window.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen, settingsDisplay);
-
     } else {
         window.create(sf::VideoMode(settings["windowWidth"], settings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
     }
@@ -38,6 +37,7 @@ Engine::Engine() {
     offsetRUN = true;
     collisionRUN = true;
     playerPosRUN = false;
+
     map.init(4, 7774);
    // map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
 
@@ -150,7 +150,6 @@ void Engine::run() {
             dependencyList["menuLib"].menuLib(window, menu, settings);
         } else {
 	        dependencyList["menuLib"].menuLib(window, menu, settings);
-
 	    }
         window.display();
 	}
@@ -196,13 +195,17 @@ void Engine::Events() {
 
     sf::Event event{};
     while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed) {
             window.close();
+            //map.deleting();
+        }
         if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape && menu == 0)
+            if (event.key.code == sf::Keyboard::Escape && menu == 0) {
                 window.close();
-            else if (event.key.code == sf::Keyboard::Escape && menu == -1)
+            } else if (event.key.code == sf::Keyboard::Escape && menu == -1) {
                 menu = 0;
+               // map.deleting();
+            }
         }
     }
 }
@@ -250,12 +253,13 @@ void Engine::collision() {
         break;
     }
 } 
-void Engine::offset() {
+void Engine::offset() const {
+
     // Define the dead zone boundaries
-    constexpr float leftDeadZone = 630.0f;
-    constexpr float rightDeadZone = 650.0f;
-    constexpr float topDeadZone = 390.0f;
-    constexpr float bottomDeadZone = 410.0f;
+    const float leftDeadZone = (((630.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().x);
+    const float rightDeadZone = (((650.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().x);
+    const float topDeadZone = (((390.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().y);
+    const float bottomDeadZone = (((410.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().y);
 
     // Player's current position
     const sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(offsetX, offsetY);

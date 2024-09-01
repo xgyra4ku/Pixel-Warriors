@@ -49,7 +49,6 @@ target_link_libraries(
 
 )
 
-# Для Windows добавляем пути к библиотекам DLL
 if(WIN32)
     # Добавляем путь для поиска динамических библиотек во время исполнения
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

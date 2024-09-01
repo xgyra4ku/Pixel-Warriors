@@ -64,7 +64,7 @@ class Engine
         void initPlayer(int textureNumPlayer1);
         void controlKeyboard();
         void collision();
-        void offset();
+        void offset() const;
         void generateMap(unsigned int seed, int WIDTH, int HEIGHT);
         //std::vector<Mod> loadMods(const std::string& directory);
         void loadDependency(const std::string& directory);

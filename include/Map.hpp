@@ -23,6 +23,9 @@ class Map
 public:
     Map();
     ~Map();
+
+    void deleting() const;
+
     void load();
     void save();
     void init(int distanceView, unsigned int seed);
