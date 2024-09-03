@@ -74,7 +74,7 @@ void Engine::loadDependency(const std::string& directory) {
     }
 
     functions.initLib = reinterpret_cast<void (*)(sf::RenderWindow &)>(GetProcAddress(hModule, "initLib"));
-    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &)>(GetProcAddress(hModule, "menuLib"));
+    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &, int &, float&)>(GetProcAddress(hModule, "menuLib"));
 
     if (!functions.initLib || !functions.menuLib) {
         std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
@@ -147,9 +147,9 @@ void Engine::run() {
         } else if (menu == -2) {
             save_and_load_.saveSettings(settings);
 	        menu = 3;
-            dependencyList["menuLib"].menuLib(window, menu, settings);
+            dependencyList["menuLib"].menuLib(window, menu, settings, wheelEventMouse, time);
         } else {
-	        dependencyList["menuLib"].menuLib(window, menu, settings);
+	        dependencyList["menuLib"].menuLib(window, menu, settings, wheelEventMouse, time);
 	    }
         window.display();
 	}
@@ -192,7 +192,7 @@ void Engine::updateDisplay() {
 
 
 void Engine::Events() {
-
+    wheelEventMouse = 0;
     sf::Event event{};
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
@@ -207,7 +207,12 @@ void Engine::Events() {
                // map.deleting();
             }
         }
+        if (event.type == sf::Event::MouseWheelMoved)
+        {
+            wheelEventMouse = event.mouseWheel.delta;
+        }
     }
+
 }
 
 

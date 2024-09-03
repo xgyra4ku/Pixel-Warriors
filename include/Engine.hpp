@@ -10,7 +10,7 @@
 
 struct DependencyFunctions {
     void (*initLib)(sf::RenderWindow&);
-    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&);
+    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&, int&, float&);
 };
 
 struct Mod {
@@ -45,6 +45,7 @@ class Engine
         float fps = 0.0f;
         int frameCount = 0;
         int menu;
+        int wheelEventMouse{};
         sf::Vector2i chunckPos;
 
         bool offsetRUN;
