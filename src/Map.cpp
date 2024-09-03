@@ -28,12 +28,12 @@ void Map::load() {
         fileInput >> objJson;
         fileInput.close();
         auto layers = objJson["layers"];
-        for (int i = 0; i < layerSizeMaxY; i++) {
+        for (int i = 0; i < g_LayerSizeMaxY; i++) {
             auto odjData = layers[0]["data"];
             auto groundData = layers[1]["data"];
-            for (int j = 0; j < layerSizeMaxX; j++) {
-                LayerOdj[i][j] = odjData[i * layerSizeMaxX + j];
-                LayerGround[i][j] = groundData[i * layerSizeMaxX + j];
+            for (int j = 0; j < g_LayerSizeMaxX; j++) {
+                LayerOdj[i][j] = odjData[i * g_LayerSizeMaxX + j];
+                LayerGround[i][j] = groundData[i * g_LayerSizeMaxX + j];
             }
         }
         std::cout << "INFO: Map loaded successfully" << std::endl;
@@ -241,31 +241,31 @@ void Map::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& La
     sf::VertexArray vertices(sf::Quads);
     const unsigned int textureSize = texture.getSize().x;
 
-    int xMax = static_cast<int>((playerPos.x + viev.x) / tileSize);
-    int xMin = static_cast<int>((playerPos.x - viev.x) / tileSize);
-    int yMax = static_cast<int>((playerPos.y + viev.y) / tileSize);
-    int yMin = static_cast<int>((playerPos.y - viev.y) / tileSize);
+    int xMax = static_cast<int>((playerPos.x + viev.x) / g_dTileSize);
+    int xMin = static_cast<int>((playerPos.x - viev.x) / g_dTileSize);
+    int yMax = static_cast<int>((playerPos.y + viev.y) / g_dTileSize);
+    int yMin = static_cast<int>((playerPos.y - viev.y) / g_dTileSize);
 
-    xMax = std::min(xMax, layerSizeMaxX);
+    xMax = std::min(xMax, g_LayerSizeMaxX);
     xMin = std::max(xMin, 0);
-    yMax = std::min(yMax, layerSizeMaxY);
+    yMax = std::min(yMax, g_LayerSizeMaxY);
     yMin = std::max(yMin, 0);
 
     for (int i = yMin; i < yMax; i++) {
         for (int j = xMin; j < xMax; j++) {
             if (Layer[i][j] != 0) {
                 const int tileIndex = Layer[i][j] - 1;
-                const int tilesPerRow = static_cast<int>(textureSize) / tileSize;
-                const auto tileX = static_cast<float>((tileIndex % tilesPerRow) * tileSize);
-                const auto tileY = static_cast<float>((tileIndex)) / static_cast<float>(tilesPerRow) * tileSize;
+                const int tilesPerRow = static_cast<int>(textureSize) / g_dTileSize;
+                const auto tileX = static_cast<float>((tileIndex % tilesPerRow) * g_dTileSize);
+                const auto tileY = static_cast<float>((tileIndex)) / static_cast<float>(tilesPerRow) * g_dTileSize;
 
-                const float X = static_cast<float>(j) * tileSize - offsetX;
-                const float Y = static_cast<float>(i) * tileSize - offsetY;
+                const float X = static_cast<float>(j) * g_dTileSize - g_fOffsetX;
+                const float Y = static_cast<float>(i) * g_dTileSize - g_fOffsetY;
 
                 vertices.append(sf::Vertex(sf::Vector2f(X, Y), sf::Vector2f(tileX, tileY)));
-                vertices.append(sf::Vertex(sf::Vector2f(X + tileSize, Y), sf::Vector2f(tileX + tileSize, tileY)));
-                vertices.append(sf::Vertex(sf::Vector2f(X + tileSize, Y + tileSize), sf::Vector2f(tileX + tileSize, tileY + tileSize)));
-                vertices.append(sf::Vertex(sf::Vector2f(X, Y + tileSize), sf::Vector2f(tileX, tileY + tileSize)));
+                vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y), sf::Vector2f(tileX + g_dTileSize, tileY)));
+                vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y + g_dTileSize), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
+                vertices.append(sf::Vertex(sf::Vector2f(X, Y + g_dTileSize), sf::Vector2f(tileX, tileY + g_dTileSize)));
             }
         }
     }
@@ -318,12 +318,12 @@ void Map::init(const int distanceView, const unsigned int seed) {
 }
 
 int Map::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, const sf::Vector2f bias) const {
-    const sf::FloatRect playerBox((playerPos.x + bias.x) - offsetX, (playerPos.y + bias.y) - offsetY, playerSize.x, playerSize.y);
+    const sf::FloatRect playerBox((playerPos.x + bias.x) - g_fOffsetX, (playerPos.y + bias.y) - g_fOffsetY, playerSize.x, playerSize.y);
 
-    for (int i = 0; i < layerSizeMaxY; i++) {
-        for (int j = 0; j < layerSizeMaxX; j++) {
+    for (int i = 0; i < g_LayerSizeMaxY; i++) {
+        for (int j = 0; j < g_LayerSizeMaxX; j++) {
             if (LayerOdj[i][j] == 159) {
-                if (const sf::FloatRect tileBox(static_cast<float>(j) * tileSize - offsetX, static_cast<float>(i) * tileSize - offsetY, tileSize, tileSize); playerBox.intersects(tileBox)) {
+                if (const sf::FloatRect tileBox(static_cast<float>(j) * g_dTileSize - g_fOffsetX, static_cast<float>(i) * g_dTileSize - g_fOffsetY, g_dTileSize, g_dTileSize); playerBox.intersects(tileBox)) {
                     const float overlapLeft = playerBox.left + playerBox.width - tileBox.left;
                     const float overlapRight = tileBox.left + tileBox.width - playerBox.left;
                     const float overlapTop = playerBox.top + playerBox.height - tileBox.top;
@@ -386,8 +386,8 @@ void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, con
 }
 
 void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSize) {
-    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
-    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * tileSize);
+    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
+    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
 
     for (int y = -distanceView; y <= distanceView; ++y) {
         for (int x = -distanceView; x <= distanceView; ++x) {
@@ -408,8 +408,8 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
 
 void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize) {
 
-    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
-    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * tileSize);
+    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
+    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
 
     for (auto it = chunks.begin(); it != chunks.end();) {
         const int chunkX = it->first.first;
@@ -430,14 +430,14 @@ void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vecto
 
     loadChunksAroundPlayer(playerPos, chunkSize);
 
-    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * tileSize);
-    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * tileSize);
+    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
+    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
 
     sf::VertexArray vertices(sf::Quads);
 
     // Округляем offsetX и offsetY
-    const float roundedOffsetX = std::round(offsetX);
-    const float roundedOffsetY = std::round(offsetY);
+    const float roundedOffsetX = std::round(g_fOffsetX);
+    const float roundedOffsetY = std::round(g_fOffsetY);
 
     for (int y = -distanceView; y <= distanceView; ++y) {
         for (int x = -distanceView; x <= distanceView; ++x) {
@@ -449,17 +449,17 @@ void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vecto
                 for (int i = 0; i < chunkSize; ++i) {
                     for (int j = 0; j < chunkSize; ++j) {
                         if (const int tileValue = chunk[i][j]; tileValue != 0) {
-                            const float X = static_cast<float>(j + chunkX * chunkSize) * tileSize;
-                            const float Y = static_cast<float>(i + chunkY * chunkSize) * tileSize;
+                            const float X = static_cast<float>(j + chunkX * chunkSize) * g_dTileSize;
+                            const float Y = static_cast<float>(i + chunkY * chunkSize) * g_dTileSize;
 
-                            const int tilesPerRow = static_cast<int>(texture.getSize().x) / tileSize;
-                            const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * tileSize;
-                            const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * tileSize;
+                            const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
+                            const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
+                            const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * g_dTileSize;
 
                             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + tileSize, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + tileSize - roundedOffsetX, Y + tileSize - roundedOffsetY), sf::Vector2f(tileX + tileSize, tileY + tileSize)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + tileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + tileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + g_dTileSize)));
                         }
                     }
                 }

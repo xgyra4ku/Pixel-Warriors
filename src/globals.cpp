@@ -1,7 +1,7 @@
 #include "../include/globals.hpp"
 
-int WindowWidth;
-int WindowHeight;
+int g_iWindowWidth;
+int g_iWindowHeight;
 
-float offsetX = 0;
-float offsetY = 0;
+float g_fOffsetX = 0;
+float g_fOffsetY = 0;

@@ -18,6 +18,7 @@ struct chunk {
     sf::Vector2f pos;
 };
 
+
 class Map
 {
 public:
@@ -65,10 +66,12 @@ private:
     bool ChunksThreadOnOff;
     bool fileWorldIsOpen;
 
+
+
     unsigned int seed{};
 
-    int LayerOdj[layerSizeMaxX][layerSizeMaxY]{};
-    int LayerGround[layerSizeMaxX][layerSizeMaxY]{};
+    int LayerOdj[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
+    int LayerGround[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
 
     std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
 
@@ -76,6 +79,7 @@ private:
 
     std::thread chunkLoadThread;
     std::mutex chunkMutex;
+
 
 
     void funkLoadChunksThread();

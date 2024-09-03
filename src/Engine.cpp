@@ -2,41 +2,41 @@
 #include "../include/globals.hpp"
 
 Engine::Engine() {
-    settings = save_and_load_.loadSettings();
+    m_mpSettings = save_and_load_.loadSettings();
     sf::ContextSettings settingsDisplay;
     settingsDisplay.antialiasingLevel = 0;
-    if (settings["fullscreen"] == 1) {
-        window.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen, settingsDisplay);
+    if (m_mpSettings["fullscreen"] == 1) {
+        m_oWindow.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen, settingsDisplay);
     } else {
-        window.create(sf::VideoMode(settings["windowWidth"], settings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
+        m_oWindow.create(sf::VideoMode(m_mpSettings["windowWidth"], m_mpSettings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
     }
-    WindowWidth = static_cast<int>(window.getSize().x);
-    WindowHeight = static_cast<int>(window.getSize().y);
+    g_iWindowWidth = static_cast<int>(m_oWindow.getSize().x);
+    g_iWindowHeight = static_cast<int>(m_oWindow.getSize().y);
 
 
-    if (!window.isOpen()) {
+    if (!m_oWindow.isOpen()) {
         std::cerr << "ERROR: Failed creating window" << std::endl;
-        window.close();
+        m_oWindow.close();
         return;
     }
 
     std::cout << "INFO: Window created successfully" << std::endl;
 
-    if (!texturePlayerList[0].loadFromFile("Assets/tex1.png")) {
+    if (!m_oTexturePlayerList[0].loadFromFile("Assets/tex1.png")) {
         std::cerr << "ERROR: Failed loading Assets/tex1.png" << std::endl;
-        window.close();
+        m_oWindow.close();
         return;
     }
 
     std::cout << "INFO: Texture loaded successfully" << std::endl;
 
-    loadDependency("Dependency/");
-    menu = 0;
+    m_loadDependency("Dependency/");
+    m_iMenu = 0;
 
     //modslist = loadMods("Mods");
-    offsetRUN = true;
-    collisionRUN = true;
-    playerPosRUN = false;
+    m_bOffsetRUN = true;
+    m_bCollisionRUN = true;
+    m_bPlayerPosRUN = false;
 
     map.init(4, 7774);
    // map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
@@ -45,7 +45,7 @@ Engine::Engine() {
     //map.load();
     // std::srand(std::time(NULL));
 
-    initPlayer(1);
+    m_initPlayer(1);
     const unsigned int seed = std::rand();
     std::cout << "INFO: Seed: " << seed << std::endl;
     // std::time(NULL);
@@ -63,7 +63,7 @@ Engine::Engine() {
 
 Engine::~Engine() = default;
 
-void Engine::loadDependency(const std::string& directory) {
+void Engine::m_loadDependency(const std::string& directory) {
     DependencyFunctions functions{};
     const std::string filePath = directory + "libmod-menu.dll";
     const HMODULE hModule = LoadLibrary(filePath.c_str());
@@ -74,14 +74,14 @@ void Engine::loadDependency(const std::string& directory) {
     }
 
     functions.initLib = reinterpret_cast<void (*)(sf::RenderWindow &)>(GetProcAddress(hModule, "initLib"));
-    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &, int &, float&)>(GetProcAddress(hModule, "menuLib"));
+    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &, int &, float&, std::string&)>(GetProcAddress(hModule, "menuLib"));
 
     if (!functions.initLib || !functions.menuLib) {
         std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
         FreeLibrary(hModule);
     }
-    functions.initLib(window);
-    dependencyList["menuLib"] = functions;
+    functions.initLib(m_oWindow);
+    m_mpDependencyList["menuLib"] = functions;
 }
 //
 // std::vector<Mod> Engine::loadMods(const std::string& directory) {
@@ -121,168 +121,171 @@ void Engine::loadDependency(const std::string& directory) {
 // }
 
 void Engine::run() {
-    if (settings["V-sync"] == 1) {
-        window.setVerticalSyncEnabled(true);
+    if (m_mpSettings["V-sync"] == 1) {
+        m_oWindow.setVerticalSyncEnabled(true);
         std::cout << "INFO: V-sync enabled" << std::endl;
     } else {
-        window.setVerticalSyncEnabled(false);
+        m_oWindow.setVerticalSyncEnabled(false);
         std::cout << "INFO: V-sync disabled" << std::endl;
-        if (settings["fps"] == -1) {
+        if (m_mpSettings["fps"] == -1) {
             std::cout << "INFO: FPS not set" << std::endl;
         } else {
-            std::cout << "INFO: FPS set to " << settings["fps"] << std::endl;
-            window.setFramerateLimit(settings["fps"]);
+            std::cout << "INFO: FPS set to " << m_mpSettings["fps"] << std::endl;
+            m_oWindow.setFramerateLimit(m_mpSettings["fps"]);
         }
     }
 
-	while (window.isOpen()) {
-        window.clear();
-        Events();
-        timer();
-        if (menu == -1) {
+	while (m_oWindow.isOpen()) {
+        m_oWindow.clear();
+        m_Events();
+        m_timer();
+        if (m_iMenu == -1) {
             //game
-            logic();
-            updateDisplay();
+            m_logic();
+            m_updateDisplay();
 
-        } else if (menu == -2) {
-            save_and_load_.saveSettings(settings);
-	        menu = 3;
-            dependencyList["menuLib"].menuLib(window, menu, settings, wheelEventMouse, time);
+        } else if (m_iMenu == -2) {
+            save_and_load_.saveSettings(m_mpSettings);
+	        m_iMenu = 3;
+            m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
+        } else if (m_iMenu == -3) {
+            std::cout << "INFO: Load world >" << m_strFileWorldName << "<" << std::endl;
+
+            m_iMenu = 0;
         } else {
-	        dependencyList["menuLib"].menuLib(window, menu, settings, wheelEventMouse, time);
-	    }
-        window.display();
+	        m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
+        }
+        m_oWindow.display();
 	}
 }
-void Engine::timer() {
+void Engine::m_timer() {
 
-    time = static_cast<float>(clock.getElapsedTime().asMicroseconds());
-    clock.restart();
+    m_fTime = static_cast<float>(m_oClock.getElapsedTime().asMicroseconds());
+    m_oClock.restart();
+    m_fTime = m_fTime / 700.0f;
 
-    time = time / 700.0f;
-
-    if (time > 60.0f) time = 60.0f;
-    frameCount++;
-    if (fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
-        fps = static_cast<float>(frameCount) / fpsClock.getElapsedTime().asSeconds();
-        frameCount = 0;
-        fpsClock.restart();
-        std::cout << "FPS: " << static_cast<int>(fps) << std::endl;
+    if (m_fTime > 60.0f) m_fTime = 60.0f;
+    m_fFrameCount++;
+    if (m_oFpsClock.getElapsedTime().asSeconds() >= 1.0f) {
+        m_fFps = static_cast<float>(m_fFrameCount) / m_oFpsClock.getElapsedTime().asSeconds();
+        m_fFrameCount = 0;
+        m_oFpsClock.restart();
+        std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
     }
 }
-void Engine::logic() {
-    if (collisionRUN)
-        collision();
-    controlKeyboard();
-    if (offsetRUN)
-        offset();
-    if (playerPosRUN)
-        std::cout << "Player position: (" << playerPos.x - offsetX << ", " << playerPos.y - offsetY << ")" << std::endl;
+void Engine::m_logic() {
+    if (m_bCollisionRUN)
+        m_collision();
+    m_controlKeyboard();
+    if (m_bOffsetRUN)
+        m_offset();
+    if (m_bPlayerPosRUN)
+        std::cout << "Player position: (" << m_oPlayerPos.x - g_fOffsetX << ", " << m_oPlayerPos.y - g_fOffsetY << ")" << std::endl;
 
 }
-void Engine::updateDisplay() {
+void Engine::m_updateDisplay() {
     //map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
 
-   map.draw(window, playerPos, sf::Vector2f((static_cast<float>(WindowWidth) / 2.0f + 30), (static_cast<float>(WindowHeight) / 2.0f + 30)), 16);
+   map.draw(m_oWindow, m_oPlayerPos, sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30), (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
 
 
 
-    player1.draw(window);
+    player1.draw(m_oWindow);
 }
 
 
-void Engine::Events() {
-    wheelEventMouse = 0;
+void Engine::m_Events() {
+    m_iWheelEventMouse = 0;
     sf::Event event{};
-    while (window.pollEvent(event)) {
+    while (m_oWindow.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
-            window.close();
+            m_oWindow.close();
             //map.deleting();
         }
         if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape && menu == 0) {
-                window.close();
-            } else if (event.key.code == sf::Keyboard::Escape && menu == -1) {
-                menu = 0;
+            if (event.key.code == sf::Keyboard::Escape && m_iMenu == 0) {
+                m_oWindow.close();
+            } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == -1) {
+                m_iMenu = 0;
                // map.deleting();
             }
         }
         if (event.type == sf::Event::MouseWheelMoved)
         {
-            wheelEventMouse = event.mouseWheel.delta;
+            m_iWheelEventMouse = event.mouseWheel.delta;
         }
     }
 
 }
 
 
-void Engine::initPlayer(int textureNumPlayer1) {
+void Engine::m_initPlayer(int textureNumPlayer1) {
     switch (textureNumPlayer1)
     {
     case 1:
-        player1.setTexture(texturePlayerList[0]);
+        player1.setTexture(m_oTexturePlayerList[0]);
         break;
     default:
         break;
     }
     player1.setPosition(sf::Vector2f(800, 800));
     player1.setSize(sf::Vector2f(16, 16));
-    offsetX = 40 ;
-    offsetY = 80 ;
+    g_fOffsetX = 40 ;
+    g_fOffsetY = 80 ;
 }
 
 
-void Engine::collision() {
+void Engine::m_collision() {
     switch (sf::Vector2f newPos = player1.getPosition(); map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
     case 1:
         std::cout << 1 << std::endl;
-        newPos.x -= ((playerSpeed * 2) * time);
+        newPos.x -= ((m_fPlayerSpeed * 2) * m_fTime);
         player1.setPosition(newPos);
         break;
     case 2:
         std::cout << 2 << std::endl;
-        newPos.x += ((playerSpeed * 2) * time);
+        newPos.x += ((m_fPlayerSpeed * 2) * m_fTime);
         player1.setPosition(newPos);
         break;
     case 3:
         std::cout << 3 << std::endl;
-        newPos.y += ((playerSpeed * 2) * time);
+        newPos.y += ((m_fPlayerSpeed * 2) * m_fTime);
         player1.setPosition(newPos);
         break;
     case 4:
         std::cout << 4 << std::endl;
-        newPos.y -= ((playerSpeed * 2) * time);
+        newPos.y -= ((m_fPlayerSpeed * 2) * m_fTime);
         player1.setPosition(newPos);
         break;
     default:
         break;
     }
 } 
-void Engine::offset() const {
+void Engine::m_offset() const {
 
     // Define the dead zone boundaries
-    const float leftDeadZone = (((630.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().x);
-    const float rightDeadZone = (((650.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().x);
-    const float topDeadZone = (((390.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().y);
-    const float bottomDeadZone = (((410.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(window.getSize().y);
+    const float leftDeadZone = (((630.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().x);
+    const float rightDeadZone = (((650.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().x);
+    const float topDeadZone = (((390.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().y);
+    const float bottomDeadZone = (((410.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().y);
 
     // Player's current position
-    const sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(offsetX, offsetY);
+    const sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(g_fOffsetX, g_fOffsetY);
 
     // Calculate the desired offset based on the player's position relative to the dead zone
-    float targetOffsetX = offsetX;
-    float targetOffsetY = offsetY;
+    float targetOffsetX = g_fOffsetX;
+    float targetOffsetY = g_fOffsetY;
 
     if (playerPos.x < leftDeadZone) {
-        targetOffsetX -= offsetSpeed * time;
+        targetOffsetX -= m_fOffSetSpeed * m_fTime;
     } else if (playerPos.x > rightDeadZone) {
-        targetOffsetX += offsetSpeed * time;
+        targetOffsetX += m_fOffSetSpeed * m_fTime;
     }
 
     if (playerPos.y < topDeadZone) {
-        targetOffsetY -= offsetSpeed * time;
+        targetOffsetY -= m_fOffSetSpeed * m_fTime;
     } else if (playerPos.y > bottomDeadZone) {
-        targetOffsetY += offsetSpeed * time;
+        targetOffsetY += m_fOffSetSpeed * m_fTime;
     }
 
     // Smoothly interpolate the offset values for a more gradual camera movement
@@ -292,90 +295,90 @@ void Engine::offset() const {
     constexpr float inertia = 0.1f; // Adjust this for more or less camera inertia
 
     // Compute the new offset values
-    offsetX += (targetOffsetX - offsetX) * smoothFactor;
-    offsetY += (targetOffsetY - offsetY) * smoothFactor;
+    g_fOffsetX += (targetOffsetX - g_fOffsetX) * smoothFactor;
+    g_fOffsetY += (targetOffsetY - g_fOffsetY) * smoothFactor;
 
     // Apply inertia when the player stops moving
     if (abs(player1.getSize().x) < 0.1f) {
-        offsetX += (playerPos.x - (leftDeadZone + rightDeadZone) / 2.0f) * inertia;
+        g_fOffsetX += (playerPos.x - (leftDeadZone + rightDeadZone) / 2.0f) * inertia;
     }
 
     if (abs(player1.getSize().y) < 0.1f) {
-        offsetY += (playerPos.y - (topDeadZone + bottomDeadZone) / 2.0f) * inertia;
+        g_fOffsetY += (playerPos.y - (topDeadZone + bottomDeadZone) / 2.0f) * inertia;
     }
 }
 
 
-void Engine::controlKeyboard() {
-    playerPos = player1.getPosition();
+void Engine::m_controlKeyboard() {
+    m_oPlayerPos = player1.getPosition();
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-       player1.animate(time, 5);
+       player1.animate(m_fTime, 5);
     }
     else {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-            playerPos.y -= (playerSpeed / 1.5f) * time;
-            playerPos.x -= (playerSpeed / 1.5f)  * time;
-            player1.animate(time, 2);
+            m_oPlayerPos.y -= (m_fPlayerSpeed / 1.5f) * m_fTime;
+            m_oPlayerPos.x -= (m_fPlayerSpeed / 1.5f)  * m_fTime;
+            player1.animate(m_fTime, 2);
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-            playerPos.y -= (playerSpeed /  1.5f) * time;
-            playerPos.x += (playerSpeed /  1.5f)  * time;
-            player1.animate(time, 4);
+            m_oPlayerPos.y -= (m_fPlayerSpeed /  1.5f) * m_fTime;
+            m_oPlayerPos.x += (m_fPlayerSpeed /  1.5f)  * m_fTime;
+            player1.animate(m_fTime, 4);
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-            playerPos.y += (playerSpeed /  1.5f) * time;
-            playerPos.x -= (playerSpeed /  1.5f)  * time;
-            player1.animate(time, 2);
+            m_oPlayerPos.y += (m_fPlayerSpeed /  1.5f) * m_fTime;
+            m_oPlayerPos.x -= (m_fPlayerSpeed /  1.5f)  * m_fTime;
+            player1.animate(m_fTime, 2);
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-            playerPos.y += (playerSpeed /  1.5f) * time;
-            playerPos.x += (playerSpeed /  1.5f)  * time;
-            player1.animate(time, 4);
+            m_oPlayerPos.y += (m_fPlayerSpeed /  1.5f) * m_fTime;
+            m_oPlayerPos.x += (m_fPlayerSpeed /  1.5f)  * m_fTime;
+            player1.animate(m_fTime, 4);
         }
         else {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-            playerPos.y -= playerSpeed * time;
-            player1.animate(time, 1);
+            m_oPlayerPos.y -= m_fPlayerSpeed * m_fTime;
+            player1.animate(m_fTime, 1);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-                playerPos.x -= playerSpeed * time;
-                player1.animate(time, 2);
+                m_oPlayerPos.x -= m_fPlayerSpeed * m_fTime;
+                player1.animate(m_fTime, 2);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-                playerPos.y += playerSpeed * time;
-                player1.animate(time, 3);
+                m_oPlayerPos.y += m_fPlayerSpeed * m_fTime;
+                player1.animate(m_fTime, 3);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-                playerPos.x += playerSpeed * time;
-                player1.animate(time, 4);
+                m_oPlayerPos.x += m_fPlayerSpeed * m_fTime;
+                player1.animate(m_fTime, 4);
             }
         }
-        player1.setPosition(playerPos);
+        player1.setPosition(m_oPlayerPos);
     }
-    if (!offsetRUN) {
+    if (!m_bOffsetRUN) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-            offsetY -= 5;
+            g_fOffsetY -= 5;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-            offsetX -= 5;
+            g_fOffsetX -= 5;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            offsetY += 5;
+            g_fOffsetY += 5;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-            offsetX += 5;
+            g_fOffsetX += 5;
         }
     }
-    player1.setPosition(playerPos);
+    player1.setPosition(m_oPlayerPos);
     
 }
 
-void Engine::generateMap(const unsigned int seed, const int WIDTH, const int HEIGHT) {
-    mapGenerated = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
+void Engine::m_generateMap(const unsigned int seed, const int WIDTH, const int HEIGHT) {
+    m_vMapGenerated = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
 
     std::cout << "Map initialized" << std::endl;
 
-    map.initializeMap(mapGenerated, seed, 0.58, WIDTH, HEIGHT); // Инициализация карты случайными значениями
+    map.initializeMap(m_vMapGenerated, seed, 0.58, WIDTH, HEIGHT); // Инициализация карты случайными значениями
 
     constexpr int generations = 20; // Количество поколений клеточного автомата
 
@@ -383,13 +386,13 @@ void Engine::generateMap(const unsigned int seed, const int WIDTH, const int HEI
 
     // Запуск клеточного автомата на заданное количество поколений
     for (int gen = 0; gen < generations; ++gen) {
-        map.stepAutomaton(mapGenerated, WIDTH, HEIGHT); // Выполнение одного шага клеточного автомата
+        map.stepAutomaton(m_vMapGenerated, WIDTH, HEIGHT); // Выполнение одного шага клеточного автомата
         std::cout << "INFO: Generation " << gen << " completed" << std::endl;
     }
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            if (mapGenerated[y][x] == 0) mapGenerated[y][x] = 159;
-            if (mapGenerated[y][x] == 1) mapGenerated[y][x] = 47;
+            if (m_vMapGenerated[y][x] == 0) m_vMapGenerated[y][x] = 159;
+            if (m_vMapGenerated[y][x] == 1) m_vMapGenerated[y][x] = 47;
         }
     }
     std::cout << "Map generated successfully" << std::endl;

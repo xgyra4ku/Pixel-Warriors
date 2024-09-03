@@ -10,7 +10,7 @@
 
 struct DependencyFunctions {
     void (*initLib)(sf::RenderWindow&);
-    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&, int&, float&);
+    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&, int&, float&, std::string&);
 };
 
 struct Mod {
@@ -20,53 +20,54 @@ struct Mod {
 
 class Engine
 {
-    public:
-        Engine();
-        ~Engine();
+public:
+    Engine();
+    ~Engine();
 
-        void run();
-    private:
-        Map map;
+    void run();
+private:
+    Map map;
+    Entity player1;
+    SaveAndLoad save_and_load_;
 
-        Entity player1;
-        SaveAndLoad save_and_load_;
+
+    sf::RenderWindow m_oWindow;
+    sf::Vector2f m_oPlayerPos;
+    sf::Clock m_oClock;
+    sf::Clock m_oFpsClock;
+    sf::Texture m_oTexturePlayerList[3];
+    sf::Vector2i m_vChunkPos;
 
 
-        sf::RenderWindow window;
-        sf::Vector2f playerPos;
-        sf::Clock clock;
-        sf::Clock fpsClock;
-        sf::Texture texturePlayerList[3];
+    //float playerSpeed = 0.08f;
+    float m_fPlayerSpeed = 5;
+    float m_fOffSetSpeed = 10;
+    float m_fTime = 0.0f;
+    float m_fFps = 0.0f;
+    int m_fFrameCount = 0;
+    int m_iMenu;
+    int m_iWheelEventMouse{};
 
-        //float playerSpeed = 0.08f;
-        float playerSpeed = 5;
-        float offsetSpeed = 10;
-        float time = 0.0f;
-        float fps = 0.0f;
-        int frameCount = 0;
-        int menu;
-        int wheelEventMouse{};
-        sf::Vector2i chunckPos;
+    bool m_bOffsetRUN;
+    bool m_bCollisionRUN;
+    bool m_bPlayerPosRUN;
+    std::string m_strFileWorldName;
 
-        bool offsetRUN;
-        bool collisionRUN;
-        bool playerPosRUN;
+    std::vector<std::vector<int>> m_vMapGenerated;
+    std::vector<Mod> m_vModsList;
+    std::vector<std::vector<int>> m_mpChunk;
+    std::map<std::string, DependencyFunctions> m_mpDependencyList;
+    std::map<std::string, int> m_mpSettings;
 
-        std::vector<std::vector<int>> mapGenerated;
-        std::vector<Mod> modsList;
-        std::vector<std::vector<int>> chunkMap;
-        std::map<std::string, DependencyFunctions> dependencyList;
-        std::map<std::string, int> settings;
-
-        void Events();
-        void timer();
-        void logic();
-        void updateDisplay();
-        void initPlayer(int textureNumPlayer1);
-        void controlKeyboard();
-        void collision();
-        void offset() const;
-        void generateMap(unsigned int seed, int WIDTH, int HEIGHT);
-        //std::vector<Mod> loadMods(const std::string& directory);
-        void loadDependency(const std::string& directory);
+    void m_Events();
+    void m_timer();
+    void m_logic();
+    void m_updateDisplay();
+    void m_initPlayer(int textureNumPlayer1);
+    void m_controlKeyboard();
+    void m_collision();
+    void m_offset() const;
+    void m_generateMap(unsigned int seed, int WIDTH, int HEIGHT);
+    //std::vector<Mod> loadMods(const std::string& directory);
+    void m_loadDependency(const std::string& directory);
 };

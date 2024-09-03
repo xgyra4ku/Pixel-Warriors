@@ -8,7 +8,7 @@ Entity::~Entity() = default;
 
 void Entity::setPosition(const sf::Vector2f positionSet) {
     position = positionSet;
-    sprite.setPosition(sf::Vector2f(position.x - offsetX, position.y - offsetY));
+    sprite.setPosition(sf::Vector2f(position.x - g_fOffsetX, position.y - g_fOffsetY));
 }
 
 void Entity::setName(const std::string &nameSet) {
