@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-Map::Map() : distanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false) {
+Map::Map() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false) {
     //startChunkLoadingThread();
 }
 
@@ -164,6 +164,9 @@ void Map::loadingChunksFromFile(const std::string& nameFile) {
     fileInput >> jsonLoad;
     fileInput.close();
 }
+sf::Vector2f Map::getPosPlayer() {
+    return {jsonLoad["player"]["pos"]["x"], jsonLoad["player"]["pos"]["y"]};
+}
 
 bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>>& chunkData) {
     if (jsonLoad.contains("chunks")) {
@@ -204,7 +207,7 @@ void Map::save() {
             } else {
                 std::cout << "INFO: New file is open for writing" << std::endl;
                 jsonSave = json::object();
-                jsonSave["seed"] = seed;
+                jsonSave["seed"] = m_uiSeed;
                 jsonSave["chunks"] = json::object();
             }
 
@@ -224,6 +227,9 @@ void Map::save() {
         jsonSave["chunks"][chunkName]["data"] = chunkData;
     }
 
+    jsonSave["player"]["pos"]["x"] = PlayerPos.x;
+    jsonSave["player"]["pos"]["y"] = PlayerPos.y;
+
     fileWorld.open("worlds/map1.json", std::ofstream::out | std::ofstream::trunc);
     if (fileWorld.is_open()) {
         fileWorld << jsonSave.dump(4);
@@ -234,7 +240,7 @@ void Map::save() {
     }
 
     chunkBuffer.clear();
-    loadingChunksFromFile("map1.json");
+    loadingChunksFromFile(strNameFileWorld);
 }
 
 void Map::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
@@ -289,13 +295,13 @@ void Map::setLayer(const int x, const int y, const int layer, const int value) {
     }
 }
 
-void Map::init(const int distanceView, const unsigned int seed) {
-    this->seed = seed;
-    this->distanceView = distanceView;
-    save();
-    loadingChunksFromFile("map1.json");
+void Map::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window) {
+    this->m_iDistanceView = iDistanceView;
+    this->strNameFileWorld = strNameFileMap;
+    loadingChunksFromFile(strNameFileMap);
+
     try {
-        std::cout << "INFO: Loading tileset" << std::endl;
+        std::cout << "INFO: Loading tile set" << std::endl;
 
         fileInput.open("Maps/map2/3.json");
         fileInput >> objJson;
@@ -310,7 +316,7 @@ void Map::init(const int distanceView, const unsigned int seed) {
         }
 
         sprite.setTexture(texture);
-        std::cout << "INFO: Tileset loaded successfully" << std::endl;
+        std::cout << "INFO: Tile set loaded successfully" << std::endl;
     }
     catch (const nlohmann::json::exception& error) {
         std::cerr << "\033[31m" << "ERROR: Failed to load tileset " << error.what() << "\033[30m" << std::endl;
@@ -319,7 +325,6 @@ void Map::init(const int distanceView, const unsigned int seed) {
 
 int Map::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, const sf::Vector2f bias) const {
     const sf::FloatRect playerBox((playerPos.x + bias.x) - g_fOffsetX, (playerPos.y + bias.y) - g_fOffsetY, playerSize.x, playerSize.y);
-
     for (int i = 0; i < g_LayerSizeMaxY; i++) {
         for (int j = 0; j < g_LayerSizeMaxX; j++) {
             if (LayerOdj[i][j] == 159) {
@@ -389,8 +394,8 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
 
-    for (int y = -distanceView; y <= distanceView; ++y) {
-        for (int x = -distanceView; x <= distanceView; ++x) {
+    for (int y = -m_iDistanceView; y <= m_iDistanceView; ++y) {
+        for (int x = -m_iDistanceView; x <= m_iDistanceView; ++x) {
             int chunkX = playerChunkX + x;
             int chunkY = playerChunkY + y;
 
@@ -399,7 +404,7 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
                 if (std::vector<std::vector<int>> temp; checkingDownloadedChunks(name, temp)) {
                     chunks[chunkKey] = temp;
                 } else {
-                    chunks[chunkKey] = generateChunk(chunkX, chunkY, seed, chunkSize);
+                    chunks[chunkKey] = generateChunk(chunkX, chunkY, m_uiSeed, chunkSize);
                 }
             }
         }
@@ -414,7 +419,7 @@ void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize)
     for (auto it = chunks.begin(); it != chunks.end();) {
         const int chunkX = it->first.first;
 
-        if (const int chunkY = it->first.second; abs(chunkX - playerChunkX) > distanceView || abs(chunkY - playerChunkY) > distanceView) {
+        if (const int chunkY = it->first.second; abs(chunkX - playerChunkX) > m_iDistanceView || abs(chunkY - playerChunkY) > m_iDistanceView) {
             auto chunkKey = std::make_pair(chunkX, chunkY);
             saveChunk(chunkX, chunkY, chunks[chunkKey], chunkSize);
             it = chunks.erase(it);
@@ -427,7 +432,7 @@ void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize)
 void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
     // Lock the mutex while modifying chunks
    // std::lock_guard<std::mutex> lock(chunkMutex);
-
+    this->PlayerPos = playerPos;
     loadChunksAroundPlayer(playerPos, chunkSize);
 
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
@@ -439,8 +444,8 @@ void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vecto
     const float roundedOffsetX = std::round(g_fOffsetX);
     const float roundedOffsetY = std::round(g_fOffsetY);
 
-    for (int y = -distanceView; y <= distanceView; ++y) {
-        for (int x = -distanceView; x <= distanceView; ++x) {
+    for (int y = -m_iDistanceView; y <= m_iDistanceView; ++y) {
+        for (int x = -m_iDistanceView; x <= m_iDistanceView; ++x) {
             int chunkX = playerChunkX + x;
             int chunkY = playerChunkY + y;
 
@@ -495,4 +500,8 @@ void Map::stopChunkLoadingThread() {
     if (chunkLoadThread.joinable()) {
         chunkLoadThread.join();
     }
+}
+
+void Map::createWorld() {
+
 }

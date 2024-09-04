@@ -29,7 +29,7 @@ public:
 
     void load();
     void save();
-    void init(int distanceView, unsigned int seed);
+    void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);
     void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize);
     void draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) const;
 
@@ -38,6 +38,10 @@ public:
     void setLayer(int x, int y, int layer, int value);
 
     int getLayer(int x, int y, int layer) const;
+    sf::Vector2f getPosPlayer();
+
+    void createWorld();
+
 
     static void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
     static void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
@@ -61,14 +65,12 @@ private:
 
     int imageHeight{};
     int imageWidth{};
-    int distanceView;
+    int m_iDistanceView;
 
     bool ChunksThreadOnOff;
     bool fileWorldIsOpen;
 
-
-
-    unsigned int seed{};
+    unsigned int m_uiSeed{};
 
     int LayerOdj[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
     int LayerGround[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
@@ -80,11 +82,14 @@ private:
     std::thread chunkLoadThread;
     std::mutex chunkMutex;
 
+    std::string strNameFileWorld;
+
 
 
     void funkLoadChunksThread();
     void startChunkLoadingThread();
     void stopChunkLoadingThread();
+
     void loadingChunksFromFile(const std::string &nameFile);
 
     bool checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>> &chunkData);

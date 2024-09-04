@@ -24,7 +24,7 @@ public:
     Engine();
     ~Engine();
 
-    void run();
+    void vRun();
 private:
     Map map;
     Entity player1;
@@ -59,15 +59,15 @@ private:
     std::map<std::string, DependencyFunctions> m_mpDependencyList;
     std::map<std::string, int> m_mpSettings;
 
-    void m_Events();
-    void m_timer();
-    void m_logic();
-    void m_updateDisplay();
-    void m_initPlayer(int textureNumPlayer1);
-    void m_controlKeyboard();
-    void m_collision();
-    void m_offset() const;
-    void m_generateMap(unsigned int seed, int WIDTH, int HEIGHT);
+    void _Events();
+    void _timer();
+    void _logic();
+    void _updateDisplay();
+    void _initPlayer(int textureNumPlayer1);
+    void _controlKeyboard();
+    void _collision();
+    void _offset() const;
+    void _generateMap(unsigned int seed, int WIDTH, int HEIGHT);
     //std::vector<Mod> loadMods(const std::string& directory);
-    void m_loadDependency(const std::string& directory);
+    void _loadDependency(const std::string& directory);
 };

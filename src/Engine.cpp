@@ -30,7 +30,7 @@ Engine::Engine() {
 
     std::cout << "INFO: Texture loaded successfully" << std::endl;
 
-    m_loadDependency("Dependency/");
+    _loadDependency("Dependency/");
     m_iMenu = 0;
 
     //modslist = loadMods("Mods");
@@ -38,16 +38,16 @@ Engine::Engine() {
     m_bCollisionRUN = true;
     m_bPlayerPosRUN = false;
 
-    map.init(4, 7774);
-   // map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
+    //map.init(TODO, TODO);
+    //map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
 
 
     //map.load();
     // std::srand(std::time(NULL));
 
-    m_initPlayer(1);
-    const unsigned int seed = std::rand();
-    std::cout << "INFO: Seed: " << seed << std::endl;
+    //m_initPlayer(1);
+    //const unsigned int seed = std::rand();
+    //std::cout << "INFO: Seed: " << seed << std::endl;
     // std::time(NULL);
     // map.generateMap(seed, 128);
     //generateMap(111111111, 1900, 1900);
@@ -58,12 +58,11 @@ Engine::Engine() {
     //noise(12345);  // Seed
     //world(noise, 12345, 3);  // Seed and render distance
     //map.initializeMap();
-
 }
 
 Engine::~Engine() = default;
 
-void Engine::m_loadDependency(const std::string& directory) {
+void Engine::_loadDependency(const std::string& directory) {
     DependencyFunctions functions{};
     const std::string filePath = directory + "libmod-menu.dll";
     const HMODULE hModule = LoadLibrary(filePath.c_str());
@@ -120,7 +119,7 @@ void Engine::m_loadDependency(const std::string& directory) {
 //     return mods;
 // }
 
-void Engine::run() {
+void Engine::vRun() {
     if (m_mpSettings["V-sync"] == 1) {
         m_oWindow.setVerticalSyncEnabled(true);
         std::cout << "INFO: V-sync enabled" << std::endl;
@@ -137,28 +136,37 @@ void Engine::run() {
 
 	while (m_oWindow.isOpen()) {
         m_oWindow.clear();
-        m_Events();
-        m_timer();
+        _Events();
+        _timer();
         if (m_iMenu == -1) {
-            //game
-            m_logic();
-            m_updateDisplay();
+
+            _logic();
+            _updateDisplay();
 
         } else if (m_iMenu == -2) {
+
             save_and_load_.saveSettings(m_mpSettings);
 	        m_iMenu = 3;
             m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
+
         } else if (m_iMenu == -3) {
             std::cout << "INFO: Load world >" << m_strFileWorldName << "<" << std::endl;
-
-            m_iMenu = 0;
+            map.init(4, m_strFileWorldName, m_oWindow);
+            _initPlayer(1);
+            player1.setPosition(map.getPosPlayer());
+            g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
+            g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
+            m_iMenu = -1;
         } else {
+
 	        m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
+
         }
+
         m_oWindow.display();
 	}
 }
-void Engine::m_timer() {
+void Engine::_timer() {
 
     m_fTime = static_cast<float>(m_oClock.getElapsedTime().asMicroseconds());
     m_oClock.restart();
@@ -173,17 +181,17 @@ void Engine::m_timer() {
         std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
     }
 }
-void Engine::m_logic() {
+void Engine::_logic() {
     if (m_bCollisionRUN)
-        m_collision();
-    m_controlKeyboard();
+        _collision();
+    _controlKeyboard();
     if (m_bOffsetRUN)
-        m_offset();
+        _offset();
     if (m_bPlayerPosRUN)
         std::cout << "Player position: (" << m_oPlayerPos.x - g_fOffsetX << ", " << m_oPlayerPos.y - g_fOffsetY << ")" << std::endl;
 
 }
-void Engine::m_updateDisplay() {
+void Engine::_updateDisplay() {
     //map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
 
    map.draw(m_oWindow, m_oPlayerPos, sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30), (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
@@ -194,7 +202,7 @@ void Engine::m_updateDisplay() {
 }
 
 
-void Engine::m_Events() {
+void Engine::_Events() {
     m_iWheelEventMouse = 0;
     sf::Event event{};
     while (m_oWindow.pollEvent(event)) {
@@ -219,7 +227,7 @@ void Engine::m_Events() {
 }
 
 
-void Engine::m_initPlayer(int textureNumPlayer1) {
+void Engine::_initPlayer(int textureNumPlayer1) {
     switch (textureNumPlayer1)
     {
     case 1:
@@ -235,7 +243,7 @@ void Engine::m_initPlayer(int textureNumPlayer1) {
 }
 
 
-void Engine::m_collision() {
+void Engine::_collision() {
     switch (sf::Vector2f newPos = player1.getPosition(); map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
     case 1:
         std::cout << 1 << std::endl;
@@ -261,7 +269,7 @@ void Engine::m_collision() {
         break;
     }
 } 
-void Engine::m_offset() const {
+void Engine::_offset() const {
 
     // Define the dead zone boundaries
     const float leftDeadZone = (((630.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().x);
@@ -309,7 +317,7 @@ void Engine::m_offset() const {
 }
 
 
-void Engine::m_controlKeyboard() {
+void Engine::_controlKeyboard() {
     m_oPlayerPos = player1.getPosition();
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
        player1.animate(m_fTime, 5);
@@ -373,7 +381,7 @@ void Engine::m_controlKeyboard() {
     
 }
 
-void Engine::m_generateMap(const unsigned int seed, const int WIDTH, const int HEIGHT) {
+void Engine::_generateMap(const unsigned int seed, const int WIDTH, const int HEIGHT) {
     m_vMapGenerated = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
 
     std::cout << "Map initialized" << std::endl;
