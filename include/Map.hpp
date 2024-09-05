@@ -25,6 +25,8 @@ public:
     Map();
     ~Map();
 
+    void deleting();
+
     void deleting() const;
 
     void load();

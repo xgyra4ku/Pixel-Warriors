@@ -8,7 +8,7 @@ Map::Map() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fi
 
 Map::~Map() {
     //stopChunkLoadingThread();
-    save();
+    //save();
 
     chunks.clear();
     chunkBufferLoadIsFile.clear();
@@ -16,9 +16,14 @@ Map::~Map() {
     chunkVector.clear();
     fileWorldIsOpen = false;
 }
-void Map::deleting() const {
-    std::cout << "deleting" << std::endl;
-    delete this;
+void Map::deleting() {
+    save();
+    chunks.clear();
+    chunkBufferLoadIsFile.clear();
+    chunkBuffer.clear();
+    chunkVector.clear();
+    fileWorldIsOpen = false;
+    std::cout << "INFO: deleting" << std::endl;
 }
 
 void Map::load() {
@@ -156,6 +161,7 @@ void Map::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, s
     }
 }
 void Map::loadingChunksFromFile(const std::string& nameFile) {
+    std::cout << "INFO: Open file " << nameFile << std::endl;
     fileInput.open("worlds/" + nameFile);
     if (!fileInput.is_open()) {
         std::cerr << "ERROR: opening file: " << nameFile << std::endl;
@@ -198,14 +204,14 @@ void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::v
 
 void Map::save() {
     if (!fileWorldIsOpen) {
-        fileWorld.open("worlds/map1.json", std::ios::out | std::ios::app);
+        fileWorld.open("worlds/"+strNameFileWorld);
         if (fileWorld.is_open()) {
 
-            if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
-                std::cout << "INFO: The file is open for writing" << std::endl;
+            if (fileWorld.peek() == EOF) {
+                std::cout << "INFO: The file " << strNameFileWorld << " is open for writing" << std::endl;
                 fileWorld >> jsonSave;
             } else {
-                std::cout << "INFO: New file is open for writing" << std::endl;
+                std::cout << "INFO: New file " << strNameFileWorld << " is open for writing" << std::endl;
                 jsonSave = json::object();
                 jsonSave["seed"] = m_uiSeed;
                 jsonSave["chunks"] = json::object();
@@ -214,10 +220,12 @@ void Map::save() {
             fileWorld.close();
             fileWorldIsOpen = true;
         } else {
-            std::cerr << "\033[31m" << "ERROR: Cannot open file for writing" << "\033[0m" <<  std::endl;
+            std::cerr << "\033[31m" << "ERROR: Cannot open file " << strNameFileWorld << " for writing" << "\033[0m" <<  std::endl;
             return;
         }
     }
+
+    std::cout << "INFO: Start save" << std::endl;
 
     for (const auto& [chunkName, data] : chunkBuffer) {
         json chunkData = json::array();
@@ -230,13 +238,13 @@ void Map::save() {
     jsonSave["player"]["pos"]["x"] = PlayerPos.x;
     jsonSave["player"]["pos"]["y"] = PlayerPos.y;
 
-    fileWorld.open("worlds/map1.json", std::ofstream::out | std::ofstream::trunc);
+    fileWorld.open("worlds/" + strNameFileWorld, std::ofstream::out | std::ofstream::trunc);
     if (fileWorld.is_open()) {
         fileWorld << jsonSave.dump(4);
         fileWorld.close();
-        std::cout << "INFO: SAVE" << std::endl;
+        std::cout << "INFO: Saved" << std::endl;
     } else {
-        std::cerr << "ERROR: Cannot open file to save changes" << std::endl;
+        std::cerr << "ERROR: Cannot open file" << strNameFileWorld << " to save changes" << std::endl;
     }
 
     chunkBuffer.clear();
@@ -299,7 +307,6 @@ void Map::init(const int iDistanceView, const std::string& strNameFileMap, const
     this->m_iDistanceView = iDistanceView;
     this->strNameFileWorld = strNameFileMap;
     loadingChunksFromFile(strNameFileMap);
-
     try {
         std::cout << "INFO: Loading tile set" << std::endl;
 
@@ -401,11 +408,13 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
 
             if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) == chunks.end()) {
                 const std::string name = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
+                //std::cout << name << std::endl;
                 if (std::vector<std::vector<int>> temp; checkingDownloadedChunks(name, temp)) {
                     chunks[chunkKey] = temp;
                 } else {
                     chunks[chunkKey] = generateChunk(chunkX, chunkY, m_uiSeed, chunkSize);
                 }
+                saveChunk(chunkX, chunkY, chunks[chunkKey], chunkSize);
             }
         }
     }

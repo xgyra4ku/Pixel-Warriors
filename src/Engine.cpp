@@ -139,16 +139,12 @@ void Engine::vRun() {
         _Events();
         _timer();
         if (m_iMenu == -1) {
-
             _logic();
             _updateDisplay();
-
         } else if (m_iMenu == -2) {
-
             save_and_load_.saveSettings(m_mpSettings);
 	        m_iMenu = 3;
             m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
-
         } else if (m_iMenu == -3) {
             std::cout << "INFO: Load world >" << m_strFileWorldName << "<" << std::endl;
             map.init(4, m_strFileWorldName, m_oWindow);
@@ -158,11 +154,8 @@ void Engine::vRun() {
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
             m_iMenu = -1;
         } else {
-
 	        m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
-
         }
-
         m_oWindow.display();
 	}
 }
@@ -208,14 +201,16 @@ void Engine::_Events() {
     while (m_oWindow.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             m_oWindow.close();
-            //map.deleting();
         }
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Escape && m_iMenu == 0) {
                 m_oWindow.close();
             } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == -1) {
                 m_iMenu = 0;
-               // map.deleting();
+                map.deleting();
+            } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == 2) {
+                m_iMenu = 0;
+                map.deleting();
             }
         }
         if (event.type == sf::Event::MouseWheelMoved)
