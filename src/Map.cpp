@@ -169,6 +169,8 @@ void Map::loadingChunksFromFile(const std::string& nameFile) {
     }
     fileInput >> jsonLoad;
     fileInput.close();
+    m_uiSeed = jsonLoad["seed"];
+
 }
 sf::Vector2f Map::getPosPlayer() {
     return {jsonLoad["player"]["pos"]["x"], jsonLoad["player"]["pos"]["y"]};
