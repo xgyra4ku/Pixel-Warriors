@@ -84,8 +84,8 @@ void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSi
     int riverY = 0;
 
     while (riverY < chunkSize) {
-        if (chunk[riverY][riverStartX] != 159) {
-            chunk[riverY][riverStartX] = 159;
+        if (chunk[riverY][riverStartX] != 91) {
+            chunk[riverY][riverStartX] = 91;
         }
         riverY++;
         const int direction = rand() % 3 - 1;

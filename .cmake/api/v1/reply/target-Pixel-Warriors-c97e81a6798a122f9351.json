@@ -173,7 +173,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/Chunk.cpp",
+			"path" : "src/Console.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -226,7 +226,7 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "include/Chunk.hpp",
+			"path" : "include/Console.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
