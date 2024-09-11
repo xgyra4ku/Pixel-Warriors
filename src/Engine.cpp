@@ -218,7 +218,6 @@ void Engine::_events() {
                 map.deleting();
             } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == 2) {
                 m_iMenu = 0;
-                map.deleting();
             }
         }
         if (event.type == sf::Event::MouseWheelMoved)

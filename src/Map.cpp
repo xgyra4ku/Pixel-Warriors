@@ -160,11 +160,11 @@ void Map::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, s
         }
     }
 }
-void Map::loadingChunksFromFile(const std::string& nameFile) {
-    std::cout << "INFO: Open file " << nameFile << std::endl;
-    fileInput.open("worlds/" + nameFile);
+void Map::loadingChunksFromFile() {
+    std::cout << "INFO: Open file " << strNameFileWorld << std::endl;
+    fileInput.open("worlds/" + strNameFileWorld);
     if (!fileInput.is_open()) {
-        std::cerr << "ERROR: opening file: " << nameFile << std::endl;
+        std::cerr << "ERROR: opening file: " << strNameFileWorld << std::endl;
         return;
     }
     fileInput >> jsonLoad;
@@ -221,7 +221,7 @@ void Map::save() {
         }
         fileWorld.open("worlds/"+strNameFileWorld);
         if (fileWorld.is_open()) {
-            if (fileWorld.peek() == std::ifstream::traits_type::eof()) {
+            if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
                 std::cout << "INFO: The file " << strNameFileWorld << " is open for writing" << std::endl;
                 fileWorld >> jsonSave;
             }
@@ -256,7 +256,7 @@ void Map::save() {
     }
 
     chunkBuffer.clear();
-    loadingChunksFromFile(strNameFileWorld);
+    loadingChunksFromFile();
 }
 
 void Map::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
@@ -311,10 +311,11 @@ void Map::setLayer(const int x, const int y, const int layer, const int value) {
     }
 }
 
+
 void Map::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window) {
     this->m_iDistanceView = iDistanceView;
-    this->strNameFileWorld = strNameFileMap;
-    loadingChunksFromFile(strNameFileMap);
+    this->strNameFileWorld = strNameFileMap + ".json";
+    loadingChunksFromFile();
     try {
         std::cout << "INFO: Loading tile set" << std::endl;
 
@@ -342,7 +343,8 @@ void Map::init(const int iDistanceView, const std::string& strNameFileMap, const
     this->m_iDistanceView = iDistanceView;
     this->strNameFileWorld = strNameFileMap + ".json";
     m_bNewWorld = true;
-    loadingChunksFromFile(strNameFileMap);
+    save();
+    loadingChunksFromFile();
     try {
         std::cout << "INFO: Loading tile set" << std::endl;
 

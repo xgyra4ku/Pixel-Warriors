@@ -92,7 +92,7 @@ private:
     void startChunkLoadingThread();
     void stopChunkLoadingThread();
 
-    void loadingChunksFromFile(const std::string &nameFile);
+    void loadingChunksFromFile();
 
     bool checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>> &chunkData);
 
