@@ -73,7 +73,7 @@ void Engine::_loadDependency(const std::string& directory) {
     }
 
     functions.initLib = reinterpret_cast<void (*)(sf::RenderWindow &)>(GetProcAddress(hModule, "initLib"));
-    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &, int &, float&, std::string&)>(GetProcAddress(hModule, "menuLib"));
+    functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &, int &, float&, std::map<std::string, std::string>&)>(GetProcAddress(hModule, "menuLib"));
 
     if (!functions.initLib || !functions.menuLib) {
         std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
@@ -136,7 +136,7 @@ void Engine::vRun() {
 
 	while (m_oWindow.isOpen()) {
         m_oWindow.clear();
-        _Events();
+        _events();
         _timer();
         if (m_iMenu == -1) {
             _logic();
@@ -144,17 +144,25 @@ void Engine::vRun() {
         } else if (m_iMenu == -2) {
             save_and_load_.saveSettings(m_mpSettings);
 	        m_iMenu = 3;
-            m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
+            m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_mpFileWorld);
         } else if (m_iMenu == -3) {
-            std::cout << "INFO: Load world >" << m_strFileWorldName << "<" << std::endl;
-            map.init(4, m_strFileWorldName, m_oWindow);
+            std::cout << "INFO: Load world >" << m_mpFileWorld["name"] << "<" << std::endl;
+            map.init(4, m_mpFileWorld["name"], m_oWindow);
             _initPlayer(1);
             player1.setPosition(map.getPosPlayer());
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
             m_iMenu = -1;
+        } else if (m_iMenu == -4) {
+            std::cout << "INFO: Create world >" << m_mpFileWorld["name"] << "<" << std::endl;
+            map.init(4, m_mpFileWorld["name"], m_oWindow, std::stoul(m_mpFileWorld["seed"]));
+            _initPlayer(1);
+            player1.setPosition(sf::Vector2f(0,0));
+            g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
+            g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
+            m_iMenu = -1;
         } else {
-	        m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_strFileWorldName);
+	        m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_mpFileWorld);
         }
         m_oWindow.display();
 	}
@@ -195,7 +203,7 @@ void Engine::_updateDisplay() {
 }
 
 
-void Engine::_Events() {
+void Engine::_events() {
     m_iWheelEventMouse = 0;
     sf::Event event{};
     while (m_oWindow.pollEvent(event)) {

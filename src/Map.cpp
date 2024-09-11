@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-Map::Map() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false) {
+Map::Map() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false), m_bNewWorld(false) {
     //startChunkLoadingThread();
 }
 
@@ -206,23 +206,29 @@ void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::v
 
 void Map::save() {
     if (!fileWorldIsOpen) {
-        fileWorld.open("worlds/"+strNameFileWorld);
-        if (fileWorld.is_open()) {
-
-            if (fileWorld.peek() == EOF) {
-                std::cout << "INFO: The file " << strNameFileWorld << " is open for writing" << std::endl;
-                fileWorld >> jsonSave;
-            } else {
+        if (m_bNewWorld) {
+            fileWorld.open("worlds/"+strNameFileWorld, std::ofstream::app);
+            if(fileWorld.is_open()) {
                 std::cout << "INFO: New file " << strNameFileWorld << " is open for writing" << std::endl;
                 jsonSave = json::object();
                 jsonSave["seed"] = m_uiSeed;
                 jsonSave["chunks"] = json::object();
+                m_bNewWorld = false;
+                fileWorld.close();
+            } else {
+                std::cerr << "ERROR: Cannot open file " << strNameFileWorld << " for writing" <<  std::endl;
             }
-
+        }
+        fileWorld.open("worlds/"+strNameFileWorld);
+        if (fileWorld.is_open()) {
+            if (fileWorld.peek() == std::ifstream::traits_type::eof()) {
+                std::cout << "INFO: The file " << strNameFileWorld << " is open for writing" << std::endl;
+                fileWorld >> jsonSave;
+            }
             fileWorld.close();
             fileWorldIsOpen = true;
         } else {
-            std::cerr << "\033[31m" << "ERROR: Cannot open file " << strNameFileWorld << " for writing" << "\033[0m" <<  std::endl;
+            std::cerr << "ERROR: Cannot open file " << strNameFileWorld << " for writing" <<  std::endl;
             return;
         }
     }
@@ -308,6 +314,34 @@ void Map::setLayer(const int x, const int y, const int layer, const int value) {
 void Map::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window) {
     this->m_iDistanceView = iDistanceView;
     this->strNameFileWorld = strNameFileMap;
+    loadingChunksFromFile(strNameFileMap);
+    try {
+        std::cout << "INFO: Loading tile set" << std::endl;
+
+        fileInput.open("Maps/map2/3.json");
+        fileInput >> objJson;
+        fileInput.close();
+
+        imageHeight = static_cast<int>(objJson["imageheight"]);
+        imageWidth = static_cast<int>(objJson["imagewidth"]);
+
+        if (!texture.loadFromFile("Maps/map2/3.png")) {
+            std::cerr << "\033[31m" << "ERROR: Failed loading texture from file" << "\033[0m" << std::endl;
+            return;
+        }
+
+        sprite.setTexture(texture);
+        std::cout << "INFO: Tile set loaded successfully" << std::endl;
+    }
+    catch (const nlohmann::json::exception& error) {
+        std::cerr << "\033[31m" << "ERROR: Failed to load tileset " << error.what() << "\033[30m" << std::endl;
+    }
+}
+void Map::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, const unsigned int seed) {
+    this->m_uiSeed = seed;
+    this->m_iDistanceView = iDistanceView;
+    this->strNameFileWorld = strNameFileMap + ".json";
+    m_bNewWorld = true;
     loadingChunksFromFile(strNameFileMap);
     try {
         std::cout << "INFO: Loading tile set" << std::endl;

@@ -27,11 +27,10 @@ public:
 
     void deleting();
 
-    void deleting() const;
-
     void load();
     void save();
     void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);
+    void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);
     void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize);
     void draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) const;
 
@@ -71,6 +70,7 @@ private:
 
     bool ChunksThreadOnOff;
     bool fileWorldIsOpen;
+    bool m_bNewWorld;
 
     unsigned int m_uiSeed{};
 

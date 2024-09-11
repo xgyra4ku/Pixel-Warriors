@@ -10,7 +10,7 @@
 
 struct DependencyFunctions {
     void (*initLib)(sf::RenderWindow&);
-    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&, int&, float&, std::string&);
+    void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&, int&, float&, std::map<std::string, std::string>&);
 };
 
 struct Mod {
@@ -51,7 +51,7 @@ private:
     bool m_bOffsetRUN;
     bool m_bCollisionRUN;
     bool m_bPlayerPosRUN;
-    std::string m_strFileWorldName;
+    std::map<std::string, std::string> m_mpFileWorld;
 
     std::vector<std::vector<int>> m_vMapGenerated;
     std::vector<Mod> m_vModsList;
@@ -59,7 +59,7 @@ private:
     std::map<std::string, DependencyFunctions> m_mpDependencyList;
     std::map<std::string, int> m_mpSettings;
 
-    void _Events();
+    void _events();
     void _timer();
     void _logic();
     void _updateDisplay();
