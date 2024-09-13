@@ -6,6 +6,7 @@
 #include "Map.hpp"
 #include "SaveAndLoad.hpp"
 #include "Entity.hpp"
+#include "Console.hpp"
 
 
 struct DependencyFunctions {
@@ -29,7 +30,7 @@ private:
     Map map;
     Entity player1;
     SaveAndLoad save_and_load_;
-
+    Console* oConsole;
 
     sf::RenderWindow m_oWindow;
     sf::Vector2f m_oPlayerPos;
@@ -37,6 +38,7 @@ private:
     sf::Clock m_oFpsClock;
     sf::Texture m_oTexturePlayerList[3];
     sf::Vector2i m_vChunkPos;
+    sf::Font m_ftFont;
 
 
     //float playerSpeed = 0.08f;

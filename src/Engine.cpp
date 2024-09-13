@@ -28,7 +28,15 @@ Engine::Engine() {
         return;
     }
 
+    if (!m_ftFont.loadFromFile("Dependency/font.otf")) {
+        std::cerr << "ERROR: Failed loading Dependency/font.otf" << std::endl;
+        m_oWindow.close();
+        return;
+    }
+
     std::cout << "INFO: Texture loaded successfully" << std::endl;
+
+    oConsole = new Console(m_ftFont, m_oWindow);
 
     _loadDependency("Dependency/");
     m_iMenu = 0;
@@ -38,26 +46,6 @@ Engine::Engine() {
     m_bCollisionRUN = true;
     m_bPlayerPosRUN = false;
 
-    //map.init(TODO, TODO);
-    //map.initChunks(12345, 16, sf::Vector2f(100, 100), sf::Vector2f(16, 16));
-
-
-    //map.load();
-    // std::srand(std::time(NULL));
-
-    //m_initPlayer(1);
-    //const unsigned int seed = std::rand();
-    //std::cout << "INFO: Seed: " << seed << std::endl;
-    // std::time(NULL);
-    // map.generateMap(seed, 128);
-    //generateMap(111111111, 1900, 1900);
-    // map.generateChunk(100, 100, chunkMap);
-    // chunckPos.x = playerPos.x;
-    // chunckPos.y = playerPos.y;
-    //map.generateMap(seed, 32);
-    //noise(12345);  // Seed
-    //world(noise, 12345, 3);  // Seed and render distance
-    //map.initializeMap();
 }
 
 Engine::~Engine() = default;
@@ -141,6 +129,7 @@ void Engine::vRun() {
         if (m_iMenu == -1) {
             _logic();
             _updateDisplay();
+            oConsole->logic(m_fTime);
         } else if (m_iMenu == -2) {
             save_and_load_.saveSettings(m_mpSettings);
 	        m_iMenu = 3;
@@ -167,6 +156,8 @@ void Engine::vRun() {
         m_oWindow.display();
 	}
 }
+
+
 void Engine::_timer() {
 
     m_fTime = static_cast<float>(m_oClock.getElapsedTime().asMicroseconds());
@@ -185,7 +176,8 @@ void Engine::_timer() {
 void Engine::_logic() {
     if (m_bCollisionRUN)
         _collision();
-    _controlKeyboard();
+    if (!oConsole->getReflections())
+        _controlKeyboard();
     if (m_bOffsetRUN)
         _offset();
     if (m_bPlayerPosRUN)
@@ -193,13 +185,12 @@ void Engine::_logic() {
 
 }
 void Engine::_updateDisplay() {
-    //map.draw(window, mapGenerated, player1.getPosition(), sf::Vector2f((WindowWidth / 2.0f + 30), (WindowHeight / 2.0f + 30)));
-
-   map.draw(m_oWindow, m_oPlayerPos, sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30), (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
-
-
-
+    map.draw(m_oWindow,
+        m_oPlayerPos,
+        sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30),
+            (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
     player1.draw(m_oWindow);
+    oConsole->draw(m_oWindow);
 }
 
 
@@ -218,6 +209,8 @@ void Engine::_events() {
                 map.deleting();
             } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == 2) {
                 m_iMenu = 0;
+            } else if (event.key.code == sf::Keyboard::Tilde) {
+                oConsole->setReflections(!oConsole->getReflections());
             }
         }
         if (event.type == sf::Event::MouseWheelMoved)
