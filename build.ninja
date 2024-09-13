@@ -42,68 +42,68 @@ cmake_ninja_workdir = E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/
 #############################################
 # Order-only phony target for Pixel-Warriors
 
-build cmake_object_order_depends_target_Pixel-Warriors: phony || .
+build cmake_object_order_depends_target_Pixel-Warriors: phony || cmake_object_order_depends_target_LibKyraText
 
 build CMakeFiles/Pixel-Warriors.dir/src/Console.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/Console.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\Console.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/Engine.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/Engine.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\Engine.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/Entity.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/Entity.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\Entity.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/KeystrokeLogging.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/KeystrokeLogging.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\KeystrokeLogging.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/Map.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/Map.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\Map.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/PerlinNoise.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/PerlinNoise.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\PerlinNoise.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/SaveAndLoad.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/SaveAndLoad.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\SaveAndLoad.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/globals.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/globals.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\globals.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
 build CMakeFiles/Pixel-Warriors.dir/src/main.cpp.obj: CXX_COMPILER__Pixel-Warriors_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/src/main.cpp || cmake_object_order_depends_target_Pixel-Warriors
   DEP_FILE = CMakeFiles\Pixel-Warriors.dir\src\main.cpp.obj.d
   FLAGS = -fdiagnostics-color=always
-  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/json/include" -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   OBJECT_FILE_DIR = CMakeFiles\Pixel-Warriors.dir\src
 
@@ -115,8 +115,8 @@ build CMakeFiles/Pixel-Warriors.dir/src/main.cpp.obj: CXX_COMPILER__Pixel-Warrio
 #############################################
 # Link the executable Debug\Pixel-Warriors.exe
 
-build Debug/Pixel-Warriors.exe: CXX_EXECUTABLE_LINKER__Pixel-Warriors_ CMakeFiles/Pixel-Warriors.dir/src/Console.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/Engine.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/Entity.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/KeystrokeLogging.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/Map.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/PerlinNoise.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/SaveAndLoad.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/globals.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/main.cpp.obj | SFML/lib/libsfml-graphics-d.a SFML/lib/libsfml-network-d.a SFML/lib/libsfml-audio-d.a SFML/lib/libsfml-window-d.a SFML/lib/libsfml-system-d.a
-  LINK_LIBRARIES = SFML/lib/libsfml-graphics-d.a  SFML/lib/libsfml-network-d.a  SFML/lib/libsfml-audio-d.a  SFML/lib/libsfml-window-d.a  SFML/lib/libsfml-system-d.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+build Debug/Pixel-Warriors.exe: CXX_EXECUTABLE_LINKER__Pixel-Warriors_ CMakeFiles/Pixel-Warriors.dir/src/Console.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/Engine.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/Entity.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/KeystrokeLogging.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/Map.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/PerlinNoise.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/SaveAndLoad.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/globals.cpp.obj CMakeFiles/Pixel-Warriors.dir/src/main.cpp.obj | SFML/lib/libsfml-graphics-d.a SFML/lib/libsfml-network-d.a SFML/lib/libsfml-audio-d.a libs/LibKyraText/libLibKyraText.a SFML/lib/libsfml-window-d.a SFML/lib/libsfml-system-d.a SFML/lib/libsfml-graphics-d.a SFML/lib/libsfml-window-d.a SFML/lib/libsfml-network-d.a SFML/lib/libsfml-audio-d.a SFML/lib/libsfml-system-d.a || libs/LibKyraText/libLibKyraText.a
+  LINK_LIBRARIES = SFML/lib/libsfml-graphics-d.a  SFML/lib/libsfml-network-d.a  SFML/lib/libsfml-audio-d.a  libs/LibKyraText/libLibKyraText.a  SFML/lib/libsfml-window-d.a  SFML/lib/libsfml-system-d.a  SFML/lib/libsfml-graphics-d.a  SFML/lib/libsfml-window-d.a  SFML/lib/libsfml-network-d.a  SFML/lib/libsfml-audio-d.a  SFML/lib/libsfml-system-d.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Pixel-Warriors.dir
   POST_BUILD = C:\Windows\system32\cmd.exe /C "cd /D "E:\C_Projects_VS\cmake_project\Pixel Warriors" && "C:\Program Files\JetBrains\CLion 2024.2\bin\cmake\win\x64\bin\cmake.exe" -E copy_directory "E:/C_Projects_VS/cmake_project/Pixel Warriors/Debug/Dependency" "E:/C_Projects_VS/cmake_project/Pixel Warriors/Debug""
   PRE_LINK = cd .
@@ -148,11 +148,74 @@ build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
 build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 
 # =============================================================================
+# Write statements declared in CMakeLists.txt:
+# E:/C_Projects_VS/cmake_project/Pixel Warriors/CMakeLists.txt
+# =============================================================================
+
+# =============================================================================
+# Object build statements for STATIC_LIBRARY target LibKyraText
+
+
+#############################################
+# Order-only phony target for LibKyraText
+
+build cmake_object_order_depends_target_LibKyraText: phony || .
+
+build libs/LibKyraText/CMakeFiles/LibKyraText.dir/src/LibKyraText.cpp.obj: CXX_COMPILER__LibKyraText_unscanned_ E$:/C_Projects_VS/cmake_project/Pixel$ Warriors/libs/LibKyraText/src/LibKyraText.cpp || cmake_object_order_depends_target_LibKyraText
+  DEP_FILE = libs\LibKyraText\CMakeFiles\LibKyraText.dir\src\LibKyraText.cpp.obj.d
+  FLAGS = -fdiagnostics-color=always
+  INCLUDES = -I"E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText/include" -isystem "E:/C_Projects_VS/cmake_project/Pixel Warriors/SFML/include"
+  OBJECT_DIR = libs\LibKyraText\CMakeFiles\LibKyraText.dir
+  OBJECT_FILE_DIR = libs\LibKyraText\CMakeFiles\LibKyraText.dir\src
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target LibKyraText
+
+
+#############################################
+# Link the static library libs\LibKyraText\libLibKyraText.a
+
+build libs/LibKyraText/libLibKyraText.a: CXX_STATIC_LIBRARY_LINKER__LibKyraText_ libs/LibKyraText/CMakeFiles/LibKyraText.dir/src/LibKyraText.cpp.obj
+  OBJECT_DIR = libs\LibKyraText\CMakeFiles\LibKyraText.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = libs\LibKyraText\libLibKyraText.a
+  TARGET_PDB = LibKyraText.a.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build libs/LibKyraText/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D "E:\C_Projects_VS\cmake_project\Pixel Warriors\libs\LibKyraText" && "C:\Program Files\JetBrains\CLion 2024.2\bin\cmake\win\x64\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build libs/LibKyraText/edit_cache: phony libs/LibKyraText/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build libs/LibKyraText/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D "E:\C_Projects_VS\cmake_project\Pixel Warriors\libs\LibKyraText" && "C:\Program Files\JetBrains\CLion 2024.2\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -S"E:\C_Projects_VS\cmake_project\Pixel Warriors" -B"E:\C_Projects_VS\cmake_project\Pixel Warriors""
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build libs/LibKyraText/rebuild_cache: phony libs/LibKyraText/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
 # Target aliases.
+
+build LibKyraText: phony libs/LibKyraText/libLibKyraText.a
 
 build Pixel-Warriors: phony Debug/Pixel-Warriors.exe
 
 build Pixel-Warriors.exe: phony Debug/Pixel-Warriors.exe
+
+build libLibKyraText.a: phony libs/LibKyraText/libLibKyraText.a
 
 # =============================================================================
 # Folder targets.
@@ -162,7 +225,14 @@ build Pixel-Warriors.exe: phony Debug/Pixel-Warriors.exe
 #############################################
 # Folder: E:/C_Projects_VS/cmake_project/Pixel Warriors
 
-build all: phony Debug/Pixel-Warriors.exe
+build all: phony Debug/Pixel-Warriors.exe libs/LibKyraText/all
+
+# =============================================================================
+
+#############################################
+# Folder: E:/C_Projects_VS/cmake_project/Pixel Warriors/libs/LibKyraText
+
+build libs/LibKyraText/all: phony libs/LibKyraText/libLibKyraText.a
 
 # =============================================================================
 # Built-in targets
@@ -171,14 +241,14 @@ build all: phony Debug/Pixel-Warriors.exe
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake CMakeLists.txt SFML/lib/cmake/SFML/SFMLConfig.cmake SFML/lib/cmake/SFML/SFMLConfigDependencies.cmake SFML/lib/cmake/SFML/SFMLConfigVersion.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-debug.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-release.cmake SFML/lib/cmake/SFML/SFMLSharedTargets.cmake
+build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake CMakeLists.txt SFML/lib/cmake/SFML/SFMLConfig.cmake SFML/lib/cmake/SFML/SFMLConfigDependencies.cmake SFML/lib/cmake/SFML/SFMLConfigVersion.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-debug.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-release.cmake SFML/lib/cmake/SFML/SFMLSharedTargets.cmake libs/LibKyraText/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake CMakeLists.txt SFML/lib/cmake/SFML/SFMLConfig.cmake SFML/lib/cmake/SFML/SFMLConfigDependencies.cmake SFML/lib/cmake/SFML/SFMLConfigVersion.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-debug.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-release.cmake SFML/lib/cmake/SFML/SFMLSharedTargets.cmake: phony
+build C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.2/bin/cmake/win/x64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeRCCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake CMakeLists.txt SFML/lib/cmake/SFML/SFMLConfig.cmake SFML/lib/cmake/SFML/SFMLConfigDependencies.cmake SFML/lib/cmake/SFML/SFMLConfigVersion.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-debug.cmake SFML/lib/cmake/SFML/SFMLSharedTargets-release.cmake SFML/lib/cmake/SFML/SFMLSharedTargets.cmake libs/LibKyraText/CMakeLists.txt: phony
 
 
 #############################################

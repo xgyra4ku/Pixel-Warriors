@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Pixel-Warriors)
 
-set(CMAKE_CXX_COMPILER "g++")
+#set(CMAKE_CXX_COMPILER "g++")
 
 set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/Debug")
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -24,6 +24,8 @@ file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.hpp")
 
 # Включите заголовочные файлы в проект для удобства IDE
 #add_library(${TARGET_NAME_XXX} SHARED ${SOME_DIR_HAVING_THIS_WARNING}/empty_xxx.c)
+
+add_subdirectory(libs/LibKyraText/)
 add_executable(Pixel-Warriors ${SOURCES} ${HEADERS})
 
 set(SFML_DIR "${CMAKE_SOURCE_DIR}/SFML")
@@ -39,14 +41,13 @@ list(APPEND CMAKE_PREFIX_PATH "${SFML_DIR}/lib/cmake/SFML")
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 target_link_libraries(
-
         Pixel-Warriors
         sfml-system
         sfml-window
         sfml-graphics
         sfml-network
         sfml-audio
-
+        LibKyraText
 )
 
 if(WIN32)
