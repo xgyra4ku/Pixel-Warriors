@@ -204,6 +204,8 @@ void Engine::_events() {
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Escape && m_iMenu == 0) {
                 m_oWindow.close();
+            } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == -1 && oConsole->getReflections()) {
+                oConsole->setReflections(false);
             } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == -1) {
                 m_iMenu = 0;
                 map.deleting();
@@ -211,6 +213,9 @@ void Engine::_events() {
                 m_iMenu = 0;
             } else if (event.key.code == sf::Keyboard::Tilde) {
                 oConsole->setReflections(!oConsole->getReflections());
+            } else if (event.key.code == sf::Keyboard::Enter) {
+                oConsole->read(m_mpCommandData);
+                _commandExecution();
             }
         }
         if (event.type == sf::Event::MouseWheelMoved)
@@ -376,27 +381,34 @@ void Engine::_controlKeyboard() {
     
 }
 
-void Engine::_generateMap(const unsigned int seed, const int WIDTH, const int HEIGHT) {
-    m_vMapGenerated = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0)); // Инициализация карты
-
-    std::cout << "Map initialized" << std::endl;
-
-    map.initializeMap(m_vMapGenerated, seed, 0.58, WIDTH, HEIGHT); // Инициализация карты случайными значениями
-
-    constexpr int generations = 20; // Количество поколений клеточного автомата
-
-    std::cout << "Map generated..." << std::endl;
-
-    // Запуск клеточного автомата на заданное количество поколений
-    for (int gen = 0; gen < generations; ++gen) {
-        map.stepAutomaton(m_vMapGenerated, WIDTH, HEIGHT); // Выполнение одного шага клеточного автомата
-        std::cout << "INFO: Generation " << gen << " completed" << std::endl;
-    }
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            if (m_vMapGenerated[y][x] == 0) m_vMapGenerated[y][x] = 159;
-            if (m_vMapGenerated[y][x] == 1) m_vMapGenerated[y][x] = 47;
+//
+// Выполнение команд
+//
+void Engine::_commandExecution() {
+    for (auto& [strCommand, iParameter] : m_mpCommandData) {//чтение и определение параметров
+        // определение команды и выполнение ее
+        if(strCommand == "speedPlayer") {
+            m_fPlayerSpeed = static_cast<float>(iParameter) * 0.01f;
+        } else if(strCommand == "speedOffset") {
+            m_fOffSetSpeed = static_cast<float>(iParameter) * 0.1f;
+        } else if (strCommand == "offset") {
+            if (iParameter == 1) {
+                m_bOffsetRUN = true;
+            } else if (iParameter == 0) {
+                m_bOffsetRUN = false;
+            }
+        } else if (strCommand == "collision") {
+            if (iParameter == 1) {
+                m_bCollisionRUN = true;
+            } else if (iParameter == 0) {
+                m_bCollisionRUN = false;
+            }
+        } else if (strCommand == "pos") {
+            if (iParameter == 1) {
+                m_bPlayerPosRUN = true;
+            } else if (iParameter == 0) {
+                m_bPlayerPosRUN  = false;
+            }
         }
     }
-    std::cout << "Map generated successfully" << std::endl;
 }

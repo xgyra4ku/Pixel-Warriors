@@ -1,10 +1,11 @@
 #include "../include/Console.hpp"
-
+#include <sstream>
+#include <iostream>
 
 //
 // Конструктор консоли
-// Определения библиотеки ввода
 // Иницилизация переменых
+// Определения библиотеки ввода
 //
 Console::Console(const sf::Font& font, const sf::RenderWindow &window) : m_bReflections(false) {
     m_oInputObj.setFont(font);
@@ -47,9 +48,25 @@ void Console::logic(const float fTime) {
 //
 // Чтения и парсинг команд выполнение
 //
-void Console::read() {
-    m_strInput = m_oInputObj.getString();
-    // написания парсера и чтения команд
+void Console::read(std::map<std::string, int>& mpData) {
+    std::istringstream iss(m_oInputObj.getString());
+    mpData.clear();
+    // Извлечение первой части строки как команды
+    if (std::string command; iss >> command) {
+        // Если команда не пустая
+        if (std::string parameter; iss >> parameter) {
+            // Если параметр тоже не пустой
+            mpData[command] = std::stoi(parameter);
+            std::cout << "INFO: Command: " << command << std::endl;
+            std::cout << "INFO: Parameter: " << parameter << std::endl;
+        } else {
+            std::cout << "INFO: Command: " << command << std::endl;
+            std::cout << "INFO: No parameter provided." << std::endl;
+        }
+    } else {
+        std::cout << "INFO: No command provided." << std::endl;
+    }
+    m_oInputObj.setString("");
 }
 
 //

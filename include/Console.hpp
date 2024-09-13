@@ -2,6 +2,8 @@
 //
 // Потключение библиотек
 //
+#include <map>
+#include <string>
 #include <SFML/Graphics.hpp>
 #include <LibKyraText.h>
 
@@ -21,7 +23,7 @@ public:
     // рисовка
     void draw(sf::RenderWindow& window) const;
     // чтение
-    void read();
+    void read(std::map<std::string, int>& mpData);
 private:
     // определения приватных переменых
     ktx::cInputText m_oInputObj;
