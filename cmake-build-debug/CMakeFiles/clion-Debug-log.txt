@@ -1,0 +1,6 @@
+"C:\Program Files\JetBrains\CLion 2024.2.1\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "MinGW Makefiles" -S C:\Users\solov\CLionProjects\Pixel-Warriors -B C:\Users\solov\CLionProjects\Pixel-Warriors\cmake-build-debug
+-- Found SFML 2.6.1 in C:/Users/solov/CLionProjects/Pixel-Warriors/SFML/lib/cmake/SFML
+-- Found SFML 2.6.1 in C:/Users/solov/CLionProjects/Pixel-Warriors/SFML/lib/cmake/SFML
+-- Configuring done (1.0s)
+-- Generating done (1.8s)
+-- Build files have been written to: C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug

@@ -1,19 +1,27 @@
 #include "../include/Engine.hpp"
 #include "../include/globals.hpp"
 
+//
+// Конструктор класса
+//
 Engine::Engine() {
+    // вызов функции получение настроей из файла
     m_mpSettings = save_and_load_.loadSettings();
+    // создание переменой с настройками окна
     sf::ContextSettings settingsDisplay;
+    // установление сглаживания
     settingsDisplay.antialiasingLevel = 0;
-    if (m_mpSettings["fullscreen"] == 1) {
+    if (m_mpSettings["fullscreen"] == 1) { // если фул скнин 1 открываем окно во весь экран
         m_oWindow.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen, settingsDisplay);
     } else {
+        // открываем окно в окне в разрешении которое в настройках
         m_oWindow.create(sf::VideoMode(m_mpSettings["windowWidth"], m_mpSettings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
     }
+    // получени размера окна
     g_iWindowWidth = static_cast<int>(m_oWindow.getSize().x);
     g_iWindowHeight = static_cast<int>(m_oWindow.getSize().y);
 
-
+    // проверка открытия окна
     if (!m_oWindow.isOpen()) {
         std::cerr << "ERROR: Failed creating window" << std::endl;
         m_oWindow.close();
@@ -22,12 +30,14 @@ Engine::Engine() {
 
     std::cout << "INFO: Window created successfully" << std::endl;
 
+    // загрузка текстур и проверка
     if (!m_oTexturePlayerList[0].loadFromFile("Assets/tex1.png")) {
         std::cerr << "ERROR: Failed loading Assets/tex1.png" << std::endl;
         m_oWindow.close();
         return;
     }
 
+    // загрузка шрифта и проверка
     if (!m_ftFont.loadFromFile("Dependency/font.otf")) {
         std::cerr << "ERROR: Failed loading Dependency/font.otf" << std::endl;
         m_oWindow.close();
@@ -36,11 +46,14 @@ Engine::Engine() {
 
     std::cout << "INFO: Texture loaded successfully" << std::endl;
 
+    // определения консоли
     oConsole = new Console(m_ftFont, m_oWindow);
 
+    // загрузка дополнеий
     _loadDependency("Dependency/");
     m_iMenu = 0;
 
+    // проверка и загрузка модов
     //modslist = loadMods("Mods");
     m_bOffsetRUN = true;
     m_bCollisionRUN = true;
@@ -50,27 +63,37 @@ Engine::Engine() {
 
 Engine::~Engine() = default;
 
+//
+// Функция загрузки дополнений
+//
 void Engine::_loadDependency(const std::string& directory) {
+    // определение структуры функций
     DependencyFunctions functions{};
     const std::string filePath = directory + "libmod-menu.dll";
     const HMODULE hModule = LoadLibrary(filePath.c_str());
 
+    // проверна на наличие дополнений
     if (hModule == nullptr) {
         std::cerr << "[ERROR]: Could not load " << filePath << std::endl;
         return;
     }
 
+    // определение функций дополнеий
     functions.initLib = reinterpret_cast<void (*)(sf::RenderWindow &)>(GetProcAddress(hModule, "initLib"));
     functions.menuLib = reinterpret_cast<void (*)(sf::RenderWindow &, int &, std::map<std::string, int> &, int &, float&, std::map<std::string, std::string>&)>(GetProcAddress(hModule, "menuLib"));
 
+    //проверна на наличие функций
     if (!functions.initLib || !functions.menuLib) {
         std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
         FreeLibrary(hModule);
     }
+    // запуск иницидизации
     functions.initLib(m_oWindow);
+    // помещегия функций дополнеий в мап
     m_mpDependencyList["menuLib"] = functions;
 }
 //
+// Функция ждя определения модов
 // std::vector<Mod> Engine::loadMods(const std::string& directory) {
 //     std::vector<Mod> mods;
 //     WIN32_FIND_DATA findFileData;
@@ -107,7 +130,11 @@ void Engine::_loadDependency(const std::string& directory) {
 //     return mods;
 // }
 
+//
+// Основная функция
+//
 void Engine::vRun() {
+    //определение настроек и применение их
     if (m_mpSettings["V-sync"] == 1) {
         m_oWindow.setVerticalSyncEnabled(true);
         std::cout << "INFO: V-sync enabled" << std::endl;
@@ -126,15 +153,15 @@ void Engine::vRun() {
         m_oWindow.clear();
         _events();
         _timer();
-        if (m_iMenu == -1) {
+        if (m_iMenu == -1) { // если запушен мир
             _logic();
             _updateDisplay();
             oConsole->logic(m_fTime);
-        } else if (m_iMenu == -2) {
+        } else if (m_iMenu == -2) { // применение настроек
             save_and_load_.saveSettings(m_mpSettings);
 	        m_iMenu = 3;
             m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_mpFileWorld);
-        } else if (m_iMenu == -3) {
+        } else if (m_iMenu == -3) { // загрузка мира
             std::cout << "INFO: Load world >" << m_mpFileWorld["name"] << "<" << std::endl;
             map.init(4, m_mpFileWorld["name"], m_oWindow);
             _initPlayer(1);
@@ -142,7 +169,7 @@ void Engine::vRun() {
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
             m_iMenu = -1;
-        } else if (m_iMenu == -4) {
+        } else if (m_iMenu == -4) { // создание мира
             std::cout << "INFO: Create world >" << m_mpFileWorld["name"] << "<" << std::endl;
             map.init(4, m_mpFileWorld["name"], m_oWindow, std::stoul(m_mpFileWorld["seed"]));
             _initPlayer(1);
@@ -150,14 +177,17 @@ void Engine::vRun() {
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
             m_iMenu = -1;
-        } else {
+        } else {// меню
 	        m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_mpFileWorld);
         }
+	    //обновление дисплея
         m_oWindow.display();
 	}
 }
 
-
+//
+// таймер и изменения фпс
+//
 void Engine::_timer() {
 
     m_fTime = static_cast<float>(m_oClock.getElapsedTime().asMicroseconds());
@@ -173,6 +203,10 @@ void Engine::_timer() {
         std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
     }
 }
+
+//
+// Логика
+//
 void Engine::_logic() {
     if (m_bCollisionRUN)
         _collision();
@@ -184,6 +218,10 @@ void Engine::_logic() {
         std::cout << "Player position: (" << m_oPlayerPos.x - g_fOffsetX << ", " << m_oPlayerPos.y - g_fOffsetY << ")" << std::endl;
 
 }
+
+//
+// Обновление дисплея
+//
 void Engine::_updateDisplay() {
     map.draw(m_oWindow,
         m_oPlayerPos,
@@ -193,15 +231,18 @@ void Engine::_updateDisplay() {
     oConsole->draw(m_oWindow);
 }
 
-
+//
+// Евенты
+//
 void Engine::_events() {
     m_iWheelEventMouse = 0;
     sf::Event event{};
+    // если есть евент
     while (m_oWindow.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
+        if (event.type == sf::Event::Closed) { // при закрытии окна
             m_oWindow.close();
         }
-        if (event.type == sf::Event::KeyPressed) {
+        if (event.type == sf::Event::KeyPressed) { // при нажатии на клавиши
             if (event.key.code == sf::Keyboard::Escape && m_iMenu == 0) {
                 m_oWindow.close();
             } else if (event.key.code == sf::Keyboard::Escape && m_iMenu == -1 && oConsole->getReflections()) {
@@ -218,15 +259,16 @@ void Engine::_events() {
                 _commandExecution();
             }
         }
-        if (event.type == sf::Event::MouseWheelMoved)
-        {
+        if (event.type == sf::Event::MouseWheelMoved) { // при прокручивание колесика мыши
             m_iWheelEventMouse = event.mouseWheel.delta;
         }
     }
 
 }
 
-
+//
+// Иницилизация игрока
+//
 void Engine::_initPlayer(int textureNumPlayer1) {
     switch (textureNumPlayer1)
     {
@@ -236,13 +278,15 @@ void Engine::_initPlayer(int textureNumPlayer1) {
     default:
         break;
     }
-    player1.setPosition(sf::Vector2f(800, 800));
+    player1.setPosition(sf::Vector2f(0, 0));
     player1.setSize(sf::Vector2f(16, 16));
     g_fOffsetX = 40 ;
     g_fOffsetY = 80 ;
 }
 
-
+//
+// Коллизии
+//
 void Engine::_collision() {
     switch (sf::Vector2f newPos = player1.getPosition(); map.collision(newPos, player1.getSize(), sf::Vector2f(0, 0))) {
     case 1:
@@ -268,45 +312,43 @@ void Engine::_collision() {
     default:
         break;
     }
-} 
+}
+
+//
+// Оффсет/Камера
+//
 void Engine::_offset() const {
 
-    // Define the dead zone boundaries
+    // определение квадрата свободы
     const float leftDeadZone = (((630.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().x);
     const float rightDeadZone = (((650.0f / 1280.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().x);
     const float topDeadZone = (((390.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().y);
     const float bottomDeadZone = (((410.0f / 800.0f) * 100.0f) / 100.0f) * static_cast<float>(m_oWindow.getSize().y);
 
-    // Player's current position
+    // Полусения позии игрока
     const sf::Vector2f playerPos = player1.getPosition() - sf::Vector2f(g_fOffsetX, g_fOffsetY);
-
-    // Calculate the desired offset based on the player's position relative to the dead zone
     float targetOffsetX = g_fOffsetX;
     float targetOffsetY = g_fOffsetY;
 
+    // проверна зоны свободы по x/y
     if (playerPos.x < leftDeadZone) {
         targetOffsetX -= m_fOffSetSpeed * m_fTime;
     } else if (playerPos.x > rightDeadZone) {
         targetOffsetX += m_fOffSetSpeed * m_fTime;
     }
-
     if (playerPos.y < topDeadZone) {
         targetOffsetY -= m_fOffSetSpeed * m_fTime;
     } else if (playerPos.y > bottomDeadZone) {
         targetOffsetY += m_fOffSetSpeed * m_fTime;
     }
 
-    // Smoothly interpolate the offset values for a more gradual camera movement
-    constexpr float smoothFactor = 0.1f; // Adjust this factor for more or less smoothness
+    constexpr float smoothFactor = 0.1f;
+    constexpr float inertia = 0.1f;
 
-    // Add some inertia to the camera movement
-    constexpr float inertia = 0.1f; // Adjust this for more or less camera inertia
-
-    // Compute the new offset values
+    // коректировка камеры
     g_fOffsetX += (targetOffsetX - g_fOffsetX) * smoothFactor;
     g_fOffsetY += (targetOffsetY - g_fOffsetY) * smoothFactor;
 
-    // Apply inertia when the player stops moving
     if (abs(player1.getSize().x) < 0.1f) {
         g_fOffsetX += (playerPos.x - (leftDeadZone + rightDeadZone) / 2.0f) * inertia;
     }
@@ -316,7 +358,9 @@ void Engine::_offset() const {
     }
 }
 
-
+//
+// Управление
+//
 void Engine::_controlKeyboard() {
     m_oPlayerPos = player1.getPosition();
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
