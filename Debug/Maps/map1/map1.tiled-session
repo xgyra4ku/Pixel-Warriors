@@ -1,0 +1,46 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "map1.json",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "Все файлы (*)",
+    "fileStates": {
+        "forest_.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map1.json": {
+            "scale": 1,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 338,
+                "y": 420
+            }
+        }
+    },
+    "last.imagePath": "E:/C_Projects_VS/cmake_project/Pixel Warriors/Maps/map1",
+    "map.height": 50,
+    "map.lastUsedFormat": "json",
+    "map.renderOrder": null,
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 50,
+    "openFiles": [
+        "map1.json",
+        "forest_.json"
+    ],
+    "project": "map1.tiled-project",
+    "recentFiles": [
+        "forest_.json",
+        "map1.json"
+    ],
+    "tileset.lastUsedFormat": "json",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
