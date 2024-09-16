@@ -1,6 +1,7 @@
 /CMakeFiles
 /.vscode
 /.cmake
+/cmake-build-debug
 .ninja_deps
 .ninja_log
 build.ninja
