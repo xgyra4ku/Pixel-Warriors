@@ -1,0 +1,6 @@
+C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug/CMakeFiles/Pixel-Warriors.dir
+C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug/libs/LibKyraText/CMakeFiles/LibKyraText.dir
+C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug/libs/LibKyraText/CMakeFiles/edit_cache.dir
+C:/Users/solov/CLionProjects/Pixel-Warriors/cmake-build-debug/libs/LibKyraText/CMakeFiles/rebuild_cache.dir
