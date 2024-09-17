@@ -1,20 +1,28 @@
 #pragma once
-
+//
+// определения файлов и библиотек
+//
 #include <fstream>
 #include <map>
 #include <nlohmann/json.hpp>
 
-
+//
+// Определения класса
+//
 class SaveAndLoad {
-
 public:
+    // констукторы дистукторы
     SaveAndLoad();
     ~SaveAndLoad();
+
+    // сохранение настроек
     void saveSettings(std::map<std::string, int>& settings);
+    // выгрузка настроек из файла
     std::map<std::string, int> loadSettings();
 private:
     nlohmann::json objJson;
     std::fstream file;
+    // вектор с клавишами
     std::vector<std::string> keys = {
         "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
         "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",

@@ -1,12 +1,18 @@
-#include "../include/Map.hpp"
+#include "../include/cMap.hpp"
 #include <iostream>
 #include <cmath>
 
-Map::Map() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false), m_bNewWorld(false) {
+//
+// Конструктор с установкой значениями переменых
+//
+cMap::cMap() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false), m_bNewWorld(false) {
     //startChunkLoadingThread();
 }
 
-Map::~Map() {
+//
+// Дистуктор
+//
+cMap::~cMap() {
     //stopChunkLoadingThread();
     //save();
 
@@ -16,7 +22,11 @@ Map::~Map() {
     chunkVector.clear();
     fileWorldIsOpen = false;
 }
-void Map::deleting() {
+
+//
+// Удаление старых данных
+//
+void cMap::deleting() {
     save();
     chunks.clear();
     chunkBufferLoadIsFile.clear();
@@ -26,7 +36,10 @@ void Map::deleting() {
     std::cout << "INFO: deleting" << std::endl;
 }
 
-void Map::load() {
+//
+// Загрузка из файлов
+//
+void cMap::load() {
     try {
         std::cout << "INFO: Loading Map" << std::endl;
         fileInput.open("./Maps/map1/map1.json");
@@ -47,12 +60,18 @@ void Map::load() {
     }
 }
 
-double Map::generatePerlinNoise(const double x, const double y, const double scale, const int octaves, const double persistence, const unsigned int seed) {
+//
+// генирация тайла
+//
+double cMap::generatePerlinNoise(const double x, const double y, const double scale, const int octaves, const double persistence, const unsigned int seed) {
     const PerlinNoise perlin(seed);
     return perlin.octave2D_01(x * scale, y * scale, octaves, persistence);
 }
 
-std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chunkY, const unsigned int seed, const int chunkSize) {
+//
+// Генирация чанков
+//
+std::vector<std::vector<int>> cMap::generateChunk(const int chunkX, const int chunkY, const unsigned int seed, const int chunkSize) {
     std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
     std::vector<std::vector<double>> noiseValues(chunkSize + 2, std::vector<double>(chunkSize + 2, 0.0));
 
@@ -79,7 +98,10 @@ std::vector<std::vector<int>> Map::generateChunk(const int chunkX, const int chu
     return chunk;
 }
 
-void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
+//
+// Генирация рек
+//
+void cMap::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSize) {
     int riverStartX = rand() % chunkSize;
     int riverY = 0;
 
@@ -94,7 +116,10 @@ void Map::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkSi
 }
 
 
-void Map::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, std::vector<std::vector<int>>& chunk, const int chunkSize) {
+//
+// Рефакторинко и адаптация чанка
+//
+void cMap::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, std::vector<std::vector<int>>& chunk, const int chunkSize) {
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
             if (chunk[y][x] != 91) {
@@ -160,7 +185,11 @@ void Map::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, s
         }
     }
 }
-void Map::loadingChunksFromFile() {
+
+//
+// Выгрузка мира из чанка
+//
+void cMap::loadingChunksFromFile() {
     std::cout << "INFO: Open file " << strNameFileWorld << std::endl;
     fileInput.open("worlds/" + strNameFileWorld);
     if (!fileInput.is_open()) {
@@ -172,11 +201,18 @@ void Map::loadingChunksFromFile() {
     m_uiSeed = jsonLoad["seed"];
 
 }
-sf::Vector2f Map::getPosPlayer() {
+
+//
+// Получения позиции игрока из мира
+//
+sf::Vector2f cMap::getPosPlayer() {
     return {jsonLoad["player"]["pos"]["x"], jsonLoad["player"]["pos"]["y"]};
 }
 
-bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>>& chunkData) {
+//
+// Проверка загружиности чанка
+//
+bool cMap::checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>>& chunkData) {
     if (jsonLoad.contains("chunks")) {
         if (jsonLoad["chunks"].contains(requiredChunk)) {
             if (const auto& chunk = jsonLoad["chunks"][requiredChunk]; chunk.contains("data")) {
@@ -198,13 +234,19 @@ bool Map::checkingDownloadedChunks(const std::string& requiredChunk, std::vector
     return false;
 }
 
-void Map::saveChunk(const int chunkX, const int chunkY, const std::vector<std::vector<int>>& data, const int chunkSize) {
+//
+// Сохранение чака
+//
+void cMap::saveChunk(const int chunkX, const int chunkY, const std::vector<std::vector<int>>& data, const int chunkSize) {
     const std::string chunkName = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
     chunkBuffer[chunkName] = data;
     if (size(chunkBuffer) > 300) save();
 }
 
-void Map::save() {
+//
+// Сохранеие мира в файл
+//
+void cMap::save() {
     if (!fileWorldIsOpen) {
         if (m_bNewWorld) {
             fileWorld.open("worlds/"+strNameFileWorld, std::ofstream::app);
@@ -259,7 +301,10 @@ void Map::save() {
     loadingChunksFromFile();
 }
 
-void Map::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
+//
+// Рисовка
+//
+void cMap::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
     sf::VertexArray vertices(sf::Quads);
     const unsigned int textureSize = texture.getSize().x;
 
@@ -297,13 +342,19 @@ void Map::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& La
     window.draw(vertices, states);
 }
 
-int Map::getLayer(const int x, const int y, const int layer) const {
+//
+// Получение слоя
+//
+int cMap::getLayer(const int x, const int y, const int layer) const {
     if (layer == 0) return LayerGround[y][x];
     if (layer == 1) return LayerOdj[y][x];
     return -1;
 }
 
-void Map::setLayer(const int x, const int y, const int layer, const int value) {
+//
+// Установка слоя
+//
+void cMap::setLayer(const int x, const int y, const int layer, const int value) {
     if (layer == 0) {
         LayerGround[y][x] = value;
     } else if (layer == 1) {
@@ -311,8 +362,10 @@ void Map::setLayer(const int x, const int y, const int layer, const int value) {
     }
 }
 
-
-void Map::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window) {
+//
+// Иницилизания созданого мира
+//
+void cMap::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window) {
     this->m_iDistanceView = iDistanceView;
     this->strNameFileWorld = strNameFileMap + ".json";
     loadingChunksFromFile();
@@ -338,7 +391,11 @@ void Map::init(const int iDistanceView, const std::string& strNameFileMap, const
         std::cerr << "\033[31m" << "ERROR: Failed to load tileset " << error.what() << "\033[30m" << std::endl;
     }
 }
-void Map::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, const unsigned int seed) {
+
+//
+// Иницилизация не созданого мира
+//
+void cMap::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, const unsigned int seed) {
     this->m_uiSeed = seed;
     this->m_iDistanceView = iDistanceView;
     this->strNameFileWorld = strNameFileMap + ".json";
@@ -368,7 +425,10 @@ void Map::init(const int iDistanceView, const std::string& strNameFileMap, const
     }
 }
 
-int Map::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, const sf::Vector2f bias) const {
+//
+// Проверка коллизий
+//
+int cMap::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, const sf::Vector2f bias) const {
     const sf::FloatRect playerBox((playerPos.x + bias.x) - g_fOffsetX, (playerPos.y + bias.y) - g_fOffsetY, playerSize.x, playerSize.y);
     for (int i = 0; i < g_LayerSizeMaxY; i++) {
         for (int j = 0; j < g_LayerSizeMaxX; j++) {
@@ -395,7 +455,10 @@ int Map::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, 
     return 0;
 }
 
-void Map::initializeMap(std::vector<std::vector<int>>& map, const unsigned int seed, const double INITIAL_PROB, const int WIDTH, const int HEIGHT) {
+//
+// Иницилизации клеточного автомата чанка
+//
+void cMap::initializeMap(std::vector<std::vector<int>>& map, const unsigned int seed, const double INITIAL_PROB, const int WIDTH, const int HEIGHT) {
     std::srand(seed);
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -404,7 +467,10 @@ void Map::initializeMap(std::vector<std::vector<int>>& map, const unsigned int s
     }
 }
 
-void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, const int HEIGHT) {
+//
+// Действия клеточного автомата
+//
+void cMap::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, const int HEIGHT) {
     std::vector<std::vector<int>> newMap = map;
 
     for (int y = 0; y < HEIGHT; ++y) {
@@ -435,7 +501,10 @@ void Map::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, con
     map = newMap;
 }
 
-void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSize) {
+//
+// Загрузка чанков ко круг игрока в зависимости от его позиии и дальности прорисовки
+//
+void cMap::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSize) {
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
 
@@ -458,7 +527,10 @@ void Map::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSi
     }
 }
 
-void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize) {
+//
+// Выгрузка чанков
+//
+void cMap::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize) {
 
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
@@ -476,7 +548,10 @@ void Map::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize)
     }
 }
 
-void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
+//
+// Рисовка
+//
+void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
     // Lock the mutex while modifying chunks
    // std::lock_guard<std::mutex> lock(chunkMutex);
     this->PlayerPos = playerPos;
@@ -525,7 +600,10 @@ void Map::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vecto
     unloadDistantChunks(playerPos, chunkSize);
 }
 
-void Map::funkLoadChunksThread() {
+//
+// Поток
+//
+void cMap::funkLoadChunksThread() {
     while (ChunksThreadOnOff) {
         // Lock the mutex while modifying chunks
         //std::lock_guard<std::mutex> lock_guard(chunkMutex);
@@ -537,18 +615,27 @@ void Map::funkLoadChunksThread() {
     }
 }
 
-void Map::startChunkLoadingThread() {
+//
+// Включения потока
+//
+void cMap::startChunkLoadingThread() {
     ChunksThreadOnOff = true;
-    chunkLoadThread = std::thread(&Map::funkLoadChunksThread, this);
+    chunkLoadThread = std::thread(&cMap::funkLoadChunksThread, this);
 }
 
-void Map::stopChunkLoadingThread() {
+//
+// Остановка потока
+//
+void cMap::stopChunkLoadingThread() {
     ChunksThreadOnOff = false;
     if (chunkLoadThread.joinable()) {
         chunkLoadThread.join();
     }
 }
 
-void Map::createWorld() {
+//
+// Создание мира
+//
+void cMap::createWorld() {
 
 }

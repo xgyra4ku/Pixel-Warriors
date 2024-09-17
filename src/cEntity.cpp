@@ -1,42 +1,72 @@
-#include "../include/Entity.hpp"
+#include "../include/cEntity.hpp"
 
 #include <cmath>
 
-Entity::Entity() = default;
+cEntity::cEntity() = default;
 
-Entity::~Entity() = default;
+cEntity::~cEntity() = default;
 
-void Entity::setPosition(const sf::Vector2f positionSet) {
+//
+// Установка позиции
+//
+void cEntity::setPosition(const sf::Vector2f positionSet) {
     position = positionSet;
     sprite.setPosition(sf::Vector2f(position.x - g_fOffsetX, position.y - g_fOffsetY));
 }
 
-void Entity::setName(const std::string &nameSet) {
+//
+// Установка имени
+//
+void cEntity::setName(const std::string &nameSet) {
     this->name = nameSet;
 }
-void Entity::setTexture(const sf::Texture& textureSet) {
+
+//
+// Установка текстур
+void cEntity::setTexture(const sf::Texture& textureSet) {
     this->texture = textureSet;
     sprite.setTexture(texture);
 }
 
-void Entity::setSize(const sf::Vector2f sizeSet) {
+//
+// Установка размера
+//
+void cEntity::setSize(const sf::Vector2f sizeSet) {
     this->size = sizeSet;
 }
 
-sf::Vector2f Entity::getPosition() const {
+//
+// Получения позиции
+//
+sf::Vector2f cEntity::getPosition() const {
     return position;
 }
-sf::Sprite Entity::getSprite() {
+
+//
+// Получения спрайта
+//
+sf::Sprite cEntity::getSprite() {
     return sprite;
 }
 
-sf::Vector2f Entity::getSize() const {
+//
+// Полученяе размера
+//
+sf::Vector2f cEntity::getSize() const {
     return size;
 }
-void Entity::draw(sf::RenderWindow& window) const {
+
+//
+// Рисовка игрока
+//
+void cEntity::draw(sf::RenderWindow& window) const {
 	window.draw(sprite);
 }
-void Entity::animate(const float time, const int dir) {
+
+//
+// Анимации
+//
+void cEntity::animate(const float time, const int dir) {
     if (dir == 1)
 	{
 		currentFrame += animationSpeed * time;

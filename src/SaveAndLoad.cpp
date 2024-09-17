@@ -5,8 +5,13 @@
 SaveAndLoad::SaveAndLoad() = default;
 
 SaveAndLoad::~SaveAndLoad() = default;
+
+//
+// Сохранение натроек
+//
 void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
     std::cout << "INFO: Saving settings" << std::endl;
+    // попытка записи
     try {
         // Открываем файл для записи
         file.open("./Save/settings.json", std::ios::out);
@@ -53,13 +58,14 @@ void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
     }
 }
 
-
+//
+// Вызгрузка из файла настроек
+//
 std::map<std::string, int> SaveAndLoad::loadSettings() {
 
     std::cout << "INFO: Loading settings" << std::endl;
 
     std::map<std::string, int> settings;
-
     try {
         file.open("./Save/settings.json");
         file >> objJson;
@@ -105,7 +111,8 @@ std::map<std::string, int> SaveAndLoad::loadSettings() {
 }
 
 
-/*{
+/*
+{
 "settings"
 :
 [
@@ -228,4 +235,5 @@ std::map<std::string, int> SaveAndLoad::loadSettings() {
     }
 ]
 
-}*/
+}
+*/

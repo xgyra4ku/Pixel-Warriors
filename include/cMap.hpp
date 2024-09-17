@@ -1,4 +1,7 @@
 #pragma once
+//
+// Определение функций и файлов
+//
 #include <SFML/Graphics.hpp>
 #include <fstream>
 #include <string>
@@ -13,57 +16,67 @@
 #include "globals.hpp"
 #include "PerlinNoise.hpp"
 
+//
+// структура ЧАНКА
+//
 struct chunk {
     std::vector<std::vector<int>> data;
     sf::Vector2f pos;
 };
 
-
-class Map
+//
+// Определение класса
+//
+class cMap
 {
 public:
-    Map();
-    ~Map();
+    // конструкторы диструкторы
+    cMap();
+    ~cMap();
 
+    // удаление старых данных для выхода или загрузки нового мира
     void deleting();
 
-    void load();
-    void save();
-    void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);
-    void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);
-    void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize);
-    void draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) const;
 
-    int collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) const;
+    void load();// загрузка из файла
+    void save();//сохранение
+    void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);// иницилизация уже до этого созданого мира
+    void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);// иницилизация нового мира
+    void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize); // рисовка
+    void draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) const;// рисовка
+    int collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) const;// коллизии
+    void setLayer(int x, int y, int layer, int value);// установка слоя
+    int getLayer(int x, int y, int layer) const;// получение слоя
+    sf::Vector2f getPosPlayer(); // получение позиции игрока из загруженого мира
+    void createWorld(); //создание мира
 
-    void setLayer(int x, int y, int layer, int value);
-
-    int getLayer(int x, int y, int layer) const;
-    sf::Vector2f getPosPlayer();
-
-    void createWorld();
-
-
+    // клеточный автомат
     static void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
     static void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
 private:
+    // переменые sfml
     sf::Sprite sprite;
     sf::Texture texture;
     sf::Vector2f PlayerPos;
 
+    // установка обектов
     using json = nlohmann::json;
     using unorderedMapChunks = std::unordered_map<std::string, std::vector<std::vector<int>>>;
 
+    // определение json
     json objJson;
     json jsonSave;
     json jsonLoad;
 
+    // определения буферов
     unorderedMapChunks chunkBuffer;
     unorderedMapChunks chunkBufferLoadIsFile;
 
+    // определения записи и сохранения обектов файла
     std::fstream fileInput;
     std::fstream fileWorld;
 
+    // определения натсроек текстура и прорисовки
     int imageHeight{};
     int imageWidth{};
     int m_iDistanceView;
@@ -77,17 +90,21 @@ private:
     int LayerOdj[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
     int LayerGround[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
 
+    // старые чанки
     std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
 
+    //векторт чанков
     std::vector<chunk> chunkVector;
 
+    // потоки и мютексы
     std::thread chunkLoadThread;
     std::mutex chunkMutex;
 
     std::string strNameFileWorld;
 
-
-
+    //
+    // Приватные функции
+    //
     void funkLoadChunksThread();
     void startChunkLoadingThread();
     void stopChunkLoadingThread();

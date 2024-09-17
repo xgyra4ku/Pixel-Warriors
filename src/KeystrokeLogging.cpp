@@ -1,5 +1,8 @@
 #include "../include/KeystrokeLogging.hpp"
 
+//
+// Проверка нажатий
+//
 char KeystrokeLogging::codeToChar(const int code) {
     if (code >= 32 && code <= 126) {
         return static_cast<char>(code);
@@ -8,6 +11,9 @@ char KeystrokeLogging::codeToChar(const int code) {
     }
 }
 
+//
+// Получение имени клавиши
+//
 std::string KeystrokeLogging::getKeyName(const sf::Keyboard::Key key) {
     static std::map<sf::Keyboard::Key, std::string> keyMap = {
         {sf::Keyboard::A, "A"},

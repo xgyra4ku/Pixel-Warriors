@@ -6,9 +6,9 @@
 #include <map>
 #include <cstdlib>
 #include <ctime>
-#include "Map.hpp"
+#include "cMap.hpp"
 #include "SaveAndLoad.hpp"
-#include "Entity.hpp"
+#include "cEntity.hpp"
 #include "Console.hpp"
 
 //
@@ -48,8 +48,8 @@ private:
     //
     // Определения других классов
     //
-    Map map;
-    Entity player1;
+    cMap map;
+    cEntity player1;
     SaveAndLoad save_and_load_;
     Console* oConsole;
 
