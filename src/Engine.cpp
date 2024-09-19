@@ -23,29 +23,26 @@ Engine::Engine() {
 
     // проверка открытия окна
     if (!m_oWindow.isOpen()) {
-        std::cerr << "ERROR: Failed creating window" << std::endl;
+        oCmdInfo.error("Failed creating window");
         m_oWindow.close();
         return;
     }
-
-    std::cout << "INFO: Window created successfully" << std::endl;
+    oCmdInfo.info("Window created successfully");
 
     // загрузка текстур и проверка
     if (!m_oTexturePlayerList[0].loadFromFile("Assets/tex1.png")) {
-        std::cerr << "ERROR: Failed loading Assets/tex1.png" << std::endl;
+        oCmdInfo.error("Failed loading Assets/tex1.png");
         m_oWindow.close();
         return;
     }
 
     // загрузка шрифта и проверка
     if (!m_ftFont.loadFromFile("Dependency/font.otf")) {
-        std::cerr << "ERROR: Failed loading Dependency/font.otf" << std::endl;
+        oCmdInfo.error("Failed loading Dependency/font.otf");
         m_oWindow.close();
         return;
     }
-
-    std::cout << "INFO: Texture loaded successfully" << std::endl;
-
+    oCmdInfo.info("Texture and font load is successfully");
     // определения консоли
     oConsole = new Console(m_ftFont, m_oWindow);
 
@@ -74,7 +71,7 @@ void Engine::_loadDependency(const std::string& directory) {
 
     // проверна на наличие дополнений
     if (hModule == nullptr) {
-        std::cerr << "[ERROR]: Could not load " << filePath << std::endl;
+        oCmdInfo.error("Could not load " + filePath);
         return;
     }
 
@@ -84,7 +81,7 @@ void Engine::_loadDependency(const std::string& directory) {
 
     //проверна на наличие функций
     if (!functions.initLib || !functions.menuLib) {
-        std::cerr << "[ERROR]: Could not locate functions in " << filePath << std::endl;
+        oCmdInfo.error("Could not locate functions in  " + filePath);
         FreeLibrary(hModule);
     }
     // запуск иницидизации
@@ -137,15 +134,15 @@ void Engine::vRun() {
     //определение настроек и применение их
     if (m_mpSettings["V-sync"] == 1) {
         m_oWindow.setVerticalSyncEnabled(true);
-        std::cout << "INFO: V-sync enabled" << std::endl;
+        oCmdInfo.info("V-sync enabled");
     } else {
         m_oWindow.setVerticalSyncEnabled(false);
-        std::cout << "INFO: V-sync disabled" << std::endl;
+        oCmdInfo.info("V-sync disabled");
         if (m_mpSettings["fps"] == -1) {
-            std::cout << "INFO: FPS not set" << std::endl;
+            oCmdInfo.info("FPS set max");
         } else {
-            std::cout << "INFO: FPS set to " << m_mpSettings["fps"] << std::endl;
             m_oWindow.setFramerateLimit(m_mpSettings["fps"]);
+            oCmdInfo.info("FPS set to " + m_mpSettings["fps"]);
         }
     }
 
@@ -162,16 +159,16 @@ void Engine::vRun() {
 	        m_iMenu = 3;
             m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_mpFileWorld);
         } else if (m_iMenu == -3) { // загрузка мира
-            std::cout << "INFO: Load world >" << m_mpFileWorld["name"] << "<" << std::endl;
-            map.init(4, m_mpFileWorld["name"], m_oWindow);
+            oCmdInfo.info("Load world >" + m_mpFileWorld["name"] + "<");
+            map.init(3, m_mpFileWorld["name"], m_oWindow);
             _initPlayer(1);
             player1.setPosition(map.getPosPlayer());
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
             m_iMenu = -1;
         } else if (m_iMenu == -4) { // создание мира
-            std::cout << "INFO: Create world >" << m_mpFileWorld["name"] << "<" << std::endl;
-            map.init(4, m_mpFileWorld["name"], m_oWindow, std::stoul(m_mpFileWorld["seed"]));
+            oCmdInfo.info("Create world >" + m_mpFileWorld["name"] + "<");
+            map.init(3, m_mpFileWorld["name"], m_oWindow, std::stoul(m_mpFileWorld["seed"]));
             _initPlayer(1);
             player1.setPosition(sf::Vector2f(0,0));
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
@@ -453,6 +450,9 @@ void Engine::_commandExecution() {
             } else if (iParameter == 0) {
                 m_bPlayerPosRUN  = false;
             }
+        } else if (strCommand == "fpsMax") {
+            m_mpSettings["fps"] = iParameter;
+            m_oWindow.setFramerateLimit(m_mpSettings["fps"]);
         }
     }
 }

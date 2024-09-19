@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <nlohmann/json.hpp>
+#include "cInfoConsole.hpp"
 
 //
 // Определения класса
@@ -22,6 +23,7 @@ public:
 private:
     nlohmann::json objJson;
     std::fstream file;
+    cInfoConsole oCmdInfo;
     // вектор с клавишами
     std::vector<std::string> keys = {
         "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",

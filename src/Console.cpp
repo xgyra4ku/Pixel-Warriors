@@ -57,14 +57,14 @@ void Console::read(std::map<std::string, int>& mpData) {
         if (std::string parameter; iss >> parameter) {
             // Если параметр тоже не пустой
             mpData[command] = std::stoi(parameter);
-            std::cout << "INFO: Command: " << command << std::endl;
-            std::cout << "INFO: Parameter: " << parameter << std::endl;
+            oCmdInfo.info("Command: "+command);
+            oCmdInfo.info("Parameter: "+parameter);
         } else {
-            std::cout << "INFO: Command: " << command << std::endl;
-            std::cout << "INFO: No parameter provided." << std::endl;
+            oCmdInfo.info("Command: "+command);
+            oCmdInfo.warning("No parameter provided.");
         }
     } else {
-        std::cout << "INFO: No command provided." << std::endl;
+        oCmdInfo.warning("No command provided.");
     }
     m_oInputObj.setString("");
 }

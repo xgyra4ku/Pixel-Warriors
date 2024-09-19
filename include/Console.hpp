@@ -6,6 +6,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <LibKyraText.h>
+#include "cInfoConsole.hpp"
 
 class Console {
 public:
@@ -26,6 +27,7 @@ public:
     void read(std::map<std::string, int>& mpData);
 private:
     // определения приватных переменых
+    cInfoConsole oCmdInfo;
     ktx::cInputText m_oInputObj;
     bool m_bReflections;
     std::string m_strInput;

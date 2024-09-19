@@ -10,7 +10,7 @@ SaveAndLoad::~SaveAndLoad() = default;
 // Сохранение натроек
 //
 void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
-    std::cout << "INFO: Saving settings" << std::endl;
+    oCmdInfo.info("Saving settings");
     // попытка записи
     try {
         // Открываем файл для записи
@@ -50,11 +50,11 @@ void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
         file << objJson.dump(4); // Используем отступ в 4 пробела для форматирования
         file.close();
 
-        std::cout << "INFO: Settings saved successfully" << std::endl;
+        oCmdInfo.info("Settings saved successfully");
     } catch (const nlohmann::json::exception& error) {
-        std::cerr << "ERROR: Failed to save settings: " << error.what() << std::endl;
+        std::cerr << "[ERROR]: Failed to save settings: " << error.what() << std::endl;
     } catch (const std::runtime_error& error) {
-        std::cerr << "ERROR: " << error.what() << std::endl;
+        std::cerr << "[ERROR]: " << error.what() << std::endl;
     }
 }
 
@@ -63,7 +63,7 @@ void SaveAndLoad::saveSettings(std::map<std::string, int>& settings) {
 //
 std::map<std::string, int> SaveAndLoad::loadSettings() {
 
-    std::cout << "INFO: Loading settings" << std::endl;
+    oCmdInfo.info("Loading settings");
 
     std::map<std::string, int> settings;
     try {
@@ -90,15 +90,14 @@ std::map<std::string, int> SaveAndLoad::loadSettings() {
         settings["fullscreen"] = settingsLayer["window"]["fullscreen"];
         settings["V-sync"] = settingsLayer["window"]["V-sync"];
 
-        std::cout << "INFO: Window settings loaded successfully" << std::endl;
-        std::cout << "INFO: Loading key settings" << std::endl;
+        oCmdInfo.info("Window settings loaded successfully");
+        oCmdInfo.info("Loading key settings");
 
         for (const auto& key : keys) {
             std::string settingKey = "keyboard_" + key;
             settings[settingKey] = settingsLayer["keys"][key];
         }
-
-        std::cout << "INFO: Settings loaded successfully" << std::endl;
+        oCmdInfo.info("Settings loaded successfully");
     }
     catch (const nlohmann::json::exception& error) {
         std::cerr << "ERROR: Failed to load settings: " << error.what() << std::endl;

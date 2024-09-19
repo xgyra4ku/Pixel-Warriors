@@ -15,6 +15,7 @@
 #include "nlohmann/json.hpp"
 #include "globals.hpp"
 #include "PerlinNoise.hpp"
+#include "cInfoConsole.hpp"
 
 //
 // структура ЧАНКА
@@ -37,8 +38,6 @@ public:
     // удаление старых данных для выхода или загрузки нового мира
     void deleting();
 
-
-    void load();// загрузка из файла
     void save();//сохранение
     void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);// иницилизация уже до этого созданого мира
     void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);// иницилизация нового мира
@@ -49,11 +48,10 @@ public:
     int getLayer(int x, int y, int layer) const;// получение слоя
     sf::Vector2f getPosPlayer(); // получение позиции игрока из загруженого мира
     void createWorld(); //создание мира
-
-    // клеточный автомат
-    static void initializeMap(std::vector<std::vector<int>>& map, unsigned int seed, double INITIAL_PROB, int WIDTH, int HEIGHT);
-    static void stepAutomaton(std::vector<std::vector<int>>& map, int WIDTH, int HEIGHT);
 private:
+    // определение инных классов
+    cInfoConsole oCmdInfo;
+
     // переменые sfml
     sf::Sprite sprite;
     sf::Texture texture;
@@ -105,6 +103,7 @@ private:
     //
     // Приватные функции
     //
+    void loadTileset();
     void funkLoadChunksThread();
     void startChunkLoadingThread();
     void stopChunkLoadingThread();

@@ -10,6 +10,7 @@
 #include "SaveAndLoad.hpp"
 #include "cEntity.hpp"
 #include "Console.hpp"
+#include "cInfoConsole.hpp"
 
 //
 // Структура дополнений
@@ -52,6 +53,7 @@ private:
     cEntity player1;
     SaveAndLoad save_and_load_;
     Console* oConsole;
+    cInfoConsole oCmdInfo;
 
     //
     // Определения классов сфмл
@@ -67,8 +69,8 @@ private:
     //
     // Определения float
     //
-    float m_fPlayerSpeed = 5; //0.08f;
-    float m_fOffSetSpeed = 10; //1.0f
+    float m_fPlayerSpeed = 0.08f; //0.08f;
+    float m_fOffSetSpeed = 1.0f; //1.0f
     float m_fTime = 0.0f;
     float m_fFps = 0.0f;
 

@@ -33,31 +33,7 @@ void cMap::deleting() {
     chunkBuffer.clear();
     chunkVector.clear();
     fileWorldIsOpen = false;
-    std::cout << "INFO: deleting" << std::endl;
-}
-
-//
-// Загрузка из файлов
-//
-void cMap::load() {
-    try {
-        std::cout << "INFO: Loading Map" << std::endl;
-        fileInput.open("./Maps/map1/map1.json");
-        fileInput >> objJson;
-        fileInput.close();
-        auto layers = objJson["layers"];
-        for (int i = 0; i < g_LayerSizeMaxY; i++) {
-            auto odjData = layers[0]["data"];
-            auto groundData = layers[1]["data"];
-            for (int j = 0; j < g_LayerSizeMaxX; j++) {
-                LayerOdj[i][j] = odjData[i * g_LayerSizeMaxX + j];
-                LayerGround[i][j] = groundData[i * g_LayerSizeMaxX + j];
-            }
-        }
-        std::cout << "INFO: Map loaded successfully" << std::endl;
-    } catch (const nlohmann::json::exception& error) {
-        std::cerr << "\033[31m" << "ERROR: Failed to load map " << error.what() << "\033[0m" << std::endl;
-    }
+    oCmdInfo.info("Deleting and saving");
 }
 
 //
@@ -193,7 +169,7 @@ void cMap::loadingChunksFromFile() {
     std::cout << "INFO: Open file " << strNameFileWorld << std::endl;
     fileInput.open("worlds/" + strNameFileWorld);
     if (!fileInput.is_open()) {
-        std::cerr << "ERROR: opening file: " << strNameFileWorld << std::endl;
+        oCmdInfo.error("Opening file: " + strNameFileWorld);
         return;
     }
     fileInput >> jsonLoad;
@@ -226,11 +202,12 @@ bool cMap::checkingDownloadedChunks(const std::string& requiredChunk, std::vecto
                 }
                 return true;
             }
-            std::cerr << "ERROR: The chunk '" << requiredChunk << "' does not contain the 'data' " << std::endl;
+            oCmdInfo.warning("The chunk '" + requiredChunk + "' does not contain the 'data' ");
         }
         return false;
     }
-    std::cerr << "ERROR: File is corrupted, there is no line 'chunks'" << std::endl;
+
+    oCmdInfo.warning("File is corrupted, there is no line 'chunks'");
     return false;
 }
 
@@ -251,31 +228,31 @@ void cMap::save() {
         if (m_bNewWorld) {
             fileWorld.open("worlds/"+strNameFileWorld, std::ofstream::app);
             if(fileWorld.is_open()) {
-                std::cout << "INFO: New file " << strNameFileWorld << " is open for writing" << std::endl;
+                oCmdInfo.info("New file " + strNameFileWorld + " is open for writing");
                 jsonSave = json::object();
                 jsonSave["seed"] = m_uiSeed;
                 jsonSave["chunks"] = json::object();
                 m_bNewWorld = false;
                 fileWorld.close();
             } else {
-                std::cerr << "ERROR: Cannot open file " << strNameFileWorld << " for writing" <<  std::endl;
+                oCmdInfo.error("Cannot open file " + strNameFileWorld + " for writing");
             }
         }
         fileWorld.open("worlds/"+strNameFileWorld);
         if (fileWorld.is_open()) {
             if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
-                std::cout << "INFO: The file " << strNameFileWorld << " is open for writing" << std::endl;
+                oCmdInfo.info("The file " + strNameFileWorld + " is open for writing");
                 fileWorld >> jsonSave;
             }
             fileWorld.close();
             fileWorldIsOpen = true;
         } else {
-            std::cerr << "ERROR: Cannot open file " << strNameFileWorld << " for writing" <<  std::endl;
+            oCmdInfo.error("Cannot open file " + strNameFileWorld + " for writing");
             return;
         }
     }
 
-    std::cout << "INFO: Start save" << std::endl;
+    oCmdInfo.info("Start save");
 
     for (const auto& [chunkName, data] : chunkBuffer) {
         json chunkData = json::array();
@@ -292,9 +269,9 @@ void cMap::save() {
     if (fileWorld.is_open()) {
         fileWorld << jsonSave.dump(4);
         fileWorld.close();
-        std::cout << "INFO: Saved" << std::endl;
+        oCmdInfo.info("Saved");
     } else {
-        std::cerr << "ERROR: Cannot open file" << strNameFileWorld << " to save changes" << std::endl;
+        oCmdInfo.error("Cannot open file" + strNameFileWorld + " to save changes");
     }
 
     chunkBuffer.clear();
@@ -369,27 +346,7 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     this->m_iDistanceView = iDistanceView;
     this->strNameFileWorld = strNameFileMap + ".json";
     loadingChunksFromFile();
-    try {
-        std::cout << "INFO: Loading tile set" << std::endl;
-
-        fileInput.open("Maps/map2/3.json");
-        fileInput >> objJson;
-        fileInput.close();
-
-        imageHeight = static_cast<int>(objJson["imageheight"]);
-        imageWidth = static_cast<int>(objJson["imagewidth"]);
-
-        if (!texture.loadFromFile("Maps/map2/3.png")) {
-            std::cerr << "\033[31m" << "ERROR: Failed loading texture from file" << "\033[0m" << std::endl;
-            return;
-        }
-
-        sprite.setTexture(texture);
-        std::cout << "INFO: Tile set loaded successfully" << std::endl;
-    }
-    catch (const nlohmann::json::exception& error) {
-        std::cerr << "\033[31m" << "ERROR: Failed to load tileset " << error.what() << "\033[30m" << std::endl;
-    }
+    loadTileset();
 }
 
 //
@@ -402,8 +359,14 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     m_bNewWorld = true;
     save();
     loadingChunksFromFile();
+    loadTileset();
+}
+//
+// Загрузка тайл сета
+//
+void cMap::loadTileset() {
     try {
-        std::cout << "INFO: Loading tile set" << std::endl;
+        oCmdInfo.info("Loading tile set");
 
         fileInput.open("Maps/map2/3.json");
         fileInput >> objJson;
@@ -413,17 +376,18 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
         imageWidth = static_cast<int>(objJson["imagewidth"]);
 
         if (!texture.loadFromFile("Maps/map2/3.png")) {
-            std::cerr << "\033[31m" << "ERROR: Failed loading texture from file" << "\033[0m" << std::endl;
+
             return;
         }
 
         sprite.setTexture(texture);
-        std::cout << "INFO: Tile set loaded successfully" << std::endl;
+        oCmdInfo.info("Tile set loaded successfully");
     }
     catch (const nlohmann::json::exception& error) {
-        std::cerr << "\033[31m" << "ERROR: Failed to load tileset " << error.what() << "\033[30m" << std::endl;
+        std::cerr << "ERROR: Failed to load tileset " << error.what() << std::endl;
     }
 }
+
 
 //
 // Проверка коллизий
@@ -453,52 +417,6 @@ int cMap::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize,
         }
     }
     return 0;
-}
-
-//
-// Иницилизации клеточного автомата чанка
-//
-void cMap::initializeMap(std::vector<std::vector<int>>& map, const unsigned int seed, const double INITIAL_PROB, const int WIDTH, const int HEIGHT) {
-    std::srand(seed);
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            map[y][x] = (std::rand() / static_cast<double>(RAND_MAX)) < INITIAL_PROB ? 1 : 0;
-        }
-    }
-}
-
-//
-// Действия клеточного автомата
-//
-void cMap::stepAutomaton(std::vector<std::vector<int>>& map, const int WIDTH, const int HEIGHT) {
-    std::vector<std::vector<int>> newMap = map;
-
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            int count = 0;
-            for (int dy = -1; dy <= 1; ++dy) {
-                for (int dx = -1; dx <= 1; ++dx) {
-                    if (dy == 0 && dx == 0) continue;
-                    const int nx = x + dx;
-                    if (const int ny = y + dy; nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                        count += map[ny][nx];
-                    }
-                }
-            }
-
-            if (map[y][x] == 1) {
-                if (count < 4) {
-                    newMap[y][x] = 0;
-                }
-            } else {
-                if (count > 4) {
-                    newMap[y][x] = 1;
-                }
-            }
-        }
-    }
-
-    map = newMap;
 }
 
 //

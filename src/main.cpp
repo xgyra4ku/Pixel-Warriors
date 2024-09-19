@@ -1,11 +1,13 @@
 #include "../include/Engine.hpp"
-
+#include "../include/cInfoConsole.hpp"
 
 int main()
 {
-    std::cout << "INFO: Starting Pixel Warriors" << std::endl;
+	cInfoConsole cCmdInfo;
+	cInfoConsole::enableANSI();
+	cCmdInfo.info("Starting Pixel Warriors");
     Engine game;
     game.vRun();
-    std::cout << "INFO: Exiting Pixel Warriors" << std::endl;
+    cCmdInfo.info("Exiting Pixel Warriors");
 	return 0;
 }
