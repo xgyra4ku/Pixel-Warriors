@@ -22,9 +22,9 @@ void PerlinNoise::reseed(const unsigned int seed) {
 // Шум в 1D
 //
 double PerlinNoise::noise(double x) const {
-    int X = static_cast<int>(std::floor(x)) & 255;
+    const int X = static_cast<int>(std::floor(x)) & 255;
     x -= std::floor(x);
-    double u = fade(x);
+    const double u = fade(x);
     return lerp(u, grad(m_viPerl[X], x), grad(m_viPerl[X + 1], x - 1.0));
 }
 
