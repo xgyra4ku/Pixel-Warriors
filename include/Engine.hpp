@@ -56,7 +56,7 @@ private:
     cInfoConsole oCmdInfo;
 
     //
-    // Определения классов сфмл
+    // Определения классов sfml
     //
     sf::RenderWindow m_oWindow;
     sf::Vector2f m_oPlayerPos;
@@ -66,11 +66,13 @@ private:
     sf::Vector2i m_vChunkPos;
     sf::Font m_ftFont;
 
+    sf::Text m_sftTextInfo;
+
     //
     // Определения float
     //
-    float m_fPlayerSpeed = 0.08f; //0.08f;
-    float m_fOffSetSpeed = 1.0f; //1.0f
+    float m_fPlayerSpeed = 0.08f; //0.08f standard
+    float m_fOffSetSpeed = 1.0f; //1.0f standard
     float m_fTime = 0.0f;
     float m_fFps = 0.0f;
 
@@ -87,6 +89,8 @@ private:
     bool m_bOffsetRUN;
     bool m_bCollisionRUN;
     bool m_bPlayerPosRUN;
+    bool m_bInfo;
+    bool m_bCheats;
 
     //
     // Определения vector

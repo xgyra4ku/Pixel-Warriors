@@ -55,6 +55,13 @@ Engine::Engine() {
     m_bOffsetRUN = true;
     m_bCollisionRUN = true;
     m_bPlayerPosRUN = false;
+    m_bInfo = false;
+    m_bCheats = false;
+
+    m_sftTextInfo.setFillColor(sf::Color::Black);
+    m_sftTextInfo.setFont(m_ftFont);
+    m_sftTextInfo.setCharacterSize(15);
+    m_sftTextInfo.setPosition(50,50);
 
 }
 
@@ -198,7 +205,12 @@ void Engine::_timer() {
         m_fFrameCount = 0;
         m_oFpsClock.restart();
         std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
+
     }
+
+    m_sftTextInfo.setString("fps: " + std::to_string(static_cast<int>(m_fFps))
+        + "\n" + "posPL: " + "X: " + std::to_string(static_cast<int>((m_oPlayerPos.x))) +" Y: " + std::to_string(static_cast<int>(m_oPlayerPos.y)));
+
 }
 
 //
@@ -211,9 +223,6 @@ void Engine::_logic() {
         _controlKeyboard();
     if (m_bOffsetRUN)
         _offset();
-    if (m_bPlayerPosRUN)
-        std::cout << "Player position: (" << m_oPlayerPos.x - g_fOffsetX << ", " << m_oPlayerPos.y - g_fOffsetY << ")" << std::endl;
-
 }
 
 //
@@ -225,6 +234,8 @@ void Engine::_updateDisplay() {
         sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30),
             (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
     player1.draw(m_oWindow);
+    if (m_bInfo)
+        m_oWindow.draw(m_sftTextInfo);
     oConsole->draw(m_oWindow);
 }
 
@@ -428,31 +439,44 @@ void Engine::_controlKeyboard() {
 void Engine::_commandExecution() {
     for (auto& [strCommand, iParameter] : m_mpCommandData) {//чтение и определение параметров
         // определение команды и выполнение ее
-        if(strCommand == "speedPlayer") {
-            m_fPlayerSpeed = static_cast<float>(iParameter) * 0.01f;
-        } else if(strCommand == "speedOffset") {
-            m_fOffSetSpeed = static_cast<float>(iParameter) * 0.1f;
-        } else if (strCommand == "offset") {
+
+        // не читерские команды
+        if (strCommand == "info") {
             if (iParameter == 1) {
-                m_bOffsetRUN = true;
+                m_bInfo = true;
             } else if (iParameter == 0) {
-                m_bOffsetRUN = false;
+                m_bInfo  = false;
             }
-        } else if (strCommand == "collision") {
+        } else if (strCommand == "cheats") {
             if (iParameter == 1) {
-                m_bCollisionRUN = true;
+                m_bCheats = true;
             } else if (iParameter == 0) {
-                m_bCollisionRUN = false;
-            }
-        } else if (strCommand == "pos") {
-            if (iParameter == 1) {
-                m_bPlayerPosRUN = true;
-            } else if (iParameter == 0) {
-                m_bPlayerPosRUN  = false;
+                m_bCheats = false;
             }
         } else if (strCommand == "fpsMax") {
             m_mpSettings["fps"] = iParameter;
             m_oWindow.setFramerateLimit(m_mpSettings["fps"]);
+        }
+
+        // читерские команды
+        if (m_bCheats) {
+            if(strCommand == "speedPlayer") {
+                m_fPlayerSpeed = static_cast<float>(iParameter) * 0.01f;
+            } else if(strCommand == "speedOffset") {
+                m_fOffSetSpeed = static_cast<float>(iParameter) * 0.1f;
+            } else if (strCommand == "offset") {
+                if (iParameter == 1) {
+                    m_bOffsetRUN = true;
+                } else if (iParameter == 0) {
+                    m_bOffsetRUN = false;
+                }
+            } else if (strCommand == "collision") {
+                if (iParameter == 1) {
+                    m_bCollisionRUN = true;
+                } else if (iParameter == 0) {
+                    m_bCollisionRUN = false;
+                }
+            }
         }
     }
 }
