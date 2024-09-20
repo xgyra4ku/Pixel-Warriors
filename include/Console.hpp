@@ -3,6 +3,7 @@
 // Потключение библиотек
 //
 #include <map>
+#include <vector>
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <LibKyraText.h>
@@ -21,12 +22,18 @@ public:
     // определения других функция
     //  логика
     void logic(float fTime);
+
+    //static void getBuffer(int iValue);
+
     // рисовка
     void draw(sf::RenderWindow& window) const;
     // чтение
     void read(std::map<std::string, int>& mpData);
 private:
     // определения приватных переменых
+    std::vector<std::string> m_vecStrBufferCommands;
+    //int index = -1;
+    //int m_iMaxIndex = 20;
     cInfoConsole oCmdInfo;
     ktx::cInputText m_oInputObj;
     bool m_bReflections;

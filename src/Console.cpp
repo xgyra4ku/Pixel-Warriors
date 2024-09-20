@@ -46,9 +46,20 @@ void Console::logic(const float fTime) {
 }
 
 //
+// Взаимодействие с буфером
+//
+// void Console::getBuffer(const int iValue) {
+//     if (iValue == 1) {
+//         if
+//     }
+// }
+
+//
 // Чтения и парсинг команд выполнение
 //
 void Console::read(std::map<std::string, int>& mpData) {
+    m_vecStrBufferCommands.push_back(m_oInputObj.getString());
+    // index += 1;
     std::istringstream iss(m_oInputObj.getString());
     mpData.clear();
     // Извлечение первой части строки как команды
