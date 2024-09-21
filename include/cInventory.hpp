@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <SFML/Graphics.hpp>
 
 //
 // Структурав инвентаря
@@ -47,5 +48,11 @@ public:
 };
 class cInventory {
 public:
+    void draw(sf::RenderWindow window);
+    void getIdItemByIndex(int iIndexItem);
+
+    bool setItemByIndex();
+
+    bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
 };

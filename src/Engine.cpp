@@ -234,6 +234,11 @@ void Engine::_updateDisplay() {
         sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30),
             (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
     player1.draw(m_oWindow);
+
+
+
+
+
     if (m_bInfo)
         m_oWindow.draw(m_sftTextInfo);
     oConsole->draw(m_oWindow);
@@ -265,7 +270,7 @@ void Engine::_events() {
             } else if (event.key.code == sf::Keyboard::Enter) {
                 oConsole->read(m_mpCommandData);
                 _commandExecution();
-            }
+            }  
         }
         if (event.type == sf::Event::MouseWheelMoved) { // при прокручивание колесика мыши
             m_iWheelEventMouse = event.mouseWheel.delta;
