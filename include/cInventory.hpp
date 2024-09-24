@@ -48,11 +48,21 @@ public:
 };
 class cInventory {
 public:
-    void draw(sf::RenderWindow window);
-    void getIdItemByIndex(int iIndexItem);
+    // конструкторы диструкторы
+    cInventory();
+    ~cInventory();
 
-    bool setItemByIndex();
+    // гетеры
+    [[nodiscard]] int getIdItemByIndex(int iIndexItem) const;
+    [[nodiscard]] bool getInventoryStatus() const;
 
+    // сетеры
+    void setItemByIndex();
+    void setInventoryStatus(bool bValue);
+
+    // инные функции
+    void draw(sf::RenderWindow window) const;
     bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
+    bool m_bInventoryIsOpen;
 };
