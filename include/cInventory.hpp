@@ -49,7 +49,7 @@ public:
 class cInventory {
 public:
     // конструкторы диструкторы
-    cInventory();
+    cInventory(sf::RenderWindow sfRwWindow);
     ~cInventory();
 
     // гетеры
@@ -64,5 +64,7 @@ public:
     void draw(sf::RenderWindow window) const;
     bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
+    sf::RectangleShape m_sfRsHomeInventoryForm;
+
     bool m_bInventoryIsOpen;
 };

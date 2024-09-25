@@ -1,7 +1,9 @@
 #include "../include/cInventory.hpp"
 
 
-cInventory::cInventory() : m_bInventoryIsOpen(false){}
+cInventory::cInventory(sf::RenderWindow sfRwWindow) : m_bInventoryIsOpen(false) {
+    m_sfRsHomeInventoryForm.setSize(sf::Vector2f(static_cast<float>(sfRwWindow.getSize().x), static_cast<float>(sfRwWindow.getSize().x)));
+}
 cInventory::~cInventory() = default;
 
 
