@@ -57,11 +57,11 @@ public:
     [[nodiscard]] bool getInventoryStatus() const;
 
     // сетеры
-    void setItemByIndex();
+    void setItemByIndex(unsigned int iIndex, unsigned int iItem);
     void setInventoryStatus(bool bValue);
 
     // инные функции
-    void draw(sf::RenderWindow window) const;
+    void draw(sf::RenderWindow sfRwWindow) const;
     bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
     sf::RectangleShape m_sfRsHomeInventoryForm;
