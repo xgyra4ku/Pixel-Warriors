@@ -4,10 +4,15 @@
 /// @brief Конструктор класса инвентаря
 /// @param sfRwWindow Окно рендеринга SFML, используемое для определения размера инвентаря
 ///
-cInventory::cInventory(sf::RenderWindow sfRwWindow) : m_bInventoryIsOpen(false) {
+cInventory::cInventory(const sf::RenderWindow& sfRwWindow) : m_bInventoryIsOpen(false) {
+    float radius = 20.0f;
     m_sfRsHomeInventoryForm.setSize(sf::Vector2f(
         (static_cast<float>(sfRwWindow.getSize().x)* 50 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 50 / 100)));
+        (static_cast<float>(sfRwWindow.getSize().y)* 50 / 100))) ;
+    m_sfRsHomeInventoryForm.setPosition(sf::Vector2f(
+        (static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
+        (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100)));
+    m_sfRsHomeInventoryForm.setFillColor(sf::Color(46, 46, 46));
 }
 
 ///
@@ -19,14 +24,19 @@ cInventory::~cInventory() = default;
 /// @brief Отрисовка инвентаря
 /// @param sfRwWindow  Окно рендеринга SFML, используемое для отрисовки инвентаря
 ///
-void cInventory::draw(sf::RenderWindow sfRwWindow) const {
+void cInventory::draw(sf::RenderWindow& sfRwWindow) const {
     if (m_bInventoryIsOpen) {
-        //window.draw();
+        sfRwWindow.draw(m_sfRsHomeInventoryForm);
     }
 }
 
-bool cInventory::checkIfTheItemIsInInventoryByIndex(int iIndexItem) {
 
+///
+/// @brief Проверяет наличие предмета в инвентаре
+/// @param iIndexItem индекс предмена
+/// @return да если есть предмет в инвентаре
+bool cInventory::checkIfTheItemIsInInventoryByIndex(int iIndexItem) {
+    return false;
 }
 
 ///
@@ -60,7 +70,7 @@ bool cInventory::getInventoryStatus() const {
 /// @return Индекс элемента
 ///
 int cInventory::getIdItemByIndex(int iIndexItem) const {
-
+    return -1;
 }
 
 

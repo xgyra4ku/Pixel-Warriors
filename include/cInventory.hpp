@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 
 //
-// Структурав инвентаря
+// Структура инвентаря
 //
 struct sInventoryOBJ {
 private:
@@ -49,7 +49,8 @@ public:
 class cInventory {
 public:
     // конструкторы диструкторы
-    cInventory(sf::RenderWindow sfRwWindow);
+    explicit cInventory(const sf::RenderWindow &sfRwWindow);
+
     ~cInventory();
 
     // гетеры
@@ -61,7 +62,7 @@ public:
     void setInventoryStatus(bool bValue);
 
     // инные функции
-    void draw(sf::RenderWindow sfRwWindow) const;
+    void draw(sf::RenderWindow &sfRwWindow) const;
     bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
     sf::RectangleShape m_sfRsHomeInventoryForm;

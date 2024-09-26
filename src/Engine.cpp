@@ -45,6 +45,7 @@ Engine::Engine() {
     oCmdInfo.info("Texture and font load is successfully");
     // определения консоли
     oConsole = new Console(m_ftFont, m_oWindow);
+    oInventory = new cInventory(m_oWindow);
 
     // загрузка дополнеий
     _loadDependency("Dependency/");
@@ -62,7 +63,7 @@ Engine::Engine() {
     m_sftTextInfo.setFont(m_ftFont);
     m_sftTextInfo.setCharacterSize(15);
     m_sftTextInfo.setPosition(50,50);
-
+    //m_oWindow.close();
 }
 
 Engine::~Engine() = default;
@@ -157,6 +158,10 @@ void Engine::vRun() {
         m_oWindow.clear();
         _events();
         _timer();
+	    if (!m_oWindow.isOpen()) {
+	        oCmdInfo.info("Window closed during event processing");
+	        break; // Выйти из цикла, если окно закрыто
+	    }
         if (m_iMenu == -1) { // если запушен мир
             _logic();
             _updateDisplay();
@@ -205,7 +210,6 @@ void Engine::_timer() {
         m_fFrameCount = 0;
         m_oFpsClock.restart();
         std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
-
     }
 
     m_sftTextInfo.setString("fps: " + std::to_string(static_cast<int>(m_fFps))
@@ -235,9 +239,7 @@ void Engine::_updateDisplay() {
             (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
     player1.draw(m_oWindow);
 
-
-
-
+    oInventory->draw(m_oWindow);
 
     if (m_bInfo)
         m_oWindow.draw(m_sftTextInfo);
@@ -270,7 +272,10 @@ void Engine::_events() {
             } else if (event.key.code == sf::Keyboard::Enter) {
                 oConsole->read(m_mpCommandData);
                 _commandExecution();
-            }  
+            }
+            else if (event.key.code == sf::Keyboard::E) {
+                oInventory->setInventoryStatus(!oInventory->getInventoryStatus());
+            }
         }
         if (event.type == sf::Event::MouseWheelMoved) { // при прокручивание колесика мыши
             m_iWheelEventMouse = event.mouseWheel.delta;

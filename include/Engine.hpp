@@ -11,6 +11,7 @@
 #include "cEntity.hpp"
 #include "Console.hpp"
 #include "cInfoConsole.hpp"
+#include "cInventory.hpp"
 
 //
 // Структура дополнений
@@ -54,6 +55,7 @@ private:
     SaveAndLoad save_and_load_;
     Console* oConsole;
     cInfoConsole oCmdInfo;
+    cInventory* oInventory;
 
     //
     // Определения классов sfml
