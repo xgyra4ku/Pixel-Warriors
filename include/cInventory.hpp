@@ -65,7 +65,9 @@ public:
     void draw(sf::RenderWindow &sfRwWindow) const;
     bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
+    sInventoryOBJ sInventory;
     sf::RectangleShape m_sfRsHomeInventoryForm;
+    sf::RectangleShape m_sfRsInventoryFormList[45];
 
     bool m_bInventoryIsOpen;
 };

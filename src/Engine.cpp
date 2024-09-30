@@ -351,12 +351,14 @@ void Engine::_offset() const {
     // проверна зоны свободы по x/y
     if (playerPos.x < leftDeadZone) {
         targetOffsetX -= m_fOffSetSpeed * m_fTime;
-    } else if (playerPos.x > rightDeadZone) {
+    }
+    if (playerPos.x > rightDeadZone) {
         targetOffsetX += m_fOffSetSpeed * m_fTime;
     }
     if (playerPos.y < topDeadZone) {
         targetOffsetY -= m_fOffSetSpeed * m_fTime;
-    } else if (playerPos.y > bottomDeadZone) {
+    }
+    if (playerPos.y > bottomDeadZone) {
         targetOffsetY += m_fOffSetSpeed * m_fTime;
     }
 

@@ -22,7 +22,6 @@ file(GLOB_RECURSE SOURCES "${SOURCE_DIR}/*.cpp")
 # Добавьте заголовочные файлы вашего проекта
 file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.hpp")
 
-# Включите заголовочные файлы в проект для удобства IDE
 #add_library(${TARGET_NAME_XXX} SHARED ${SOME_DIR_HAVING_THIS_WARNING}/empty_xxx.c)
 
 add_subdirectory(libs/LibKyraText/)

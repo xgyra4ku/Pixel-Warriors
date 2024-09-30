@@ -5,14 +5,28 @@
 /// @param sfRwWindow Окно рендеринга SFML, используемое для определения размера инвентаря
 ///
 cInventory::cInventory(const sf::RenderWindow& sfRwWindow) : m_bInventoryIsOpen(false) {
-    float radius = 20.0f;
     m_sfRsHomeInventoryForm.setSize(sf::Vector2f(
         (static_cast<float>(sfRwWindow.getSize().x)* 50 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 50 / 100))) ;
+        (static_cast<float>(sfRwWindow.getSize().y)* 50 / 100)));
     m_sfRsHomeInventoryForm.setPosition(sf::Vector2f(
         (static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
         (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100)));
     m_sfRsHomeInventoryForm.setFillColor(sf::Color(46, 46, 46));
+    const auto null = sf::Vector2f(
+        (static_cast<float>(sfRwWindow.getSize().x) * 25 / 100),
+        (static_cast<float>(sfRwWindow.getSize().y) * 25 / 100));
+
+    float shiftX;
+    float shiftY;
+
+    sInventory.init();
+    for (int i = 0; i <= 44; i++) {
+        m_sfRsInventoryFormList[i].setSize(sf::Vector2f(
+        (static_cast<float>(sfRwWindow.getSize().x)* 5 / 100),
+        (static_cast<float>(sfRwWindow.getSize().y)* 5 / 100)));
+
+
+    }
 }
 
 ///
