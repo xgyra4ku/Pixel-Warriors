@@ -17,16 +17,16 @@ cInventory::cInventory(const sf::RenderWindow& sfRwWindow) : m_bInventoryIsOpen(
         (static_cast<float>(sfRwWindow.getSize().y) * 25 / 100));
 
     constexpr float shiftX = 5;
-    constexpr float shiftY = 3;
+    constexpr float shiftY = 1;
 
     sInventory.init();
-    float x = 2;
+    float x = 1;
     float y = 2;
     const sf::Vector2f size = {m_sfRsHomeInventoryForm.getSize().x / 9 + shiftX, m_sfRsHomeInventoryForm.getSize().y / 5 + shiftY};
-    for (int i = 0; i <= 44; i++) {
+    for (int i = 0; i <= 39; i++) {
         m_sfRsInventoryFormList[i].setSize(sf::Vector2f(
-        (static_cast<float>(sfRwWindow.getSize().x)* 4.5 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 4.5 / 100)));
+        (static_cast<float>(sfRwWindow.getSize().x)* 5.5 / 100),
+        (static_cast<float>(sfRwWindow.getSize().y)* 7.5 / 100)));
         if (x == 9) {
             x = 2;
             y++;
@@ -34,8 +34,8 @@ cInventory::cInventory(const sf::RenderWindow& sfRwWindow) : m_bInventoryIsOpen(
             x++;
         }
 
-        m_sfRsInventoryFormList[i].setPosition((x -1) *size.x + m_sfRsHomeInventoryForm.getSize().x/3.3, y*size.y + m_sfRsHomeInventoryForm.getSize().y/3.3);
-        m_sfRsInventoryFormList[i].setFillColor(sf::Color::Yellow);
+        m_sfRsInventoryFormList[i].setPosition((x -1) *size.x + m_sfRsHomeInventoryForm.getSize().x/2.39, y*size.y + m_sfRsHomeInventoryForm.getSize().y/7.2);
+        m_sfRsInventoryFormList[i].setFillColor(sf::Color(128,128,128));
     }
 }
 
