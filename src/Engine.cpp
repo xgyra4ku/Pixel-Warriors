@@ -45,7 +45,12 @@ Engine::Engine() {
     oCmdInfo.info("Texture and font load is successfully");
     // определения консоли
     oConsole = new Console(m_ftFont, m_oWindow);
-    oInventory = new cInventory(m_oWindow);
+    sf::Texture tex;
+    if (!tex.loadFromFile("UI/2/Inventory_style_02b.png")) {
+        return;
+    }
+    // определение инвентаря
+    oInventory = new cInventory(tex,m_oWindow);
 
     // загрузка дополнеий
     _loadDependency("Dependency/");

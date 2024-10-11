@@ -2,41 +2,28 @@
 
 ///
 /// @brief Конструктор класса инвентаря
-/// @param sfRwWindow Окно рендеринга SFML, используемое для определения размера инвентаря
+/// @param texture Изображение инвентаря
+/// @param sfRwWindow Окно рендеринга SFML
 ///
-cInventory::cInventory(const sf::RenderWindow& sfRwWindow) : m_bInventoryIsOpen(false) {
-    m_sfRsHomeInventoryForm.setSize(sf::Vector2f(
-        (static_cast<float>(sfRwWindow.getSize().x)* 50 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 50 / 100)));
-    m_sfRsHomeInventoryForm.setPosition(sf::Vector2f(
+cInventory::cInventory(const sf::Texture &texture, const sf::RenderWindow &sfRwWindow) : m_bInventoryIsOpen(false) {
+    m_texture = texture;  // Копируем текстуру
+    spriteInventory.setTexture(m_texture);
+    // Целевые размеры
+    const float targetWidth = (static_cast<float>(sfRwWindow.getSize().x)* 50 / 100);
+    const float targetHeight = (static_cast<float>(sfRwWindow.getSize().x)* 30 / 100);
+
+    // Получаем размеры текстуры
+    const sf::Vector2u textureSize = texture.getSize();
+
+    // Вычисляем масштабирование
+    const float scaleX = targetWidth / textureSize.x;
+    const float scaleY = targetHeight / textureSize.y;
+
+    // Устанавливаем масштаб
+    spriteInventory.setScale(scaleX, scaleY);
+    spriteInventory.setPosition(
         (static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100)));
-    m_sfRsHomeInventoryForm.setFillColor(sf::Color(46, 46, 46));
-    const auto null = sf::Vector2f(
-        (static_cast<float>(sfRwWindow.getSize().x) * 25 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y) * 25 / 100));
-
-    constexpr float shiftX = 5;
-    constexpr float shiftY = 1;
-
-    sInventory.init();
-    float x = 1;
-    float y = 2;
-    const sf::Vector2f size = {m_sfRsHomeInventoryForm.getSize().x / 9 + shiftX, m_sfRsHomeInventoryForm.getSize().y / 5 + shiftY};
-    for (int i = 0; i <= 39; i++) {
-        m_sfRsInventoryFormList[i].setSize(sf::Vector2f(
-        (static_cast<float>(sfRwWindow.getSize().x)* 5.5 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 7.5 / 100)));
-        if (x == 9) {
-            x = 2;
-            y++;
-        } else {
-            x++;
-        }
-
-        m_sfRsInventoryFormList[i].setPosition((x -1) *size.x + m_sfRsHomeInventoryForm.getSize().x/2.39, y*size.y + m_sfRsHomeInventoryForm.getSize().y/7.2);
-        m_sfRsInventoryFormList[i].setFillColor(sf::Color(128,128,128));
-    }
+        (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100));
 }
 
 ///
@@ -50,10 +37,7 @@ cInventory::~cInventory() = default;
 ///
 void cInventory::draw(sf::RenderWindow& pWindow) const {
     if (m_bInventoryIsOpen) {
-        pWindow.draw(m_sfRsHomeInventoryForm);
-        for (int i = 0; i <= 44; i++) {
-            pWindow.draw(m_sfRsInventoryFormList[i]);
-        }
+        pWindow.draw(spriteInventory);
     }
 }
 

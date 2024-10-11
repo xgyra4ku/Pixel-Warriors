@@ -51,6 +51,10 @@ public:
     // конструкторы диструкторы
     explicit cInventory(const sf::RenderWindow &sfRwWindow);
 
+    cInventory(const sf::Texture &texture);
+
+    cInventory(const sf::Texture &texture, const sf::RenderWindow &sfRwWindow);
+
     ~cInventory();
 
     // гетеры
@@ -65,11 +69,9 @@ public:
     void draw(sf::RenderWindow &pWindow) const;
     bool checkIfTheItemIsInInventoryByIndex(int iIndexItem);
 private:
+    sf::Texture m_texture;  // Хранить текстуру внутри объекта
     sInventoryOBJ sInventory;
-    sf::RectangleShape m_sfRsHomeInventoryForm;
-    sf::RectangleShape m_sfRsInventoryFormList[45];
-
-
+    sf::Sprite spriteInventory;
 
     bool m_bInventoryIsOpen;
 };
