@@ -9,42 +9,25 @@
 //
 struct sInventoryOBJ {
 private:
-    // 1-9 слоты быстрого доступа 10-45 обычный инвентарь
-    std::map<unsigned int, unsigned int> mpData;
-    const unsigned int iInventSize = 45;
+    // слоты инвентаря
+    std::map<unsigned int, unsigned int> fastSlot;
+    std::map<unsigned int, unsigned int> normalSlot;
+    // размеры слотов
+    int iSizeFastSlot = 10;
+    int iSizeNormalSlot = 24;
 public:
-    void init() {
-        for (int i = 1; i <= iInventSize; ++i) {
-            mpData[i] = 0;
-        }
-    }
-    // Геттер для доступа к вектору (как const ссылка)
-    [[nodiscard]] const std::map<unsigned int, unsigned int>& getData() const {
-        return mpData;
-    }
+    sInventoryOBJ();
 
-    // Сеттер для изменения данных (например, добавление нового элемента)
-    void setElementByIndexFromDate(const unsigned int iValue, const unsigned int iValue2) {
-        if (iValue <= iInventSize) {
-            mpData[iValue] = iValue2;
-        }
-    }
 
-    // Функция для удаления элементов
-    void deleteElementByIndexFromDate(const unsigned int iValue) {
-        if (iValue <= iInventSize) {
-            mpData[iValue] = 0;
-        }
-    }
+    // гетеры
+    [[nodiscard]] std::map<unsigned int, unsigned int> getFastSlot() const;
+    [[nodiscard]] std::map<unsigned int, unsigned int> getNormalSlot() const;
+    // сетеры
+    void setFastSlot(const std::map<unsigned int, unsigned int> &fastSlot);
+    void setNormalSlot(const std::map<unsigned int, unsigned int> &normalSlot);
+    // инные функции
+    // ...
 
-    // Пример функции для получения элемента по индексу
-    unsigned int getElementByIndexFromDate(const unsigned int iValue) {
-        if (iValue <= iInventSize) {
-            return mpData[iValue];
-        }
-
-        return -1;
-    }
 };
 class cInventory {
 public:

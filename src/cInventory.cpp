@@ -1,5 +1,39 @@
 #include "../include/cInventory.hpp"
 
+/// struct sInventoryOBJ
+/// {
+///     std::vector<unsigned int> fastSlot;
+///     std::vector<unsigned int> normalSlot;
+///     void init();
+/// };
+sInventoryOBJ::sInventoryOBJ() {
+    for (int i = 1; i <= iSizeFastSlot; ++i) {
+        fastSlot[i] = 0;
+    }
+
+    for (int i = 1; i <= iSizeNormalSlot; ++i) {
+        normalSlot[i] = 0;
+    }
+}
+
+
+
+std::map<unsigned int, unsigned int> sInventoryOBJ::getFastSlot() const {
+    return fastSlot;
+}
+
+std::map<unsigned int, unsigned int> sInventoryOBJ::getNormalSlot() const {
+    return normalSlot;
+}
+
+void sInventoryOBJ::setFastSlot(const std::map<unsigned int, unsigned int> &fastSlot) {
+    this->fastSlot = fastSlot;
+}
+void sInventoryOBJ::setNormalSlot(const std::map<unsigned int, unsigned int> &normalSlot) {
+    this->normalSlot = normalSlot;
+}
+
+
 ///
 /// @brief Конструктор класса инвентаря
 /// @param texture Изображение инвентаря
