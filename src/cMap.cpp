@@ -81,10 +81,10 @@ ChunkStruct cMap::generateChunk(const int chunkX, const int chunkY, const unsign
         }
     }for (int y = 0; y < chunkSize/2; ++y) {
         for (int x = 0; x < chunkSize/2; ++x) {
-            if (const double noiseValueObject = noiseValuesObject[y + 1][x + 1]; noiseValueObject < 0.5) {
-                chunkObjects[y][x] = 91;
+            if (const double noiseValueObject = noiseValuesObject[y + 1][x + 1]; noiseValueObject < 0.1) {
+                chunkObjects[y][x] = 0;
             } else {
-                chunkObjects[y][x] = ((0 + rand() % 2) == 1) ? 143 : 106;
+                chunkObjects[y][x] = 1;
             }
         }
     }
@@ -298,47 +298,47 @@ void cMap::save() {
     chunkBuffer.clear();
     loadingChunksFromFile();
 }
-
 //
-// Рисовка
+// //
+// // Рисовка
+// //
+// void cMap::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
+//     sf::VertexArray vertices(sf::Quads);
+//     const unsigned int textureSize = texture.getSize().x;
 //
-void cMap::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
-    sf::VertexArray vertices(sf::Quads);
-    const unsigned int textureSize = texture.getSize().x;
-
-    int xMax = static_cast<int>((playerPos.x + viev.x) / g_dTileSize);
-    int xMin = static_cast<int>((playerPos.x - viev.x) / g_dTileSize);
-    int yMax = static_cast<int>((playerPos.y + viev.y) / g_dTileSize);
-    int yMin = static_cast<int>((playerPos.y - viev.y) / g_dTileSize);
-
-    xMax = std::min(xMax, g_LayerSizeMaxX);
-    xMin = std::max(xMin, 0);
-    yMax = std::min(yMax, g_LayerSizeMaxY);
-    yMin = std::max(yMin, 0);
-
-    for (int i = yMin; i < yMax; i++) {
-        for (int j = xMin; j < xMax; j++) {
-            if (Layer[i][j] != 0) {
-                const int tileIndex = Layer[i][j] - 1;
-                const int tilesPerRow = static_cast<int>(textureSize) / g_dTileSize;
-                const auto tileX = static_cast<float>((tileIndex % tilesPerRow) * g_dTileSize);
-                const auto tileY = static_cast<float>((tileIndex)) / static_cast<float>(tilesPerRow) * g_dTileSize;
-
-                const float X = static_cast<float>(j) * g_dTileSize - g_fOffsetX;
-                const float Y = static_cast<float>(i) * g_dTileSize - g_fOffsetY;
-
-                vertices.append(sf::Vertex(sf::Vector2f(X, Y), sf::Vector2f(tileX, tileY)));
-                vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y), sf::Vector2f(tileX + g_dTileSize, tileY)));
-                vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y + g_dTileSize), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
-                vertices.append(sf::Vertex(sf::Vector2f(X, Y + g_dTileSize), sf::Vector2f(tileX, tileY + g_dTileSize)));
-            }
-        }
-    }
-
-    sf::RenderStates states;
-    states.texture = &texture;
-    window.draw(vertices, states);
-}
+//     int xMax = static_cast<int>((playerPos.x + viev.x) / g_dTileSize);
+//     int xMin = static_cast<int>((playerPos.x - viev.x) / g_dTileSize);
+//     int yMax = static_cast<int>((playerPos.y + viev.y) / g_dTileSize);
+//     int yMin = static_cast<int>((playerPos.y - viev.y) / g_dTileSize);
+//
+//     xMax = std::min(xMax, g_LayerSizeMaxX);
+//     xMin = std::max(xMin, 0);
+//     yMax = std::min(yMax, g_LayerSizeMaxY);
+//     yMin = std::max(yMin, 0);
+//
+//     for (int i = yMin; i < yMax; i++) {
+//         for (int j = xMin; j < xMax; j++) {
+//             if (Layer[i][j] != 0) {
+//                 const int tileIndex = Layer[i][j] - 1;
+//                 const int tilesPerRow = static_cast<int>(textureSize) / g_dTileSize;
+//                 const auto tileX = static_cast<float>((tileIndex % tilesPerRow) * g_dTileSize);
+//                 const auto tileY = static_cast<float>((tileIndex)) / static_cast<float>(tilesPerRow) * g_dTileSize;
+//
+//                 const float X = static_cast<float>(j) * g_dTileSize - g_fOffsetX;
+//                 const float Y = static_cast<float>(i) * g_dTileSize - g_fOffsetY;
+//
+//                 vertices.append(sf::Vertex(sf::Vector2f(X, Y), sf::Vector2f(tileX, tileY)));
+//                 vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y), sf::Vector2f(tileX + g_dTileSize, tileY)));
+//                 vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y + g_dTileSize), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
+//                 vertices.append(sf::Vertex(sf::Vector2f(X, Y + g_dTileSize), sf::Vector2f(tileX, tileY + g_dTileSize)));
+//             }
+//         }
+//     }
+//
+//     sf::RenderStates states;
+//     states.texture = &texture;
+//     window.draw(vertices, states);
+// }
 
 //
 // Получение слоя
@@ -521,6 +521,29 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
                         if (const int tileValue = el2; tileValue != 0) {
                             const float X = static_cast<float>(j + chunkX * chunkSize) * g_dTileSize;
                             const float Y = static_cast<float>(i + chunkY * chunkSize) * g_dTileSize;
+
+                            const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
+                            const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
+                            const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * g_dTileSize;
+
+                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + g_dTileSize)));
+                        }
+                        j++;
+                    }
+                    i++;
+                }
+                i = 0;
+                for (const auto& el1 : chunks[chunkKey].dataObjects) {
+                    int j = 0;
+                    for (const auto& el2 : el1) {
+                        if (const int tileValue = el2; tileValue != 0) {
+                            int treeXSize = 48;
+                            int treeYSize = 64;
+                            const float X = static_cast<float>(j + chunkX * (chunkSize / 2)) * treeXSize;
+                            const float Y = static_cast<float>(i + chunkY * (chunkSize / 2)) * treeYSize;
 
                             const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
                             const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
