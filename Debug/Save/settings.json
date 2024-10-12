@@ -113,8 +113,8 @@
                 "V-sync": 0,
                 "fps": -1,
                 "fullscreen": 0,
-                "height": 768,
-                "width": 1024
+                "height": 900,
+                "width": 1440
             }
         }
     ]

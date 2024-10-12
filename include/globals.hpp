@@ -11,3 +11,4 @@ extern int g_iWindowHeight;
 
 extern float g_fOffsetX;
 extern float g_fOffsetY;
+extern bool ComGenerateChunkRUN;

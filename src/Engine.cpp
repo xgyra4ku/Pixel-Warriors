@@ -493,6 +493,12 @@ void Engine::_commandExecution() {
                 } else if (iParameter == 0) {
                     m_bCollisionRUN = false;
                 }
+            } else if (strCommand == "generate") {
+                if (iParameter == 1) {
+                    ComGenerateChunkRUN = true;
+                } else if (iParameter == 0) {
+                    ComGenerateChunkRUN = false;
+                }
             }
         }
     }

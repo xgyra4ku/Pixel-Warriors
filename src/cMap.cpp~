@@ -454,10 +454,12 @@ void cMap::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkS
 
             if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) == chunks.end()) {
                 const std::string name = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
-                //std::cout << name << std::endl;
+                std::cout << name << std::endl;
                 if (std::vector<std::vector<int>> temp = chunks[chunkKey].data; checkingDownloadedChunks(name, temp)) {
+                    std::cout << name  << " LOAD" << std::endl;
                     chunks[chunkKey].data = temp;
                     saveChunk(chunkX, chunkY, chunks[chunkKey].data, chunkSize);
+                    std::cout << name << " SUF" << std::endl;
                 } else {
                     if (ComGenerateChunkRUN) {
                         chunks[chunkKey] = generateChunk(chunkX, chunkY, m_uiSeed, chunkSize);

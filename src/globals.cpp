@@ -5,3 +5,5 @@ int g_iWindowHeight;
 
 float g_fOffsetX = 0;
 float g_fOffsetY = 0;
+
+bool ComGenerateChunkRUN = false;

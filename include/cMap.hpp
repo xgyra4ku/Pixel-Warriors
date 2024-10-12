@@ -20,9 +20,10 @@
 //
 // структура ЧАНКА
 //
-struct chunk {
+struct ChunkStruct {
     std::vector<std::vector<int>> data;
     sf::Vector2f pos;
+    std::vector<std::vector<int>> dataObjects;
 };
 
 //
@@ -89,10 +90,10 @@ private:
     int LayerGround[g_LayerSizeMaxX][g_LayerSizeMaxY]{};
 
     // старые чанки
-    std::map<std::pair<int, int>, std::vector<std::vector<int>>> chunks;
+    std::map<std::pair<int, int>, ChunkStruct> chunks;
 
     //векторт чанков
-    std::vector<chunk> chunkVector;
+    std::vector<ChunkStruct> chunkVector;
 
     // потоки и мютексы
     std::thread chunkLoadThread;
@@ -119,5 +120,5 @@ private:
     static void chunkAdaptation(const std::vector<std::vector<double>> &noiseValues, std::vector<std::vector<int>> &chunk, int chunkSize);
     static void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
     static double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence, unsigned int seed);
-    static std::vector<std::vector<int>> generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize);
+    static ChunkStruct generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize);
 };
