@@ -49,7 +49,7 @@ double cMap::generatePerlinNoise(const double x, const double y, const double sc
 //
 ChunkStruct cMap::generateChunk(const int chunkX, const int chunkY, const unsigned int seed, const int chunkSize) {
     std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
-    std::vector<std::vector<int>> chunkObjects(chunkSize/2, std::vector<int>(chunkSize/2, 0));
+    std::vector<std::vector<int>> chunkObjects(chunkSize, std::vector<int>(chunkSize, 0));
     std::vector<std::vector<double>> noiseValuesObject((chunkSize / 2 )+ 2, std::vector<double>((chunkSize / 2 ) + 2, 0.0));
     std::vector<std::vector<double>> noiseValues(chunkSize + 2, std::vector<double>(chunkSize + 2, 0.0));
 
@@ -79,9 +79,9 @@ ChunkStruct cMap::generateChunk(const int chunkX, const int chunkY, const unsign
                 chunk[y][x] = ((0 + rand() % 2) == 1) ? 143 : 106;
             }
         }
-    }for (int y = 0; y < chunkSize/2; ++y) {
-        for (int x = 0; x < chunkSize/2; ++x) {
-            if (const double noiseValueObject = noiseValuesObject[y + 1][x + 1]; noiseValueObject < 0.1) {
+    }for (int y = 0; y < chunkSize; ++y) {
+        for (int x = 0; x < chunkSize; ++x) {
+            if (const double noiseValueObject = noiseValues[y + 1][x + 1]; noiseValueObject < 0.1) {
                 chunkObjects[y][x] = 0;
             } else {
                 chunkObjects[y][x] = 1;
@@ -535,24 +535,30 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
                     }
                     i++;
                 }
+                //для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
+                // нужно чтобы у текстур были свои не зависимые кординаты на карте
                 i = 0;
                 for (const auto& el1 : chunks[chunkKey].dataObjects) {
                     int j = 0;
                     for (const auto& el2 : el1) {
                         if (const int tileValue = el2; tileValue != 0) {
+                            // Размеры дерева
                             int treeXSize = 48;
                             int treeYSize = 64;
-                            const float X = static_cast<float>(j + chunkX * (chunkSize / 2)) * treeXSize;
-                            const float Y = static_cast<float>(i + chunkY * (chunkSize / 2)) * treeYSize;
 
-                            const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
-                            const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
-                            const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * g_dTileSize;
+                            // Координаты для дерева в мире
+                            const float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
+                            const float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
 
+                            // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
+                            const float tileX = 192; // X координата на текстуре
+                            const float tileY = 0;   // Y координата на текстуре
+
+                            // Добавляем вершины для дерева, учитывая размеры (48x64)
                             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + g_dTileSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY + treeYSize)));
+                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX, tileY + treeYSize)));
                         }
                         j++;
                     }
