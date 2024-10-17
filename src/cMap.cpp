@@ -1,7 +1,7 @@
 #include "../include/cMap.hpp"
 #include <iostream>
 #include <cmath>
-
+#include <random>
 //
 // Конструктор с установкой значениями переменых
 //
@@ -537,18 +537,30 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
                 }
                 //для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
                 // нужно чтобы у текстур были свои не зависимые кординаты на карте
+
+                // Размеры дерева
+                int treeXSize = 48;
+                int treeYSize = 64;
+                // Создаем генератор случайных чисел
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::uniform_int_distribution<> disX(-treeXSize / 4, treeXSize / 4);  // Смещение по X
+                std::uniform_int_distribution<> disY(-treeYSize / 4, treeYSize / 4);  // Смещение по Y
+
                 i = 0;
                 for (const auto& el1 : chunks[chunkKey].dataObjects) {
                     int j = 0;
                     for (const auto& el2 : el1) {
                         if (const int tileValue = el2; tileValue != 0) {
-                            // Размеры дерева
-                            int treeXSize = 48;
-                            int treeYSize = 64;
+
 
                             // Координаты для дерева в мире
-                            const float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
-                            const float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
+                            float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
+                            float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
+
+                            // Добавляем случайные смещения
+                            X += disX(gen);
+                            Y += disY(gen);
 
                             // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
                             const float tileX = 192; // X координата на текстуре

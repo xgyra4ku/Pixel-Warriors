@@ -35,6 +35,14 @@ void cEntity::setSize(const sf::Vector2f sizeSet) {
     this->size = sizeSet;
 }
 
+void cEntity::setRectСollision(const Rect rect) {
+	rectСollision = rect;
+}
+
+void cEntity::setHP(const unsigned int HPSet) {
+	HP = HPSet;
+}
+
 //
 // Получения позиции
 //
@@ -55,7 +63,12 @@ sf::Sprite cEntity::getSprite() {
 sf::Vector2f cEntity::getSize() const {
     return size;
 }
-
+Rect cEntity::getRectСollision() const {
+	return rectСollision;
+}
+unsigned int cEntity::getHP() const {
+	return HP;
+}
 //
 // Рисовка игрока
 //
