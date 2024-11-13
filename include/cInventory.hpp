@@ -9,6 +9,9 @@
 //
 struct sInventoryOBJ {
 private:
+    std::map<int, int> mapInventoryBase; // 4x6
+    std::map<int, int> mapInventoryFast; // 1x9
+    std::map<int, int> mapInventoryProtection; // 2x2
     // слоты инвентаря
     std::map<unsigned int, unsigned int> fastSlot;
     std::map<unsigned int, unsigned int> normalSlot;
