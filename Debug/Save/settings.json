@@ -110,8 +110,8 @@
                 "y": 40
             },
             "window": {
-                "V-sync": 0,
-                "fps": -1,
+                "V-sync": 1,
+                "fps": 0,
                 "fullscreen": 0,
                 "height": 900,
                 "width": 1440
