@@ -39,7 +39,10 @@ void cMap::deleting() {
 //
 // генирация тайла
 //
-v
+double cMap::generatePerlinNoise(const double x, const double y, const double scale, const int octaves, const double persistence, const unsigned int seed) {
+    const PerlinNoise perlin(seed);
+    return perlin.octave2D_01(x * scale, y * scale, octaves, persistence);
+}
 
 //
 // Генирация чанков

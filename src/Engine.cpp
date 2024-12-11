@@ -12,7 +12,7 @@ Engine::Engine() {
     // установление сглаживания
     settingsDisplay.antialiasingLevel = 0;
     if (m_mpSettings["fullscreen"] == 1) { // если фул скнин 1 открываем окно во весь экран
-        m_oWindow.create(sf::VideoMode::getDesktopMode(), "3D Engine", sf::Style::Fullscreen, settingsDisplay);
+        m_oWindow.create(sf::VideoMode::getDesktopMode(), "Pixel Warriors", sf::Style::Fullscreen, settingsDisplay);
     } else {
         // открываем окно в окне в разрешении которое в настройках
         m_oWindow.create(sf::VideoMode(m_mpSettings["windowWidth"], m_mpSettings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
@@ -214,7 +214,7 @@ void Engine::_timer() {
         m_fFps = static_cast<float>(m_fFrameCount) / m_oFpsClock.getElapsedTime().asSeconds();
         m_fFrameCount = 0;
         m_oFpsClock.restart();
-        std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
+        //std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
     }
 
     m_sftTextInfo.setString("fps: " + std::to_string(static_cast<int>(m_fFps))
