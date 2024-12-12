@@ -1,36 +1,49 @@
 #include "../include/cInventory.hpp"
 
-/// struct sInventoryOBJ
-/// {
-///     std::vector<unsigned int> fastSlot;
-///     std::vector<unsigned int> normalSlot;
-///     void init();
-/// };
+
+// Конструктор класса sInventoryOBJ, который инициализирует объект инвентаря
 sInventoryOBJ::sInventoryOBJ() {
+    // Инициализация быстрых слотов инвентаря
+    // iSizeFastSlot - количество быстрых слотов, определенное в классе sInventoryOBJ
     for (int i = 1; i <= iSizeFastSlot; ++i) {
-        fastSlot[i] = 0;
+        // mapInventoryFast - карта быстрых слотов, где ключ - индекс слота, а значение - идентификатор предмета в слоте
+        // В этом цикле все быстрые слоты инициализируются значением 0, что означает, что они пусты
+        mapInventoryFast[i] = 0;
     }
 
+    // Инициализация обычных слотов инвентаря
+    // iSizeNormalSlot - количество обычных слотов, определенное в классе sInventoryOBJ
     for (int i = 1; i <= iSizeNormalSlot; ++i) {
-        normalSlot[i] = 0;
+        // mapInventoryBase - карта обычных слотов, где ключ - индекс слота, а значение - идентификатор предмета в слоте
+        // В этом цикле все обычные слоты инициализируются значением 0, что означает, что они пусты
+        mapInventoryBase[i] = 0;
     }
 }
 
 
 
-std::map<unsigned int, unsigned int> sInventoryOBJ::getFastSlot() const {
-    return fastSlot;
+std::map<int,int> sInventoryOBJ::getFastSlot() const {
+    return mapInventoryFast;
 }
 
-std::map<unsigned int, unsigned int> sInventoryOBJ::getNormalSlot() const {
-    return normalSlot;
+std::map<int, int> sInventoryOBJ::getBaseSlot() const {
+    return mapInventoryBase;
 }
 
-void sInventoryOBJ::setFastSlot(const std::map<unsigned int, unsigned int> &fastSlot) {
-    this->fastSlot = fastSlot;
+
+void sInventoryOBJ::setFastSlot(const std::map<int, int> &fastSlot) {
+    this->mapInventoryFast = fastSlot;
 }
-void sInventoryOBJ::setNormalSlot(const std::map<unsigned int, unsigned int> &normalSlot) {
-    this->normalSlot = normalSlot;
+void sInventoryOBJ::setBaseSlot(const std::map<int, int> &normalSlot) {
+    this->mapInventoryBase = normalSlot;
+}
+
+void sInventoryOBJ::setSlotByIndex(const char typeSlots, const int iIndex, const int iItem) {
+    if (typeSlots == 'f') {
+        mapInventoryFast[iIndex] = iItem;
+    } else if (typeSlots == 'b') {
+        mapInventoryBase[iIndex] = iItem;
+    }
 }
 
 

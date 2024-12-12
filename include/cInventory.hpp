@@ -11,26 +11,22 @@ struct sInventoryOBJ {
 private:
     std::map<int, int> mapInventoryBase; // 4x6
     std::map<int, int> mapInventoryFast; // 1x9
-    std::map<int, int> mapInventoryProtection; // 2x2
-    // слоты инвентаря
-    std::map<unsigned int, unsigned int> fastSlot;
-    std::map<unsigned int, unsigned int> normalSlot;
+    //std::map<int, int> mapInventoryProtection; // 2x2
     // размеры слотов
-    int iSizeFastSlot = 10;
-    int iSizeNormalSlot = 24;
+    int iSizeFastSlot = 9; // 1x9
+    int iSizeNormalSlot = 24; // 4x6
 public:
     sInventoryOBJ();
 
 
     // гетеры
-    [[nodiscard]] std::map<unsigned int, unsigned int> getFastSlot() const;
-    [[nodiscard]] std::map<unsigned int, unsigned int> getNormalSlot() const;
+    [[nodiscard]] std::map<int,int> getFastSlot() const;
+    [[nodiscard]] std::map<int,int> getBaseSlot() const;
     // сетеры
-    void setFastSlot(const std::map<unsigned int, unsigned int> &fastSlot);
-    void setNormalSlot(const std::map<unsigned int, unsigned int> &normalSlot);
-    // инные функции
-    // ...
+    void setFastSlot(const std::map<int, int> &fastSlot);
+    void setBaseSlot(const std::map<int, int> &normalSlot);
 
+    void setSlotByIndex(char typeSlots, int iIndex, int iItem);
 };
 class cInventory {
 public:
