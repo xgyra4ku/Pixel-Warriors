@@ -477,9 +477,9 @@ void Engine::_commandExecution() {
 
         // читерские команды
         if (m_bCheats) {
-            if(strCommand == "speedPlayer") {
+            if(strCommand == "sppl") {
                 m_fPlayerSpeed = static_cast<float>(iParameter) * 0.01f;
-            } else if(strCommand == "speedOffset") {
+            } else if(strCommand == "spoffset") {
                 m_fOffSetSpeed = static_cast<float>(iParameter) * 0.1f;
             } else if (strCommand == "offset") {
                 if (iParameter == 1) {

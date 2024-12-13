@@ -41,6 +41,8 @@ public:
 
     void save();//сохранение
     void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);// иницилизация уже до этого созданого мира
+    [[noreturn]] void chunkLoadUnloadThread();
+
     void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);// иницилизация нового мира
     void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize); // рисовка
     void draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) const;// рисовка
@@ -75,6 +77,9 @@ private:
     std::fstream fileInput;
     std::fstream fileWorld;
 
+    std::mutex MUTEX;
+    sf::Thread thread; // Поток как член класса
+
     // определения натсроек текстура и прорисовки
     int imageHeight{};
     int imageWidth{};
@@ -101,6 +106,8 @@ private:
 
     std::string strNameFileWorld;
 
+    const int chunkSize = 16;
+
     //
     // Приватные функции
     //
@@ -113,8 +120,8 @@ private:
 
     bool checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>> &chunkData);
 
-    void loadChunksAroundPlayer(sf::Vector2f playerPos, int chunkSize);
-    void unloadDistantChunks(sf::Vector2f playerPos, int chunkSize);
+    void loadChunksAroundPlayer();
+    void unloadDistantChunks();
     void saveChunk(int chunkX, int chunkY, const std::vector<std::vector<int>> &data, int chunkSize);
 
     static void chunkAdaptation(const std::vector<std::vector<double>> &noiseValues, std::vector<std::vector<int>> &chunk, int chunkSize);

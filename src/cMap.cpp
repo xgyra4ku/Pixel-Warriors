@@ -5,7 +5,7 @@
 //
 // Конструктор с установкой значениями переменых
 //
-cMap::cMap() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false), m_bNewWorld(false) {
+cMap::cMap() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false), m_bNewWorld(false), thread(&cMap::chunkLoadUnloadThread, this) {
     //startChunkLoadingThread();
 }
 
@@ -368,6 +368,27 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     this->strNameFileWorld = strNameFileMap + ".json";
     loadingChunksFromFile();
     loadTileset();
+    // // создаём поток с функцией func() в качестве входной точки
+    // sf::Thread threadLoadChunksAroundPlayer(&cMap::loadChunksAroundPlayer, this);
+    // sf::Thread threadUnloadDistantChunks(&cMap::unloadDistantChunks, this);
+    //
+    // // запускаем поток
+    // threadLoadChunksAroundPlayer.launch();
+    // threadUnloadDistantChunks.launch();
+    // создаём поток с функцией func() в качестве входной точки
+    //sf::Thread thread(&cMap::chunkLoadUnloadThread, this);
+
+    // запускаем поток
+    thread.launch();
+}
+
+[[noreturn]] void cMap::chunkLoadUnloadThread() {
+    while (true) {
+        std::lock_guard<std::mutex> lock(MUTEX);
+        loadChunksAroundPlayer();
+        unloadDistantChunks();
+        //std::cout << "ChunkLoadUnloadThread" << std::endl;
+    }
 }
 
 //
@@ -381,6 +402,10 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     save();
     loadingChunksFromFile();
     loadTileset();
+    sf::Thread thread(&cMap::chunkLoadUnloadThread, this);
+
+    // запускаем поток
+    thread.launch();
 }
 //
 // Загрузка тайл сета
@@ -443,9 +468,9 @@ int cMap::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize,
 //
 // Загрузка чанков ко круг игрока в зависимости от его позиии и дальности прорисовки
 //
-void cMap::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkSize) {
-    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
-    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
+void cMap::loadChunksAroundPlayer() {
+    const int playerChunkX = static_cast<int>(PlayerPos.x) / (chunkSize * g_dTileSize);
+    const int playerChunkY = static_cast<int>(PlayerPos.y) / (chunkSize * g_dTileSize);
 
     for (int y = -m_iDistanceView; y <= m_iDistanceView; ++y) {
         for (int x = -m_iDistanceView; x <= m_iDistanceView; ++x) {
@@ -472,10 +497,10 @@ void cMap::loadChunksAroundPlayer(const sf::Vector2f playerPos, const int chunkS
 //
 // Выгрузка чанков
 //
-void cMap::unloadDistantChunks(const sf::Vector2f playerPos, const int chunkSize) {
+void cMap::unloadDistantChunks() {
 
-    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
-    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
+    const int playerChunkX = static_cast<int>(PlayerPos.x) / (chunkSize * g_dTileSize);
+    const int playerChunkY = static_cast<int>(PlayerPos.y) / (chunkSize * g_dTileSize);
 
     for (auto it = chunks.begin(); it != chunks.end();) {
         const int chunkX = it->first.first;
@@ -497,7 +522,7 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
     // Lock the mutex while modifying chunks
    // std::lock_guard<std::mutex> lock(chunkMutex);
     this->PlayerPos = playerPos;
-    loadChunksAroundPlayer(playerPos, chunkSize);
+    //loadChunksAroundPlayer(playerPos, chunkSize);
 
     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
@@ -583,7 +608,7 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
     sf::RenderStates states;
     states.texture = &texture;
     window.draw(vertices, states);
-    unloadDistantChunks(playerPos, chunkSize);
+    //unloadDistantChunks(playerPos, chunkSize);
 }
 
 //
