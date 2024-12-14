@@ -241,7 +241,7 @@ void Engine::_updateDisplay() {
     map.draw(m_oWindow,
         m_oPlayerPos,
         sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30),
-            (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), 16);
+            (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), iCHUNK_SIZE);
     player1.draw(m_oWindow);
 
     oInventory->draw(m_oWindow);
@@ -473,6 +473,8 @@ void Engine::_commandExecution() {
         } else if (strCommand == "fpsMax") {
             m_mpSettings["fps"] = iParameter;
             m_oWindow.setFramerateLimit(m_mpSettings["fps"]);
+        } else if (strCommand == "view") {
+            iDISTANCE_VIEW = iParameter;
         }
 
         // читерские команды

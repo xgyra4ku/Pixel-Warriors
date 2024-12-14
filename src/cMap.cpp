@@ -5,9 +5,7 @@
 //
 // Конструктор с установкой значениями переменых
 //
-cMap::cMap() : m_iDistanceView(3), chunkLoadThread(), ChunksThreadOnOff(false), fileWorldIsOpen(false), m_bNewWorld(false), thread(&cMap::chunkLoadUnloadThread, this) {
-    //startChunkLoadingThread();
-}
+cMap::cMap() : thread(&cMap::chunkLoadUnloadThread, this), m_iDistanceView(3), fileWorldIsOpen(false), m_bNewWorld(false), isThreadRunning(false), isThreadStarted(false) {}
 
 //
 // Дистуктор
@@ -21,6 +19,7 @@ cMap::~cMap() {
     chunkBuffer.clear();
     chunkVector.clear();
     fileWorldIsOpen = false;
+    thread.terminate();
 }
 
 //
@@ -28,6 +27,7 @@ cMap::~cMap() {
 //
 void cMap::deleting() {
     save();
+    isThreadStarted = false;
     chunks.clear();
     chunkBufferLoadIsFile.clear();
     chunkBuffer.clear();
@@ -48,52 +48,67 @@ double cMap::generatePerlinNoise(const double x, const double y, const double sc
 // Генирация чанков
 //
 ChunkStruct cMap::generateChunk(const int chunkX, const int chunkY, const unsigned int seed, const int chunkSize) {
+    // Инициализация структур чанков и шумов
     std::vector<std::vector<int>> chunk(chunkSize, std::vector<int>(chunkSize, 0));
     std::vector<std::vector<int>> chunkObjects(chunkSize, std::vector<int>(chunkSize, 0));
-    std::vector<std::vector<double>> noiseValuesObject((chunkSize / 2 )+ 2, std::vector<double>((chunkSize / 2 ) + 2, 0.0));
+    std::vector<std::vector<double>> noiseValuesObject((chunkSize / 2) + 2, std::vector<double>((chunkSize / 2) + 2, 0.0));
     std::vector<std::vector<double>> noiseValues(chunkSize + 2, std::vector<double>(chunkSize + 2, 0.0));
+
+    // Генерация основного шума
+    constexpr double persistence = 0.01;
+    constexpr int octaves = 1;
+    constexpr double scale = 0.001;
 
     for (int y = -1; y <= chunkSize; ++y) {
         for (int x = -1; x <= chunkSize; ++x) {
-            constexpr double persistence = 0.01;
-            constexpr int octaves = 1;
-            constexpr double scale = 0.001;
-            const double noiseValue = generatePerlinNoise((x + chunkX * chunkSize), (y + chunkY * chunkSize), scale, octaves, persistence, seed);
+            double noiseValue = generatePerlinNoise(
+                (x + chunkX * chunkSize),
+                (y + chunkY * chunkSize),
+                scale, octaves, persistence, seed
+            );
             noiseValues[y + 1][x + 1] = noiseValue;
         }
     }
-    for (int y = -1; y <= chunkSize/2; ++y) {
-        for (int x = -1; x <= chunkSize/2; ++x) {
-            constexpr double persistence = 0.01;
-            constexpr int octaves = 1;
-            constexpr double scale = 0.001;
-            const double noiseValueObject = generatePerlinNoise((x + chunkX * chunkSize), (y + chunkY * chunkSize), scale, octaves, persistence, seed+static_cast<unsigned int>(6.5/seed));
+
+    // Генерация шума объектов
+    for (int y = -1; y <= chunkSize / 2; ++y) {
+        for (int x = -1; x <= chunkSize / 2; ++x) {
+            double noiseValueObject = generatePerlinNoise(
+                (x + chunkX * chunkSize),
+                (y + chunkY * chunkSize),
+                scale, octaves, persistence,
+                seed + static_cast<unsigned int>(6.5 / seed)
+            );
             noiseValuesObject[y + 1][x + 1] = noiseValueObject;
         }
     }
+
+    // Заполнение данных чанка
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
-            if (const double noiseValue = noiseValues[y + 1][x + 1]; noiseValue < 0) {
-                chunk[y][x] = 91;
-            } else {
-                chunk[y][x] = ((0 + rand() % 2) == 1) ? 143 : 106;
-            }
-        }
-    }for (int y = 0; y < chunkSize; ++y) {
-        for (int x = 0; x < chunkSize; ++x) {
-            if (const double noiseValueObject = noiseValues[y + 1][x + 1]; noiseValueObject < 0.1) {
-                chunkObjects[y][x] = 0;
-            } else {
-                chunkObjects[y][x] = 1;
-            }
+            const double noiseValue = noiseValues[y + 1][x + 1];
+            chunk[y][x] = (noiseValue < 0) ? 91 : ((rand() % 2 == 0) ? 143 : 106);
         }
     }
+
+    // Заполнение объектов чанка
+    for (int y = 0; y < chunkSize; ++y) {
+        for (int x = 0; x < chunkSize; ++x) {
+            const double noiseValueObject = noiseValues[y + 1][x + 1];
+            chunkObjects[y][x] = (noiseValueObject < 0.1) ? 0 : 1;
+        }
+    }
+
+    // Адаптация чанка
     chunkAdaptation(noiseValues, chunk, chunkSize);
+
+    // Подготовка и возврат структуры
     ChunkStruct chunkStruct;
     chunkStruct.data = chunk;
     chunkStruct.dataObjects = chunkObjects;
     return chunkStruct;
 }
+
 
 //
 // Генирация рек
@@ -119,65 +134,64 @@ void cMap::generateRivers(std::vector<std::vector<int>>& chunk, const int chunkS
 void cMap::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, std::vector<std::vector<int>>& chunk, const int chunkSize) {
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
-            if (chunk[y][x] != 91) {
-                //верх низ право лево
-                if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
-                    chunk[y][x] = 127;  // Верхний левый
-                    continue;
-                }
-                if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x + 2] < 0) {
-                    chunk[y][x] = 114;  // Верхний правый
-                    continue;
-                }
-                if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 2] < 0) {
-                    chunk[y][x] = 144;  // Нижний правый
-                    continue;
-                }
-                if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
-                    chunk[y][x] = 157;  // Нижний левый
-                    continue;
-                }
+            if (chunk[y][x] == 91) {
+                continue;
+            }
 
-                // двойное соприкосновкение
-                if (noiseValues[y + 1][x] < 0 && noiseValues[y + 1][x + 1] >= 0) {
-                    chunk[y][x] = 142;  // Соприкосновение с водой слева
-                    continue;
-                }
-                if (noiseValues[y + 1][x + 2] < 0 && noiseValues[y + 1][x + 1] >= 0) {
-                    chunk[y][x] = 129;  // Соприкосновение с водой справа
-                    continue;
-                }
-                if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
-                    chunk[y][x] = 128;  // Соприкосновение с водой сверху
-                    continue;
-                }
-                if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
-                    chunk[y][x] = 158;  // Соприкосновение с водой снизу
-                    continue;
-                }
+            // Верхний левый угол
+            if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
+                chunk[y][x] = 127;
+                continue;
+            }
+            // Верхний правый угол
+            if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                chunk[y][x] = 114;
+                continue;
+            }
+            // Нижний правый угол
+            if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 2] < 0) {
+                chunk[y][x] = 144;
+                continue;
+            }
+            // Нижний левый угол
+            if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x] < 0) {
+                chunk[y][x] = 157;
+                continue;
+            }
 
-                // Проверка диагонали: вода в верхнем левом углу
-                if (noiseValues[y][x] < 0) {
-                    chunk[y][x] = 153;  // Вода в верхнем левом углу
-                    continue;
-                }
+            // Соприкосновение с водой
+            if (noiseValues[y + 1][x] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                chunk[y][x] = 142; // Слева
+                continue;
+            }
+            if (noiseValues[y + 1][x + 2] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                chunk[y][x] = 129; // Справа
+                continue;
+            }
+            if (noiseValues[y][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                chunk[y][x] = 128; // Сверху
+                continue;
+            }
+            if (noiseValues[y + 2][x + 1] < 0 && noiseValues[y + 1][x + 1] >= 0) {
+                chunk[y][x] = 158; // Снизу
+                continue;
+            }
 
-                // Проверка диагонали: вода в верхнем правом углу
-                if (noiseValues[y][x + 2] < 0) {
-                    chunk[y][x] = 151;  // Вода в верхнем правом углу
-                    continue;
-                }
-
-                // Проверка диагонали: вода в нижнем левом углу
-                if (noiseValues[y + 2][x] < 0) {
-                    chunk[y][x] = 123;  // Вода в нижнем левом углу
-                    continue;
-                }
-
-                // Проверка диагонали: вода в нижнем правом углу
-                if (noiseValues[y + 2][x + 2] < 0) {
-                    chunk[y][x] = 121;  // Вода в нижнем правом углу
-                }
+            // Диагонали
+            if (noiseValues[y][x] < 0) {
+                chunk[y][x] = 153; // Верхний левый
+                continue;
+            }
+            if (noiseValues[y][x + 2] < 0) {
+                chunk[y][x] = 151; // Верхний правый
+                continue;
+            }
+            if (noiseValues[y + 2][x] < 0) {
+                chunk[y][x] = 123; // Нижний левый
+                continue;
+            }
+            if (noiseValues[y + 2][x + 2] < 0) {
+                chunk[y][x] = 121; // Нижний правый
             }
         }
     }
@@ -199,53 +213,90 @@ void cMap::loadingChunksFromFile() {
 
 }
 
-//
-// Получения позиции игрока из мира
-//
+///
+/// Получения позиции игрока из мира
+///
 sf::Vector2f cMap::getPosPlayer() {
     return {jsonLoad["player"]["pos"]["x"], jsonLoad["player"]["pos"]["y"]};
 }
 
-//
-// Проверка загружиности чанка
-//
+/**
+ * Проверяет, загружены ли необходимые чанки из файла.
+ *
+ * @param requiredChunk Имя чанка, который необходимо проверить.
+ * @param chunkData Вектор, в который будут записаны данные чанка.
+ *
+ * @return True, если чанк загружен успешно, false в противном случае.
+ */
 bool cMap::checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>>& chunkData) {
+    // Проверяем, содержит ли файл раздел "chunks"
     if (jsonLoad.contains("chunks")) {
+        // Проверяем, содержит ли раздел "chunks" необходимый чанк
         if (jsonLoad["chunks"].contains(requiredChunk)) {
+            // Получаем данные чанка
             if (const auto& chunk = jsonLoad["chunks"][requiredChunk]; chunk.contains("data")) {
+                // Очищаем вектор для записи данных чанка
                 chunkData.clear();
+                // Перебираем строки данных чанка
                 for (const auto& row : chunk["data"]) {
+                    // Создаём временный вектор для строки данных
                     std::vector<int> rowData;
+                    // Перебираем значения в строке данных
                     for (const auto& value : row) {
+                        // Добавляем значение в строку данных
                         rowData.push_back(value);
                     }
+                    // Добавляем строку данных в вектор чанка
                     chunkData.push_back(rowData);
                 }
+                // Если чанк загружен успешно, возвращаем true
                 return true;
             }
+            // Если чанк не содержит данных, выводим предупреждение
             oCmdInfo.warning("The chunk '" + requiredChunk + "' does not contain the 'data' ");
         }
+        // Если чанк не найден, возвращаем false
         return false;
     }
 
+    // Если файл коррумпирован, выводим предупреждение
     oCmdInfo.warning("File is corrupted, there is no line 'chunks'");
+    // Возвращаем false, если файл коррумпирован
     return false;
 }
 
-//
-// Сохранение чака
-//
+
+/**
+ * Сохраняет чанк в буфере.
+ *
+ * @param chunkX Координата X чанка.
+ * @param chunkY Координата Y чанка.
+ * @param data Данные чанка.
+ * @param chunkSize Размер чанка.
+ */
 void cMap::saveChunk(const int chunkX, const int chunkY, const std::vector<std::vector<int>>& data, const int chunkSize) {
+    // Создаём имя чанка на основе его координат
     const std::string chunkName = std::to_string(chunkX) + "<>" + std::to_string(chunkY);
+
+    // Сохраняем данные чанка в буфере
     chunkBuffer[chunkName] = data;
+
+    // Если размер буфера превышает 300, сохраняем данные в файл
     if (size(chunkBuffer) > 300) save();
 }
 
-//
-// Сохранеие мира в файл
-//
+/**
+ * Сохраняет текущий мир в файл.
+ *
+ * Если мир новый, создает новый файл и записывает в него начальные данные.
+ * Если мир уже существует, открывает файл, считывает данные и обновляет их.
+ *
+ * @note Функция также очищает буфер чанков после сохранения.
+ */
 void cMap::save() {
+    // Проверяем, открыт ли файл мира для записи
     if (!fileWorldIsOpen) {
+        // Если мир новый, создаем новый файл и записываем в него начальные данные
         if (m_bNewWorld) {
             fileWorld.open("worlds/"+strNameFileWorld, std::ofstream::app);
             if(fileWorld.is_open()) {
@@ -259,8 +310,10 @@ void cMap::save() {
                 oCmdInfo.error("Cannot open file " + strNameFileWorld + " for writing");
             }
         }
+        // Открываем файл мира для чтения и записи
         fileWorld.open("worlds/"+strNameFileWorld);
         if (fileWorld.is_open()) {
+            // Если файл не пустой, считываем данные из него
             if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
                 oCmdInfo.info("The file " + strNameFileWorld + " is open for writing");
                 fileWorld >> jsonSave;
@@ -273,8 +326,10 @@ void cMap::save() {
         }
     }
 
+    // Начинаем процесс сохранения мира
     oCmdInfo.info("Start save");
 
+    // Обходим все чанки в буфере и записываем их в файл
     for (const auto& [chunkName, data] : chunkBuffer) {
         json chunkData = json::array();
         for (const auto& row : data) {
@@ -283,11 +338,14 @@ void cMap::save() {
         jsonSave["chunks"][chunkName]["data"] = chunkData;
     }
 
+    // Обновляем позицию игрока в файле
     jsonSave["player"]["pos"]["x"] = PlayerPos.x;
     jsonSave["player"]["pos"]["y"] = PlayerPos.y;
 
+    // Открываем файл мира для записи и сбрасываем его содержимое
     fileWorld.open("worlds/" + strNameFileWorld, std::ofstream::out | std::ofstream::trunc);
     if (fileWorld.is_open()) {
+        // Записываем данные в файл
         fileWorld << jsonSave.dump(4);
         fileWorld.close();
         oCmdInfo.info("Saved");
@@ -295,50 +353,10 @@ void cMap::save() {
         oCmdInfo.error("Cannot open file" + strNameFileWorld + " to save changes");
     }
 
+    // Очищаем буфер чанков после сохранения
     chunkBuffer.clear();
     loadingChunksFromFile();
 }
-//
-// //
-// // Рисовка
-// //
-// void cMap::draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, const sf::Vector2f playerPos, const sf::Vector2f viev) const {
-//     sf::VertexArray vertices(sf::Quads);
-//     const unsigned int textureSize = texture.getSize().x;
-//
-//     int xMax = static_cast<int>((playerPos.x + viev.x) / g_dTileSize);
-//     int xMin = static_cast<int>((playerPos.x - viev.x) / g_dTileSize);
-//     int yMax = static_cast<int>((playerPos.y + viev.y) / g_dTileSize);
-//     int yMin = static_cast<int>((playerPos.y - viev.y) / g_dTileSize);
-//
-//     xMax = std::min(xMax, g_LayerSizeMaxX);
-//     xMin = std::max(xMin, 0);
-//     yMax = std::min(yMax, g_LayerSizeMaxY);
-//     yMin = std::max(yMin, 0);
-//
-//     for (int i = yMin; i < yMax; i++) {
-//         for (int j = xMin; j < xMax; j++) {
-//             if (Layer[i][j] != 0) {
-//                 const int tileIndex = Layer[i][j] - 1;
-//                 const int tilesPerRow = static_cast<int>(textureSize) / g_dTileSize;
-//                 const auto tileX = static_cast<float>((tileIndex % tilesPerRow) * g_dTileSize);
-//                 const auto tileY = static_cast<float>((tileIndex)) / static_cast<float>(tilesPerRow) * g_dTileSize;
-//
-//                 const float X = static_cast<float>(j) * g_dTileSize - g_fOffsetX;
-//                 const float Y = static_cast<float>(i) * g_dTileSize - g_fOffsetY;
-//
-//                 vertices.append(sf::Vertex(sf::Vector2f(X, Y), sf::Vector2f(tileX, tileY)));
-//                 vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y), sf::Vector2f(tileX + g_dTileSize, tileY)));
-//                 vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize, Y + g_dTileSize), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
-//                 vertices.append(sf::Vertex(sf::Vector2f(X, Y + g_dTileSize), sf::Vector2f(tileX, tileY + g_dTileSize)));
-//             }
-//         }
-//     }
-//
-//     sf::RenderStates states;
-//     states.texture = &texture;
-//     window.draw(vertices, states);
-// }
 
 //
 // Получение слоя
@@ -360,53 +378,83 @@ void cMap::setLayer(const int x, const int y, const int layer, const int value) 
     }
 }
 
-//
-// Иницилизания созданого мира
-//
+/**
+ * Инициализация созданного мира.
+ *
+ * Эта функция инициализирует карту, загружая чанки из файла и тайлсет,
+ * а также запускает поток для обработки чанков.
+ *
+ * @param iDistanceView Расстояние видимости
+ * @param strNameFileMap Имя файла карты
+ * @param window Окно SFML
+ */
 void cMap::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window) {
+    // Установка расстояния видимости
     this->m_iDistanceView = iDistanceView;
+
+    // Формирование имени файла мира
     this->strNameFileWorld = strNameFileMap + ".json";
+
+    // Загрузка чанков из файла
     loadingChunksFromFile();
+
+    // Загрузка тайлсета
     loadTileset();
-    // // создаём поток с функцией func() в качестве входной точки
-    // sf::Thread threadLoadChunksAroundPlayer(&cMap::loadChunksAroundPlayer, this);
-    // sf::Thread threadUnloadDistantChunks(&cMap::unloadDistantChunks, this);
-    //
-    // // запускаем поток
-    // threadLoadChunksAroundPlayer.launch();
-    // threadUnloadDistantChunks.launch();
-    // создаём поток с функцией func() в качестве входной точки
-    //sf::Thread thread(&cMap::chunkLoadUnloadThread, this);
 
-    // запускаем поток
-    thread.launch();
+    // Запуск потока, если он еще не запущен
+    if (!isThreadRunning) {
+        isThreadRunning = true;
+        isThreadStarted = true;
+        thread.launch();
+    } else {
+        isThreadStarted = true;
+    }
 }
+/**
+ * Инициализация нового мира
+ *
+ * @param iDistanceView - расстояние видимости
+ * @param strNameFileMap - имя файла карты
+ * @param window - окно SFML
+ * @param seed - зерно генератора случайных чисел
+ */
+void cMap::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, const unsigned int seed) {
+    // Устанавливаем зерно генератора случайных чисел
+    this->m_uiSeed = seed;
+    // Устанавливаем расстояние видимости
+    this->m_iDistanceView = iDistanceView;
+    // Формируем имя файла карты
+    this->strNameFileWorld = strNameFileMap + ".json";
+    // Устанавливаем флаг нового мира
+    m_bNewWorld = true;
+    // Сохраняем данные
+    save();
+    // Загружаем чанки из файла
+    loadingChunksFromFile();
+    // Загружаем тайлсет
+    loadTileset();
 
-[[noreturn]] void cMap::chunkLoadUnloadThread() {
-    while (true) {
-        std::lock_guard<std::mutex> lock(MUTEX);
-        loadChunksAroundPlayer();
-        unloadDistantChunks();
-        //std::cout << "ChunkLoadUnloadThread" << std::endl;
+    // Запускаем поток, если он еще не запущен
+    if (!isThreadRunning) {
+        isThreadRunning = true;
+        isThreadStarted = true;
+        thread.launch();
+    } else {
+        isThreadStarted = true;
     }
 }
 
-//
-// Иницилизация не созданого мира
-//
-void cMap::init(const int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, const unsigned int seed) {
-    this->m_uiSeed = seed;
-    this->m_iDistanceView = iDistanceView;
-    this->strNameFileWorld = strNameFileMap + ".json";
-    m_bNewWorld = true;
-    save();
-    loadingChunksFromFile();
-    loadTileset();
-    sf::Thread thread(&cMap::chunkLoadUnloadThread, this);
-
-    // запускаем поток
-    thread.launch();
+void cMap::chunkLoadUnloadThread() {
+    while (isThreadRunning) {
+        if (isThreadStarted) {
+            std::lock_guard<std::mutex> lock(MUTEX);
+            loadChunksAroundPlayer();
+            unloadDistantChunks();
+        }
+    }
 }
+
+
 //
 // Загрузка тайл сета
 //
@@ -609,39 +657,6 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
     states.texture = &texture;
     window.draw(vertices, states);
     //unloadDistantChunks(playerPos, chunkSize);
-}
-
-//
-// Поток
-//
-void cMap::funkLoadChunksThread() {
-    while (ChunksThreadOnOff) {
-        // Lock the mutex while modifying chunks
-        //std::lock_guard<std::mutex> lock_guard(chunkMutex);
-
-        //loadChunksAroundPlayer(PlayerPos, 16);
-        //unloadDistantChunks(PlayerPos, 16);
-
-        //std::this_thread::sleep_for(std::chrono::seconds(1)); // Adjust as needed
-    }
-}
-
-//
-// Включения потока
-//
-void cMap::startChunkLoadingThread() {
-    ChunksThreadOnOff = true;
-    chunkLoadThread = std::thread(&cMap::funkLoadChunksThread, this);
-}
-
-//
-// Остановка потока
-//
-void cMap::stopChunkLoadingThread() {
-    ChunksThreadOnOff = false;
-    if (chunkLoadThread.joinable()) {
-        chunkLoadThread.join();
-    }
 }
 
 //

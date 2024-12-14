@@ -41,11 +41,9 @@ public:
 
     void save();//сохранение
     void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);// иницилизация уже до этого созданого мира
-    [[noreturn]] void chunkLoadUnloadThread();
 
     void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);// иницилизация нового мира
     void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize); // рисовка
-    void draw(sf::RenderWindow &window, const std::vector<std::vector<int>>& Layer, sf::Vector2f playerPos, sf::Vector2f viev) const;// рисовка
     int collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) const;// коллизии
     void setLayer(int x, int y, int layer, int value);// установка слоя
     int getLayer(int x, int y, int layer) const;// получение слоя
@@ -85,9 +83,11 @@ private:
     int imageWidth{};
     int m_iDistanceView;
 
-    bool ChunksThreadOnOff;
+    bool ChunksThreadOnOff{};
     bool fileWorldIsOpen;
     bool m_bNewWorld;
+    bool isThreadRunning;
+    bool isThreadStarted;
 
     unsigned int m_uiSeed{};
 
@@ -100,32 +100,24 @@ private:
     //векторт чанков
     std::vector<ChunkStruct> chunkVector;
 
-    // потоки и мютексы
-    std::thread chunkLoadThread;
-    std::mutex chunkMutex;
-
     std::string strNameFileWorld;
 
     const int chunkSize = 16;
 
-    //
-    // Приватные функции
-    //
     void loadTileset();
-    void funkLoadChunksThread();
-    void startChunkLoadingThread();
-    void stopChunkLoadingThread();
-
+    void chunkLoadUnloadThread();
     void loadingChunksFromFile();
-
-    bool checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>> &chunkData);
-
     void loadChunksAroundPlayer();
     void unloadDistantChunks();
     void saveChunk(int chunkX, int chunkY, const std::vector<std::vector<int>> &data, int chunkSize);
 
+    bool checkingDownloadedChunks(const std::string& requiredChunk, std::vector<std::vector<int>> &chunkData);
+
+
     static void chunkAdaptation(const std::vector<std::vector<double>> &noiseValues, std::vector<std::vector<int>> &chunk, int chunkSize);
     static void generateRivers(std::vector<std::vector<int>>& chunk, int chunkSize);
+
     static double generatePerlinNoise(double x, double y, double scale, int octaves, double persistence, unsigned int seed);
+
     static ChunkStruct generateChunk(int chunkX, int chunkY, unsigned int seed, int chunkSize);
 };
