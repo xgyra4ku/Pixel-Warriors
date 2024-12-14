@@ -177,16 +177,16 @@ void Engine::vRun() {
             m_mpDependencyList["menuLib"].menuLib(m_oWindow, m_iMenu, m_mpSettings, m_iWheelEventMouse, m_fTime, m_mpFileWorld);
         } else if (m_iMenu == -3) { // загрузка мира
             oCmdInfo.info("Load world >" + m_mpFileWorld["name"] + "<");
-            map.init(3, m_mpFileWorld["name"], m_oWindow);
-            _initPlayer(1);
+            map.init(iDISTANCE_VIEW, m_mpFileWorld["name"], m_oWindow);
+            _initPlayer(iTextureNumPlayer1);
             player1.setPosition(map.getPosPlayer());
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);
             m_iMenu = -1;
         } else if (m_iMenu == -4) { // создание мира
             oCmdInfo.info("Create world >" + m_mpFileWorld["name"] + "<");
-            map.init(3, m_mpFileWorld["name"], m_oWindow, std::stoul(m_mpFileWorld["seed"]));
-            _initPlayer(1);
+            map.init(iDISTANCE_VIEW, m_mpFileWorld["name"], m_oWindow, std::stoul(m_mpFileWorld["seed"]));
+            _initPlayer(iTextureNumPlayer1);
             player1.setPosition(sf::Vector2f(0,0));
             g_fOffsetX = (player1.getPosition().x - static_cast<float>(m_oWindow.getSize().x) / 2);
             g_fOffsetY = (player1.getPosition().y - static_cast<float>(m_oWindow.getSize().y) / 2);

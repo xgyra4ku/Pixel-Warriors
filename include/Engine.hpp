@@ -46,6 +46,13 @@ public:
     //
     void vRun();
 private:
+    ///
+    /// Настройки по умолчанию
+    ///
+    int iDISTANCE_VIEW = 2;
+    int iCHUNK_SIZE = 16;
+    int iTextureNumPlayer1 = 1;
+
 
     //
     // Определения других классов
