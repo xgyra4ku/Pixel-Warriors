@@ -5,7 +5,7 @@
 //
 // Конструктор с установкой значениями переменых
 //
-cMap::cMap() : thread(&cMap::chunkLoadUnloadThread, this), m_iDistanceView(3), fileWorldIsOpen(false), m_bNewWorld(false), isThreadRunning(false), isThreadStarted(false) {}
+cMap::cMap() : thread(&cMap::chunkLoadUnloadThread, this), thread2(&cMap::threadFunction, this), vertices(sf::Quads), m_iDistanceView(3), fileWorldIsOpen(false), m_bNewWorld(false), isThreadRunning(false), isThreadStarted(false){}
 
 //
 // Дистуктор
@@ -26,8 +26,8 @@ cMap::~cMap() {
 // Удаление старых данных
 //
 void cMap::deleting() {
-    save();
     isThreadStarted = false;
+    save();
     chunks.clear();
     chunkBufferLoadIsFile.clear();
     chunkBuffer.clear();
@@ -401,14 +401,7 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     // Загрузка тайлсета
     loadTileset();
 
-    // Запуск потока, если он еще не запущен
-    if (!isThreadRunning) {
-        isThreadRunning = true;
-        isThreadStarted = true;
-        thread.launch();
-    } else {
-        isThreadStarted = true;
-    }
+    initAndStartThreads();
 }
 /**
  * Инициализация нового мира
@@ -434,11 +427,15 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     // Загружаем тайлсет
     loadTileset();
 
-    // Запускаем поток, если он еще не запущен
+    initAndStartThreads();
+}
+
+void cMap::initAndStartThreads() {
     if (!isThreadRunning) {
         isThreadRunning = true;
         isThreadStarted = true;
         thread.launch();
+        thread2.launch();
     } else {
         isThreadStarted = true;
     }
@@ -447,9 +444,11 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
 void cMap::chunkLoadUnloadThread() {
     while (isThreadRunning) {
         if (isThreadStarted) {
-            std::lock_guard<std::mutex> lock(MUTEX);
-            loadChunksAroundPlayer();
-            unloadDistantChunks();
+            {
+                std::lock_guard<std::mutex> lock(MUTEX);
+                loadChunksAroundPlayer();
+                unloadDistantChunks();
+            }
         }
     }
 }
@@ -572,91 +571,119 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
     this->PlayerPos = playerPos;
     //loadChunksAroundPlayer(playerPos, chunkSize);
 
-    const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
-    const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
+    sf::RenderStates states;
+    states.texture = &texture;
+    // Блокируем доступ к вершинам во время рендера
+    {
+        std::lock_guard<std::mutex> lock(MUTEX2);
+        if (vertices.getVertexCount() > 0) {
+            window.draw(vertices, states);
+        }
+    }
+    //unloadDistantChunks(playerPos, chunkSize);
+}
 
-    sf::VertexArray vertices(sf::Quads);
+void cMap::swapBuffers() {
+    std::lock_guard<std::mutex> lock(bufferMutex);
+    chunksRenderBuffer = chunks; // Копируем готовые данные в буфер рендера
+}
 
-    // Округляем offsetX и offsetY
-    const float roundedOffsetX = std::round(g_fOffsetX);
-    const float roundedOffsetY = std::round(g_fOffsetY);
+///
+/// Поток
+///
+void cMap::threadFunction() {
+    while (isThreadRunning) {
+        if (isThreadStarted) {
+            //std::lock_guard<std::mutex> lock(MUTEX2);
+            // Очистка старых вершин
+            //vertices.clear();
+            sf::VertexArray LocalVertices(sf::Quads);
 
-    for (int y = -m_iDistanceView; y <= m_iDistanceView; ++y) {
-        for (int x = -m_iDistanceView; x <= m_iDistanceView; ++x) {
-            int chunkX = playerChunkX + x;
-            int chunkY = playerChunkY + y;
 
-            if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) != chunks.end()) {
-                int i = 0;
-                for (const auto& el1 : chunks[chunkKey].data) {
-                    int j = 0;
-                    for (const auto& el2 : el1) {
-                        if (const int tileValue = el2; tileValue != 0) {
-                            const float X = static_cast<float>(j + chunkX * chunkSize) * g_dTileSize;
-                            const float Y = static_cast<float>(i + chunkY * chunkSize) * g_dTileSize;
+            const int playerChunkX = static_cast<int>(PlayerPos.x) / (chunkSize * g_dTileSize);
+            const int playerChunkY = static_cast<int>(PlayerPos.y) / (chunkSize * g_dTileSize);
 
-                            const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
-                            const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
-                            const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * g_dTileSize;
+            // Округляем offsetX и offsetY
+            const float roundedOffsetX = std::round(g_fOffsetX);
+            const float roundedOffsetY = std::round(g_fOffsetY);
 
-                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + g_dTileSize)));
+            for (int y = -m_iDistanceView; y <= m_iDistanceView; ++y) {
+                for (int x = -m_iDistanceView; x <= m_iDistanceView; ++x) {
+                    int chunkX = playerChunkX + x;
+                    int chunkY = playerChunkY + y;
+
+                    if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) != chunks.end()) {
+                        int i = 0;
+                        for (const auto& el1 : chunks[chunkKey].data) {
+                            int j = 0;
+                            for (const auto& el2 : el1) {
+                                if (const int tileValue = el2; tileValue != 0) {
+                                    const float X = static_cast<float>(j + chunkX * chunkSize) * g_dTileSize;
+                                    const float Y = static_cast<float>(i + chunkY * chunkSize) * g_dTileSize;
+
+                                    const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
+                                    const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
+                                    const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * g_dTileSize;
+
+                                    LocalVertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+                                    LocalVertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY)));
+                                    LocalVertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
+                                    LocalVertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + g_dTileSize)));
+                                }
+                                j++;
+                            }
+                            i++;
                         }
-                        j++;
+                        //для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
+                        // нужно чтобы у текстур были свои не зависимые кординаты на карте
+
+                        // Размеры дерева
+                        // int treeXSize = 48;
+                        // int treeYSize = 64;
+                        // // Создаем генератор случайных чисел
+                        // std::random_device rd;
+                        // std::mt19937 gen(rd());
+                        // std::uniform_int_distribution<> disX(-treeXSize / 4, treeXSize / 4);  // Смещение по X
+                        // std::uniform_int_distribution<> disY(-treeYSize / 4, treeYSize / 4);  // Смещение по Y
+                        //
+                        // i = 0;
+                        // for (const auto& el1 : chunks[chunkKey].dataObjects) {
+                        //     int j = 0;
+                        //     for (const auto& el2 : el1) {
+                        //         if (const int tileValue = el2; tileValue != 0) {
+                        //
+                        //
+                        //             // Координаты для дерева в мире
+                        //             float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
+                        //             float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
+                        //
+                        //             // Добавляем случайные смещения
+                        //             X += disX(gen);
+                        //             Y += disY(gen);
+                        //
+                        //             // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
+                        //             const float tileX = 192; // X координата на текстуре
+                        //             const float tileY = 0;   // Y координата на текстуре
+                        //
+                        //             // Добавляем вершины для дерева, учитывая размеры (48x64)
+                        //             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+                        //             vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY)));
+                        //             vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY + treeYSize)));
+                        //             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX, tileY + treeYSize)));
+                        //         }
+                        //         j++;
+                        //     }
+                        //     i++;
+                        // }
                     }
-                    i++;
                 }
-                //для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
-                // нужно чтобы у текстур были свои не зависимые кординаты на карте
-
-                // Размеры дерева
-                int treeXSize = 48;
-                int treeYSize = 64;
-                // Создаем генератор случайных чисел
-                std::random_device rd;
-                std::mt19937 gen(rd());
-                std::uniform_int_distribution<> disX(-treeXSize / 4, treeXSize / 4);  // Смещение по X
-                std::uniform_int_distribution<> disY(-treeYSize / 4, treeYSize / 4);  // Смещение по Y
-
-                i = 0;
-                for (const auto& el1 : chunks[chunkKey].dataObjects) {
-                    int j = 0;
-                    for (const auto& el2 : el1) {
-                        if (const int tileValue = el2; tileValue != 0) {
-
-
-                            // Координаты для дерева в мире
-                            float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
-                            float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
-
-                            // Добавляем случайные смещения
-                            X += disX(gen);
-                            Y += disY(gen);
-
-                            // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
-                            const float tileX = 192; // X координата на текстуре
-                            const float tileY = 0;   // Y координата на текстуре
-
-                            // Добавляем вершины для дерева, учитывая размеры (48x64)
-                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY + treeYSize)));
-                            vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX, tileY + treeYSize)));
-                        }
-                        j++;
-                    }
-                    i++;
-                }
+            }
+            {
+                std::lock_guard<std::mutex> lock1(MUTEX2);
+                vertices = LocalVertices;
             }
         }
     }
-
-    sf::RenderStates states;
-    states.texture = &texture;
-    window.draw(vertices, states);
-    //unloadDistantChunks(playerPos, chunkSize);
 }
 
 //
@@ -665,3 +692,100 @@ void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vect
 void cMap::createWorld() {
 
 }
+
+//
+// //
+// // Рисовка
+// //
+// void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
+//     // Lock the mutex while modifying chunks
+//    // std::lock_guard<std::mutex> lock(chunkMutex);
+//     this->PlayerPos = playerPos;
+//     //loadChunksAroundPlayer(playerPos, chunkSize);
+//
+//     const int playerChunkX = static_cast<int>(playerPos.x) / (chunkSize * g_dTileSize);
+//     const int playerChunkY = static_cast<int>(playerPos.y) / (chunkSize * g_dTileSize);
+//
+//     sf::VertexArray vertices(sf::Quads);
+//
+//     // Округляем offsetX и offsetY
+//     const float roundedOffsetX = std::round(g_fOffsetX);
+//     const float roundedOffsetY = std::round(g_fOffsetY);
+//
+//     for (int y = -m_iDistanceView; y <= m_iDistanceView; ++y) {
+//         for (int x = -m_iDistanceView; x <= m_iDistanceView; ++x) {
+//             int chunkX = playerChunkX + x;
+//             int chunkY = playerChunkY + y;
+//
+//             if (auto chunkKey = std::make_pair(chunkX, chunkY); chunks.find(chunkKey) != chunks.end()) {
+//                 int i = 0;
+//                 for (const auto& el1 : chunks[chunkKey].data) {
+//                     int j = 0;
+//                     for (const auto& el2 : el1) {
+//                         if (const int tileValue = el2; tileValue != 0) {
+//                             const float X = static_cast<float>(j + chunkX * chunkSize) * g_dTileSize;
+//                             const float Y = static_cast<float>(i + chunkY * chunkSize) * g_dTileSize;
+//
+//                             const int tilesPerRow = static_cast<int>(texture.getSize().x) / g_dTileSize;
+//                             const float tileX = static_cast<float>((tileValue - 1) % tilesPerRow) * g_dTileSize;
+//                             const float tileY = std::round(static_cast<float>(tileValue - 1) / static_cast<float>(tilesPerRow)) * g_dTileSize;
+//
+//                             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+//                             vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY)));
+//                             vertices.append(sf::Vertex(sf::Vector2f(X + g_dTileSize - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX + g_dTileSize, tileY + g_dTileSize)));
+//                             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + g_dTileSize - roundedOffsetY), sf::Vector2f(tileX, tileY + g_dTileSize)));
+//                         }
+//                         j++;
+//                     }
+//                     i++;
+//                 }
+//                 //для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
+//                 // нужно чтобы у текстур были свои не зависимые кординаты на карте
+//
+//                 // Размеры дерева
+//                 int treeXSize = 48;
+//                 int treeYSize = 64;
+//                 // Создаем генератор случайных чисел
+//                 std::random_device rd;
+//                 std::mt19937 gen(rd());
+//                 std::uniform_int_distribution<> disX(-treeXSize / 4, treeXSize / 4);  // Смещение по X
+//                 std::uniform_int_distribution<> disY(-treeYSize / 4, treeYSize / 4);  // Смещение по Y
+//
+//                 i = 0;
+//                 for (const auto& el1 : chunks[chunkKey].dataObjects) {
+//                     int j = 0;
+//                     for (const auto& el2 : el1) {
+//                         if (const int tileValue = el2; tileValue != 0) {
+//
+//
+//                             // Координаты для дерева в мире
+//                             float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
+//                             float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
+//
+//                             // Добавляем случайные смещения
+//                             X += disX(gen);
+//                             Y += disY(gen);
+//
+//                             // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
+//                             const float tileX = 192; // X координата на текстуре
+//                             const float tileY = 0;   // Y координата на текстуре
+//
+//                             // Добавляем вершины для дерева, учитывая размеры (48x64)
+//                             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+//                             vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY)));
+//                             vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY + treeYSize)));
+//                             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX, tileY + treeYSize)));
+//                         }
+//                         j++;
+//                     }
+//                     i++;
+//                 }
+//             }
+//         }
+//     }
+//
+//     sf::RenderStates states;
+//     states.texture = &texture;
+//     window.draw(vertices, states);
+//     //unloadDistantChunks(playerPos, chunkSize);
+//}

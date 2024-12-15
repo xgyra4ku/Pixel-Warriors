@@ -49,7 +49,7 @@ private:
     ///
     /// Настройки по умолчанию
     ///
-    int iDISTANCE_VIEW = 2;
+    int iDISTANCE_VIEW = 3;
     int iCHUNK_SIZE = 16;
     int iTextureNumPlayer1 = 1;
 

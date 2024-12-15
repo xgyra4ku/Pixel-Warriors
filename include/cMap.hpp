@@ -43,7 +43,13 @@ public:
     void init(int iDistanceView, const std::string &strNameFileMap, const sf::RenderWindow &window);// иницилизация уже до этого созданого мира
 
     void init(int iDistanceView, const std::string& strNameFileMap, const sf::RenderWindow& window, unsigned int seed);// иницилизация нового мира
+    void initAndStartThreads();
+
     void draw(sf::RenderWindow &window, sf::Vector2f playerPos, sf::Vector2f view, int chunkSize); // рисовка
+    void swapBuffers();
+
+    void threadFunction();
+
     int collision(sf::Vector2f playerPos, sf::Vector2f playerSize, sf::Vector2f bias) const;// коллизии
     void setLayer(int x, int y, int layer, int value);// установка слоя
     int getLayer(int x, int y, int layer) const;// получение слоя
@@ -76,7 +82,9 @@ private:
     std::fstream fileWorld;
 
     std::mutex MUTEX;
+    std::mutex MUTEX2;
     sf::Thread thread; // Поток как член класса
+    sf::Thread thread2; // Поток как член класса
 
     // определения натсроек текстура и прорисовки
     int imageHeight{};
@@ -96,9 +104,14 @@ private:
 
     // старые чанки
     std::map<std::pair<int, int>, ChunkStruct> chunks;
+    std::map<std::pair<int, int>, ChunkStruct> chunksRenderBuffer;
+    //std::map<std::pair<int, int>, ChunkStruct> chunksWorkBuffer;
+    std::mutex bufferMutex;
+
 
     //векторт чанков
     std::vector<ChunkStruct> chunkVector;
+    sf::VertexArray vertices;
 
     std::string strNameFileWorld;
 
