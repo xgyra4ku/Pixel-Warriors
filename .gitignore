@@ -1,11 +1,10 @@
 /CMakeFiles/
 /.vscode/
 /.cmake/
+/Testing/
+
 .ninja_deps
 .ninja_log
-build.ninja
+.ninja
 cmake_install.cmake
 CMakeCache.txt
-.exe
-.json
-.dll
