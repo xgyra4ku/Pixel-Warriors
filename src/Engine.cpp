@@ -4,22 +4,21 @@
 //
 // Конструктор класса
 //
-Engine::Engine() {
-    // вызов функции получение настроей из файла
+Engine::Engine() : m_iMenu(0), m_bOffsetRUN(true), m_bCollisionRUN(true), m_bPlayerPosRUN(false),m_bInfo(false), m_bCheats(false) {
     m_mpSettings = save_and_load_.loadSettings();
-    // создание переменой с настройками окна
     sf::ContextSettings settingsDisplay;
     // установление сглаживания
-    settingsDisplay.antialiasingLevel = 0;
-    if (m_mpSettings["fullscreen"] == 1) { // если фул скнин 1 открываем окно во весь экран
+    settingsDisplay.antialiasingLevel = 8;
+    if (m_mpSettings["fullscreen"] == 1) {
         m_oWindow.create(sf::VideoMode::getDesktopMode(), "Pixel Warriors", sf::Style::Fullscreen, settingsDisplay);
     } else {
-        // открываем окно в окне в разрешении которое в настройках
-        m_oWindow.create(sf::VideoMode(m_mpSettings["windowWidth"], m_mpSettings["windowHeight"]), "3D Engine", sf::Style::Close, settingsDisplay);
+        m_oWindow.create(sf::VideoMode(m_mpSettings["windowWidth"], m_mpSettings["windowHeight"]), "Pixel Warriors", sf::Style::Close, settingsDisplay);
     }
     // получени размера окна
     g_iWindowWidth = static_cast<int>(m_oWindow.getSize().x);
     g_iWindowHeight = static_cast<int>(m_oWindow.getSize().y);
+
+    sf::Texture textureInventory;
 
     // проверка открытия окна
     if (!m_oWindow.isOpen()) {
@@ -35,6 +34,12 @@ Engine::Engine() {
         m_oWindow.close();
         return;
     }
+    if (!textureInventory.loadFromFile("UI/2/Inventory_style_02b.png")) {
+        oCmdInfo.error("Failed loading UI/2/Inventory_style_02b.png");
+        m_oWindow.close();
+        return;
+    }
+    oCmdInfo.info("Texture load is successfully");
 
     // загрузка шрифта и проверка
     if (!m_ftFont.loadFromFile("Dependency/font.otf")) {
@@ -42,27 +47,18 @@ Engine::Engine() {
         m_oWindow.close();
         return;
     }
-    oCmdInfo.info("Texture and font load is successfully");
-    // определения консоли
+    oCmdInfo.info("Font load is successfully");
+
+    // определения консоли и инвентаря
     oConsole = new Console(m_ftFont, m_oWindow);
-    sf::Texture tex;
-    if (!tex.loadFromFile("UI/2/Inventory_style_02b.png")) {
-        return;
-    }
-    // определение инвентаря
-    oInventory = new cInventory(tex,m_oWindow);
+    oInventory = new cInventory(textureInventory,m_oWindow);
 
     // загрузка дополнеий
     _loadDependency("Dependency/");
-    m_iMenu = 0;
+
 
     // проверка и загрузка модов
     //modslist = loadMods("Mods");
-    m_bOffsetRUN = true;
-    m_bCollisionRUN = true;
-    m_bPlayerPosRUN = false;
-    m_bInfo = false;
-    m_bCheats = false;
 
     m_sftTextInfo.setFillColor(sf::Color::Black);
     m_sftTextInfo.setFont(m_ftFont);
@@ -203,27 +199,24 @@ void Engine::vRun() {
 // таймер и изменения фпс
 //
 void Engine::_timer() {
-
     m_fTime = static_cast<float>(m_oClock.getElapsedTime().asMicroseconds());
     m_oClock.restart();
     m_fTime = m_fTime / 700.0f;
-
     if (m_fTime > 60.0f) m_fTime = 60.0f;
     m_fFrameCount++;
     if (m_oFpsClock.getElapsedTime().asSeconds() >= 1.0f) {
         m_fFps = static_cast<float>(m_fFrameCount) / m_oFpsClock.getElapsedTime().asSeconds();
         m_fFrameCount = 0;
         m_oFpsClock.restart();
-        //std::cout << "FPS: " << static_cast<int>(m_fFps) << std::endl;
     }
-
-    m_sftTextInfo.setString("fps: " + std::to_string(static_cast<int>(m_fFps))
-        + "\n" + "posPL: " + "X: " + std::to_string(static_cast<int>((m_oPlayerPos.x))) +" Y: " + std::to_string(static_cast<int>(m_oPlayerPos.y)));
-
+    m_sftTextInfo.setString(
+        "Fps: " + std::to_string(static_cast<int>(m_fFps))+ "\n"+"posPL:"+
+        " X: " +std::to_string(static_cast<int>(m_oPlayerPos.x/16)) +
+        " Y: " + std::to_string(static_cast<int>(m_oPlayerPos.y/16)));
 }
 
 //
-// Логика
+// Логика обработки флагов
 //
 void Engine::_logic() {
     if (m_bCollisionRUN)
@@ -243,9 +236,7 @@ void Engine::_updateDisplay() {
         sf::Vector2f((static_cast<float>(g_iWindowWidth) / 2.0f + 30),
             (static_cast<float>(g_iWindowHeight) / 2.0f + 30)), iCHUNK_SIZE);
     player1.draw(m_oWindow);
-
     oInventory->draw(m_oWindow);
-
     if (m_bInfo)
         m_oWindow.draw(m_sftTextInfo);
     oConsole->draw(m_oWindow);
@@ -257,7 +248,6 @@ void Engine::_updateDisplay() {
 void Engine::_events() {
     m_iWheelEventMouse = 0;
     sf::Event event{};
-    // если есть евент
     while (m_oWindow.pollEvent(event)) {
         if (event.type == sf::Event::Closed) { // при закрытии окна
             m_oWindow.close();

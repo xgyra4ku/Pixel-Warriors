@@ -201,7 +201,7 @@ void cMap::chunkAdaptation(const std::vector<std::vector<double>>& noiseValues, 
 // Выгрузка мира из чанка
 //
 void cMap::loadingChunksFromFile() {
-    std::cout << "INFO: Open file " << strNameFileWorld << std::endl;
+    oCmdInfo.info("Open file " + strNameFileWorld);
     fileInput.open("worlds/" + strNameFileWorld);
     if (!fileInput.is_open()) {
         oCmdInfo.error("Opening file: " + strNameFileWorld);
@@ -294,9 +294,9 @@ void cMap::saveChunk(const int chunkX, const int chunkY, const std::vector<std::
  * @note Функция также очищает буфер чанков после сохранения.
  */
 void cMap::save() {
-    // Проверяем, открыт ли файл мира для записи
+    /// Проверяем, открыт ли файл мира для записи
     if (!fileWorldIsOpen) {
-        // Если мир новый, создаем новый файл и записываем в него начальные данные
+        /// Если мир новый, создаем новый файл и записываем в него начальные данные
         if (m_bNewWorld) {
             fileWorld.open("worlds/"+strNameFileWorld, std::ofstream::app);
             if(fileWorld.is_open()) {
@@ -310,10 +310,10 @@ void cMap::save() {
                 oCmdInfo.error("Cannot open file " + strNameFileWorld + " for writing");
             }
         }
-        // Открываем файл мира для чтения и записи
+        /// Открываем файл мира для чтения и записи
         fileWorld.open("worlds/"+strNameFileWorld);
         if (fileWorld.is_open()) {
-            // Если файл не пустой, считываем данные из него
+            /// Если файл не пустой, считываем данные из него
             if (fileWorld.peek() != std::ifstream::traits_type::eof()) {
                 oCmdInfo.info("The file " + strNameFileWorld + " is open for writing");
                 fileWorld >> jsonSave;
@@ -326,10 +326,10 @@ void cMap::save() {
         }
     }
 
-    // Начинаем процесс сохранения мира
-    oCmdInfo.info("Start save");
+    /// Начинаем процесс сохранения мира
+    oCmdInfo.info("Starting saved...");
 
-    // Обходим все чанки в буфере и записываем их в файл
+    /// Обходим все чанки в буфере и записываем их в файл
     for (const auto& [chunkName, data] : chunkBuffer) {
         json chunkData = json::array();
         for (const auto& row : data) {
@@ -338,14 +338,14 @@ void cMap::save() {
         jsonSave["chunks"][chunkName]["data"] = chunkData;
     }
 
-    // Обновляем позицию игрока в файле
+    /// Обновляем позицию игрока в файле
     jsonSave["player"]["pos"]["x"] = PlayerPos.x;
     jsonSave["player"]["pos"]["y"] = PlayerPos.y;
 
-    // Открываем файл мира для записи и сбрасываем его содержимое
+    /// Открываем файл мира для записи и сбрасываем его содержимое
     fileWorld.open("worlds/" + strNameFileWorld, std::ofstream::out | std::ofstream::trunc);
     if (fileWorld.is_open()) {
-        // Записываем данные в файл
+        /// Записываем данные в файл
         fileWorld << jsonSave.dump(4);
         fileWorld.close();
         oCmdInfo.info("Saved");
@@ -353,23 +353,23 @@ void cMap::save() {
         oCmdInfo.error("Cannot open file" + strNameFileWorld + " to save changes");
     }
 
-    // Очищаем буфер чанков после сохранения
+    /// Очищаем буфер чанков после сохранения
     chunkBuffer.clear();
     loadingChunksFromFile();
 }
 
-//
-// Получение слоя
-//
+///
+/// Получение слоя
+///
 int cMap::getLayer(const int x, const int y, const int layer) const {
     if (layer == 0) return LayerGround[y][x];
     if (layer == 1) return LayerOdj[y][x];
     return -1;
 }
 
-//
-// Установка слоя
-//
+///
+/// Установка слоя
+///
 void cMap::setLayer(const int x, const int y, const int layer, const int value) {
     if (layer == 0) {
         LayerGround[y][x] = value;
@@ -399,7 +399,7 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     loadingChunksFromFile();
 
     // Загрузка тайлсета
-    loadTileset();
+    loadTileSet();
 
     initAndStartThreads();
 }
@@ -425,7 +425,7 @@ void cMap::init(const int iDistanceView, const std::string& strNameFileMap, cons
     // Загружаем чанки из файла
     loadingChunksFromFile();
     // Загружаем тайлсет
-    loadTileset();
+    loadTileSet();
 
     initAndStartThreads();
 }
@@ -457,7 +457,7 @@ void cMap::chunkLoadUnloadThread() {
 //
 // Загрузка тайл сета
 //
-void cMap::loadTileset() {
+void cMap::loadTileSet() {
     try {
         oCmdInfo.info("Loading tile set");
 
@@ -477,14 +477,14 @@ void cMap::loadTileset() {
         oCmdInfo.info("Tile set loaded successfully");
     }
     catch (const nlohmann::json::exception& error) {
-        std::cerr << "ERROR: Failed to load tileset " << error.what() << std::endl;
+        std::cerr << "ERROR: Failed to load tile set " << error.what() << std::endl;
     }
 }
 
 
-//
-// Проверка коллизий
-//
+///
+/// Проверка коллизий
+///
 int cMap::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize, const sf::Vector2f bias) const {
     const sf::FloatRect playerBox((playerPos.x + bias.x) - g_fOffsetX, (playerPos.y + bias.y) - g_fOffsetY, playerSize.x, playerSize.y);
     for (int i = 0; i < g_LayerSizeMaxY; i++) {
@@ -512,9 +512,9 @@ int cMap::collision(const sf::Vector2f playerPos, const sf::Vector2f playerSize,
     return 0;
 }
 
-//
-// Загрузка чанков ко круг игрока в зависимости от его позиии и дальности прорисовки
-//
+///
+/// Загрузка чанков ко круг игрока в зависимости от его позиии и дальности прорисовки
+///
 void cMap::loadChunksAroundPlayer() {
     const int playerChunkX = static_cast<int>(PlayerPos.x) / (chunkSize * g_dTileSize);
     const int playerChunkY = static_cast<int>(PlayerPos.y) / (chunkSize * g_dTileSize);
@@ -541,9 +541,9 @@ void cMap::loadChunksAroundPlayer() {
     }
 }
 
-//
-// Выгрузка чанков
-//
+///
+/// Выгрузка чанков
+///
 void cMap::unloadDistantChunks() {
 
     const int playerChunkX = static_cast<int>(PlayerPos.x) / (chunkSize * g_dTileSize);
@@ -562,30 +562,24 @@ void cMap::unloadDistantChunks() {
     }
 }
 
-//
-// Рисовка
-//
+///
+/// Рисовка
+///
 void cMap::draw(sf::RenderWindow &window, const sf::Vector2f playerPos, sf::Vector2f view, const int chunkSize) {
-    // Lock the mutex while modifying chunks
-   // std::lock_guard<std::mutex> lock(chunkMutex);
     this->PlayerPos = playerPos;
-    //loadChunksAroundPlayer(playerPos, chunkSize);
-
     sf::RenderStates states;
     states.texture = &texture;
-    // Блокируем доступ к вершинам во время рендера
     {
         std::lock_guard<std::mutex> lock(MUTEX2);
         if (vertices.getVertexCount() > 0) {
             window.draw(vertices, states);
         }
     }
-    //unloadDistantChunks(playerPos, chunkSize);
 }
 
 void cMap::swapBuffers() {
     std::lock_guard<std::mutex> lock(bufferMutex);
-    chunksRenderBuffer = chunks; // Копируем готовые данные в буфер рендера
+    chunksRenderBuffer = chunks; /// Копируем готовые данные в буфер рендера
 }
 
 ///
@@ -595,7 +589,7 @@ void cMap::threadFunction() {
     while (isThreadRunning) {
         if (isThreadStarted) {
             //std::lock_guard<std::mutex> lock(MUTEX2);
-            // Очистка старых вершин
+            /// Очистка старых вершин
             //vertices.clear();
             sf::VertexArray LocalVertices(sf::Quads);
 

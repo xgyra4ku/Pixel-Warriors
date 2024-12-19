@@ -117,7 +117,7 @@ private:
 
     const int chunkSize = 16;
 
-    void loadTileset();
+    void loadTileSet();
     void chunkLoadUnloadThread();
     void loadingChunksFromFile();
     void loadChunksAroundPlayer();

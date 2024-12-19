@@ -1,11 +1,12 @@
 #pragma once
-//
-// ОПРЕДЕЛЕНИЯ БИБЛИОТЕК
-//
+///
+/// ОПРЕДЕЛЕНИЯ БИБЛИОТЕК
+///
 #include <windows.h>
 #include <map>
 #include <cstdlib>
 #include <ctime>
+
 #include "cMap.hpp"
 #include "SaveAndLoad.hpp"
 #include "cEntity.hpp"
@@ -13,37 +14,37 @@
 #include "cInfoConsole.hpp"
 #include "cInventory.hpp"
 
-//
-// Структура дополнений
-//
+///
+/// Структура дополнений
+///
 struct DependencyFunctions {
     void (*initLib)(sf::RenderWindow&);
     void (*menuLib)(sf::RenderWindow&, int&, std::map<std::string, int>&, int&, float&, std::map<std::string, std::string>&);
 };
 
-//
-// Структура модов
-//
+///
+/// Структура модов
+///
 struct Mod {
     HMODULE hModule;
     DependencyFunctions functions;
 };
 
-//
-// Основной класс
-//
+///
+/// Основной класс
+///
 class Engine
 {
 public:
-    //
-    // опредления констукторов диструкторв глобальных функций
-    //
+    ///
+    /// опредления констукторов диструкторв глобальных функций
+    ///
     Engine();
     ~Engine();
 
-    //
-    // Определение главной функции
-    //
+    ///
+    /// Определение главной функции
+    ///
     void vRun();
 private:
     ///
@@ -54,9 +55,9 @@ private:
     int iTextureNumPlayer1 = 1;
 
 
-    //
-    // Определения других классов
-    //
+    ///
+    /// Определения других классов
+    ///
     cMap map;
     cEntity player1;
     SaveAndLoad save_and_load_;
@@ -64,9 +65,9 @@ private:
     cInfoConsole oCmdInfo;
     cInventory* oInventory;
 
-    //
-    // Определения классов sfml
-    //
+    ///
+    /// Определения классов sfml
+    ///
     sf::RenderWindow m_oWindow;
     sf::Vector2f m_oPlayerPos;
     sf::Clock m_oClock;
@@ -77,48 +78,48 @@ private:
 
     sf::Text m_sftTextInfo;
 
-    //
-    // Определения float
-    //
+    ///
+    /// Определения float
+    ///
     float m_fPlayerSpeed = 0.08f; //0.08f standard
     float m_fOffSetSpeed = 1.0f; //1.0f standard
     float m_fTime = 0.0f;
     float m_fFps = 0.0f;
 
-    //
-    // Определения int
-    //
+    ///
+    /// Определения int
+    ///
     int m_fFrameCount = 0;
     int m_iMenu;
     int m_iWheelEventMouse{};
 
-    //
-    // Определения bool
-    //
+    ///
+    /// Определения bool
+    ///
     bool m_bOffsetRUN;
     bool m_bCollisionRUN;
     bool m_bPlayerPosRUN;
     bool m_bInfo;
     bool m_bCheats;
 
-    //
-    // Определения vector
-    //
+    ///
+    /// Определения vector
+    ///
     std::vector<std::vector<int>> m_vMapGenerated;
     std::vector<Mod> m_vModsList;
     std::vector<std::vector<int>> m_mpChunk;
 
-    //
-    // Определения map
-    //
+    ///
+    /// Определения map
+    ///
     std::map<std::string, std::string> m_mpFileWorld;
     std::map<std::string, DependencyFunctions> m_mpDependencyList;
     std::map<std::string, int> m_mpSettings;
     std::map<std::string, int> m_mpCommandData;
 
-    //
-    // Определения приватных функций
-    //
+    ///
+    /// Определения приватных функций
+    ///
     void _events();
     void _timer();
     void _logic();
