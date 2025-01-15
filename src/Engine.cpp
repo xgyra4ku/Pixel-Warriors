@@ -141,13 +141,13 @@ void Engine::_loadDependency(const std::string& directory) {
 //
 void Engine::vRun() {
     //определение настроек и применение их
-    if (m_mpSettings["V-sync"] == 1) {
+    if (m_mpSettings["fps"] == 0) {
         m_oWindow.setVerticalSyncEnabled(true);
         oCmdInfo.info("V-sync enabled");
     } else {
         m_oWindow.setVerticalSyncEnabled(false);
         oCmdInfo.info("V-sync disabled");
-        if (m_mpSettings["fps"] == -1) {
+        if (m_mpSettings["fps"] == 250) {
             oCmdInfo.info("FPS set max");
         } else {
             m_oWindow.setFramerateLimit(m_mpSettings["fps"]);
