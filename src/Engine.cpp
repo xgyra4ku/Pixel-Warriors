@@ -154,8 +154,8 @@ void Engine::vRun() {
             oCmdInfo.info("FPS set to " + m_mpSettings["fps"]);
         }
     }
-
-	while (m_oWindow.isOpen()) {
+    // если окно открыто
+    while (m_oWindow.isOpen()) {
         m_oWindow.clear();
         _events();
         _timer();
