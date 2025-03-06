@@ -628,47 +628,47 @@ void cMap::threadFunction() {
                             }
                             i++;
                         }
-                        //для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
-                        // нужно чтобы у текстур были свои не зависимые кординаты на карте
+                        // для деревьев и друких структур для них чанк состоит 8 на 8 а для тайлов 16 на 16
+                        //  нужно чтобы у текстур были свои не зависимые кординаты на карте
+                        //
+                        //  Размеры дерева
+                         int treeXSize = 48;
+                         int treeYSize = 64;
+                         // // Создаем генератор случайных чисел
+                         // std::random_device rd;
+                         // std::mt19937 gen(rd());
+                         // std::uniform_int_distribution<> disX(-treeXSize / 4, treeXSize / 4);  // Смещение по X
+                         // std::uniform_int_distribution<> disY(-treeYSize / 4, treeYSize / 4);  // Смещение по Y
 
-                        // Размеры дерева
-                        // int treeXSize = 48;
-                        // int treeYSize = 64;
-                        // // Создаем генератор случайных чисел
-                        // std::random_device rd;
-                        // std::mt19937 gen(rd());
-                        // std::uniform_int_distribution<> disX(-treeXSize / 4, treeXSize / 4);  // Смещение по X
-                        // std::uniform_int_distribution<> disY(-treeYSize / 4, treeYSize / 4);  // Смещение по Y
-                        //
-                        // i = 0;
-                        // for (const auto& el1 : chunks[chunkKey].dataObjects) {
-                        //     int j = 0;
-                        //     for (const auto& el2 : el1) {
-                        //         if (const int tileValue = el2; tileValue != 0) {
-                        //
-                        //
-                        //             // Координаты для дерева в мире
-                        //             float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
-                        //             float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
-                        //
-                        //             // Добавляем случайные смещения
-                        //             X += disX(gen);
-                        //             Y += disY(gen);
-                        //
-                        //             // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
-                        //             const float tileX = 192; // X координата на текстуре
-                        //             const float tileY = 0;   // Y координата на текстуре
-                        //
-                        //             // Добавляем вершины для дерева, учитывая размеры (48x64)
-                        //             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
-                        //             vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY)));
-                        //             vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY + treeYSize)));
-                        //             vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX, tileY + treeYSize)));
-                        //         }
-                        //         j++;
-                        //     }
-                        //     i++;
-                        // }
+                         i = 0;
+                         for (const auto& el1 : chunks[chunkKey].dataObjects) {
+                             int j = 0;
+                             for (const auto& el2 : el1) {
+                                 if (const int tileValue = el2; tileValue != 0) {
+
+
+                                     // Координаты для дерева в мире
+                                     float X = static_cast<float>(j + chunkX * (chunkSize)) * treeXSize;
+                                     float Y = static_cast<float>(i + chunkY * (chunkSize)) * treeYSize;
+
+                                     // // Добавляем случайные смещения
+                                     // X += disX(gen);
+                                     // Y += disY(gen);
+
+                                     // Координаты дерева на текстуре (верхний левый угол: 192,0 и нижний правый угол: 240,64)
+                                     const float tileX = 192; // X координата на текстуре
+                                     const float tileY = 0;   // Y координата на текстуре
+
+                                     // Добавляем вершины для дерева, учитывая размеры (48x64)
+                                     vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX, tileY)));
+                                     vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY)));
+                                     vertices.append(sf::Vertex(sf::Vector2f(X + treeXSize - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX + treeXSize, tileY + treeYSize)));
+                                     vertices.append(sf::Vertex(sf::Vector2f(X - roundedOffsetX, Y + treeYSize - roundedOffsetY), sf::Vector2f(tileX, tileY + treeYSize)));
+                                 }
+                                 j++;
+                             }
+                             i++;
+                         }
                     }
                 }
             }
