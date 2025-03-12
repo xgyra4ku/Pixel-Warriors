@@ -14,8 +14,9 @@ private:
     //std::map<int, int> mapInventoryProtection; // 2x2
     // размеры слотов
     int iSizeFastSlot = 9; // 1x9
-    int iSizeNormalSlot = 24; // 4x6
+    int iSizeNormalSlot = 24; // 4x6  g
 public:
+
     sInventoryOBJ();
 
 
