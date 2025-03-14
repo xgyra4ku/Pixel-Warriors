@@ -30,7 +30,6 @@ std::map<int, int> sInventoryOBJ::getBaseSlot() const {
     return mapInventoryBase;
 }
 
-
 void sInventoryOBJ::setFastSlot(const std::map<int, int> &fastSlot) {
     this->mapInventoryFast = fastSlot;
 }
