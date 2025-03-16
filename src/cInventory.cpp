@@ -70,6 +70,19 @@ cInventory::cInventory(const sf::Texture &texture, const sf::RenderWindow &sfRwW
     spriteInventory.setPosition(
         (static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
         (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100));
+
+    sf::Vector2f startPos = {(static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
+                         (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100)};
+    for (int i = 0; i < 9; ++i) {
+        sf::RectangleShape el;
+        el.setPosition(startPos);
+        el.setSize({48, 48});
+        el.setFillColor(sf::Color::Transparent);
+        el.setOutlineColor(sf::Color::White);
+        el.setOutlineThickness(2);
+        startPos.x += 49;
+        rectsInventoryFast.push_back(el);
+    }
 }
 
 ///
@@ -83,7 +96,8 @@ cInventory::~cInventory() = default;
 ///
 void cInventory::draw(sf::RenderWindow& pWindow) const {
     if (m_bInventoryIsOpen) {
-        pWindow.draw(spriteInventory);
+        //pWindow.draw(spriteInventory);
+        for (const auto& el : rectsInventoryFast) { pWindow.draw(el); }
     }
 }
 

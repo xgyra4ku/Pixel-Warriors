@@ -55,6 +55,7 @@ private:
     sf::Texture m_texture;  // Хранить текстуру внутри объекта
     sInventoryOBJ sInventory;
     sf::Sprite spriteInventory;
+    std::vector<sf::RectangleShape> rectsInventoryFast;
 
     bool m_bInventoryIsOpen;
 };
