@@ -1,17 +1,14 @@
-// blur.frag
 uniform sampler2D texture;
-uniform vec2 blurRadius; // Радиус размытия
-
 void main() {
-    vec2 texCoord = gl_TexCoord[0].xy;
-
-    // Простое размытие по горизонтали
+    vec2 uv = gl_TexCoord[0].xy;
     vec4 color = vec4(0.0);
-    for (int i = -5; i <= 5; ++i) {
-        vec2 offset = vec2(float(i) * blurRadius.x, 0.0);
-        color += texture2D(texture, texCoord + offset);
-    }
-    color /= 11.0; // Нормализация цвета
+    float offset = 1.0 / 512.0; // настройка размытия
 
+    for (int i = -4; i <= 4; i++) {
+        for (int j = -4; j <= 4; j++) {
+            color += texture2D(texture, uv + vec2(i, j) * offset) * 0.0625;
+        }
+    }
+    
     gl_FragColor = color;
 }

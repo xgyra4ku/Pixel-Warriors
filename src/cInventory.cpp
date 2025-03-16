@@ -52,24 +52,24 @@ void sInventoryOBJ::setSlotByIndex(const char typeSlots, const int iIndex, const
 /// @param sfRwWindow Окно рендеринга SFML
 ///
 cInventory::cInventory(const sf::Texture &texture, const sf::RenderWindow &sfRwWindow) : m_bInventoryIsOpen(false) {
-    m_texture = texture;  // Копируем текстуру
-    spriteInventory.setTexture(m_texture);
-    // Целевые размеры
-    const float targetWidth = (static_cast<float>(sfRwWindow.getSize().x)* 50 / 100);
-    const float targetHeight = (static_cast<float>(sfRwWindow.getSize().x)* 30 / 100);
-
-    // Получаем размеры текстуры
-    const sf::Vector2u textureSize = texture.getSize();
-
-    // Вычисляем масштабирование
-    const float scaleX = targetWidth / textureSize.x;
-    const float scaleY = targetHeight / textureSize.y;
-
-    // Устанавливаем масштаб
-    spriteInventory.setScale(scaleX, scaleY);
-    spriteInventory.setPosition(
-        (static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
-        (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100));
+    // m_texture = texture;  // Копируем текстуру
+    // spriteInventory.setTexture(m_texture);
+    // // Целевые размеры
+    // const float targetWidth = (static_cast<float>(sfRwWindow.getSize().x)* 50 / 100);
+    // const float targetHeight = (static_cast<float>(sfRwWindow.getSize().x)* 30 / 100);
+    //
+    // // Получаем размеры текстуры
+    // const sf::Vector2u textureSize = texture.getSize();
+    //
+    // // Вычисляем масштабирование
+    // const float scaleX = targetWidth / textureSize.x;
+    // const float scaleY = targetHeight / textureSize.y;
+    //
+    // // Устанавливаем масштаб
+    // spriteInventory.setScale(scaleX, scaleY);
+    // spriteInventory.setPosition(
+    //     (static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
+    //     (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100));
 
     sf::Vector2f startPos = {(static_cast<float>(sfRwWindow.getSize().x)* 25 / 100),
                          (static_cast<float>(sfRwWindow.getSize().y)* 25 / 100)};
@@ -77,12 +77,13 @@ cInventory::cInventory(const sf::Texture &texture, const sf::RenderWindow &sfRwW
         sf::RectangleShape el;
         el.setPosition(startPos);
         el.setSize({48, 48});
-        el.setFillColor(sf::Color::Transparent);
+        el.setFillColor(sf::Color(100, 100, 100));
         el.setOutlineColor(sf::Color::White);
         el.setOutlineThickness(2);
         startPos.x += 49;
         rectsInventoryFast.push_back(el);
     }
+
 }
 
 ///
