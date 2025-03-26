@@ -86,6 +86,7 @@ cInventory::cInventory(const sf::Texture &texture, const sf::RenderWindow &sfRwW
 
 }
 
+
 ///
 /// @brief Диструктор класса инвентаря
 ///
