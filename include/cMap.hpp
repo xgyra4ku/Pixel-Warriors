@@ -112,6 +112,7 @@ private:
     //векторт чанков
     std::vector<ChunkStruct> chunkVector;
     sf::VertexArray vertices;
+    sf::VertexArray verticesTree;
 
     std::string strNameFileWorld;
 

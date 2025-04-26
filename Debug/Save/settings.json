@@ -111,7 +111,7 @@
             },
             "window": {
                 "V-sync": 0,
-                "fps": 0,
+                "fps": 210,
                 "fullscreen": 0,
                 "height": 900,
                 "width": 1440
